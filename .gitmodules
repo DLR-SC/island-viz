@@ -1,0 +1,3 @@
+[submodule "Assets/QuickGraph4Unity"]
+	path = Assets/QuickGraph4Unity
+	url = https://github.com/MartinMisiak/quickgraph4unity.git
