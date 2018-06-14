@@ -23,12 +23,10 @@ namespace OsgiViz
         //Relative Height of the TextLabel, as seen from the bottom of the holoplane.
         public float relativeHeight = 0.5f;
         public float relativeScale = 1.0f;
-        private float fov;
 
         // Use this for initialization
         void Awake()
         {
-            fov = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>().fieldOfView;
             hologramCenter = GameObject.Find("HologramCenter");
             textLabelPrefab = (GameObject)Resources.Load("Prefabs/TextLabel");
             GameObject observerGO = GameObject.FindGameObjectWithTag("Observer");
