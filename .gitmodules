@@ -1,3 +1,6 @@
 [submodule "Assets/QuickGraph4Unity"]
 	path = Assets/QuickGraph4Unity
 	url = https://github.com/MartinMisiak/quickgraph4unity.git
+[submodule "Assets/JsonObject"]
+	path = Assets/JsonObject
+	url = https://github.com/mtschoen/JSONObject.git
