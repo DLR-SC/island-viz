@@ -4,3 +4,7 @@
 [submodule "Assets/JsonObject"]
 	path = Assets/JsonObject
 	url = https://github.com/mtschoen/JSONObject.git
+[submodule "Assets/Triangle"]
+	path = Assets/Triangle
+	url = https://github.com/eppz/Triangle.NET.git
+	branch = Release
