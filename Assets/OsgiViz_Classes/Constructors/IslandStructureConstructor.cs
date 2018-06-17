@@ -328,6 +328,7 @@ namespace OsgiViz.SideThreadConstructors
             return selectedCandidate;
         }
 
+        /*
         private void populateIslandCoastDistance(CartographicIsland island, int hf)
         {
             //Init land height to Inf
@@ -359,8 +360,8 @@ namespace OsgiViz.SideThreadConstructors
                     }
                 }
             }
-
         }
+        */
 
         /*
         private void computeIslandHeight(CartographicIsland island, float hf)
