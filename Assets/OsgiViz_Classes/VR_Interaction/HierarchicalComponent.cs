@@ -6,7 +6,6 @@ using ignoreHovering = Valve.VR.InteractionSystem.IgnoreHovering;
 namespace OsgiViz
 {
 
-    [RequireComponent(typeof(ignoreHovering))]
     public class HierarchicalComponent : MonoBehaviour{
 
 
@@ -28,8 +27,7 @@ namespace OsgiViz
 
 	    // Use this for initialization
 	    void Start () {
-            ignoreHover = GetComponent<ignoreHovering>();
-            ignoreHover.enabled = false;
+
 	    }
 
         
@@ -53,7 +51,7 @@ namespace OsgiViz
                 hc.gameObject.SetActive(true);
             }
             disableAllComponents(gameObject);
-            ignoreHover.enabled = true;
+            ignoreHover = gameObject.AddComponent<ignoreHovering>();
             isSplit = true;
         }
 
@@ -64,7 +62,7 @@ namespace OsgiViz
                 hc.gameObject.SetActive(false);
             }
             enableAllComponents(gameObject);
-            ignoreHover.enabled = false;
+            Destroy(ignoreHover);
             isSplit = false;
         }
 

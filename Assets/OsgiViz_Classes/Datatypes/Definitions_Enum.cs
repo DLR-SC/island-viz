@@ -69,7 +69,7 @@ namespace OsgiViz.Core
         public const float labelOffset = 0.1f;
 
         //Height of the holotable
-        public static float hologramTableHeight = 1.0f;
+        public static float hologramTableHeight = 1.25f;
 
         //Viewport-Manipulation
         // The maximal distance the visualization can be draged from the island-world center.

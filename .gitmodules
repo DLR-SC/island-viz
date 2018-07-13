@@ -8,3 +8,7 @@
 	path = Assets/Triangle
 	url = https://github.com/eppz/Triangle.NET.git
 	branch = Release
+[submodule "Assets/SteamVR"]
+	path = Assets/SteamVR
+	url = https://github.com/ValveSoftware/steamvr_unity_plugin.git
+	branch = master

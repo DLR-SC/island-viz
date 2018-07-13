@@ -150,6 +150,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
                         scGO.transform.localScale = new Vector3(GlobalVar.serviceNodeSize, GlobalVar.serviceNodeSize, GlobalVar.serviceNodeSize);
                         scGO.transform.SetParent(serviceSlice.transform);
                         ServiceNodeScript scGOcomponent = scGO.AddComponent<ServiceNodeScript>();
+                        scGO.AddComponent<TextLabelComponent>();
                         scGOcomponent.addConnectedServiceNode(sns);
                         sns.addConnectedServiceNode(scGOcomponent);
                         scGOcomponent.disableServiceNode();
@@ -168,6 +169,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
                         scGO.transform.localScale = new Vector3(GlobalVar.serviceNodeSize, GlobalVar.serviceNodeSize, GlobalVar.serviceNodeSize);
                         scGO.transform.SetParent(serviceSlice.transform);
                         ServiceNodeScript scGOcomponent = scGO.AddComponent<ServiceNodeScript>();
+                        scGO.AddComponent<TextLabelComponent>();
                         scGOcomponent.addConnectedServiceNode(sns);
                         sns.addConnectedServiceNode(scGOcomponent);
 
