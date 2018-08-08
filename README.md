@@ -1,5 +1,6 @@
 Dependencies: 
-JsonObject, QuickGraph4Unity, SteamVR, Triangle.NET C# port
+JsonObject, QuickGraph4Unity, SteamVR, Triangle.NET C# port.
+
 All of these are included as sub-modules and are obtained automatically when the IslandViz repo is cloned recursively:
 "git clone --recurse-submodules https://github.com/DLR-SC/island-viz.git"
 
