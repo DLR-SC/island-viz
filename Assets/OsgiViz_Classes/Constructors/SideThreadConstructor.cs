@@ -9,8 +9,7 @@ namespace OsgiViz.SideThreadConstructors
 
     public class SideThreadConstructor {
 
-        public string projectModelFile = "Resources/rce_23_05_2017.model";
-        //public string projectModelFile = "Resources/rce_lite.model";
+        public string projectModelFile = GlobalVar.projectmodelPath;
         private JsonObjConstructor jConstructor;
         private OsgiProjectConstructor osgiConstructor;
         private IslandStructureConstructor isConstructor;

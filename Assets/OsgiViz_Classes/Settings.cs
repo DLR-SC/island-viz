@@ -23,6 +23,9 @@ namespace OsgiViz.Core
     //Global
     public static class GlobalVar
     {
+        public const string projectmodelPath = "Resources/rce_23_05_2017.model";
+        //public const string projectmodelPath = "Resources/rce_lite.model";
+
         //Scale multiplicator of the voronoi cells. Many other variables depend on this scale
         public const float voronoiCellScalefactor = 20f;
 
@@ -33,8 +36,7 @@ namespace OsgiViz.Core
         public const float dockScaleMult = 0.005f * voronoiCellScalefactor;
         //Smallest dock size
         public const float minDockSize = 0.02f * voronoiCellScalefactor;
-        //[0 - 1]
-        //The percentage of the islands, that is above the ocean.
+        //The percentage of the islands, that is above the ocean. Range [0 - 1]
         public const float islandAboveOcean = 0.9f * 2;
         //The island height profile. Each array entry results in one additional ring of claimed coast cells. The value in the entry is assigned to the island height. 0 is the height level of the regions.
         public static float[] islandHeightProfile = { -0.03f * voronoiCellScalefactor, -0.034f * voronoiCellScalefactor, -0.036f * voronoiCellScalefactor, -0.037f * voronoiCellScalefactor, -0.0375f * voronoiCellScalefactor };
@@ -49,14 +51,6 @@ namespace OsgiViz.Core
         public static float subdivisionDistanceIslandSquared  = 400f;
         public static float subdivisionDistanceCountrySquared = 144f;
         public static float subdivisionDistanceCUSquared = 0f;
-
-        //Dynamic Variables - written to by IslandViz
-        public static int islandNumber = 100;
-        public static float inverseHologramScale = 1.0f;
-        public static float worldRadius = 1f;
-        public static Vector3 worldCenter = Vector3.zero;
-        public static long maximumLOCinProject = 0;
-        public static bool recenterValid = false;
 
         //Text Variables
         //Label font size
@@ -85,6 +79,14 @@ namespace OsgiViz.Core
         public const int groupsPerSlice = 4;
         public const float startingHeight = 1.20f;
         public const float heightStep = 0.02f;
+
+        //Dynamic Variables - written to by IslandViz - Modification is useless ;)
+        public static int islandNumber = 100;
+        public static float inverseHologramScale = 1.0f;
+        public static float worldRadius = 1f;
+        public static Vector3 worldCenter = Vector3.zero;
+        public static long maximumLOCinProject = 0;
+        public static bool recenterValid = false;
     }
 
     public class JavaParser
