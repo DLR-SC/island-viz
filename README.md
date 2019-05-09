@@ -1,3 +1,7 @@
+
+[![Licence](https://img.shields.io/hexpm/l/plug.svg)](https://github.com/DLR-SC/island-viz/blob/master/LICENSE)
+
+
 Dependencies: 
 JsonObject, QuickGraph4Unity, SteamVR, Triangle.NET C# port.
 
