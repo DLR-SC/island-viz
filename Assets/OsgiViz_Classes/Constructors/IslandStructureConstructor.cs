@@ -53,9 +53,9 @@ namespace OsgiViz.SideThreadConstructors
             foreach (Bundle bundle in osgiProject.getBundles())
             {
                 islands.Add(constructIslandFromBundle(bundle));
-                yield return null;
+                //yield return null;
             }
-
+            
             status = Status.Finished;
             Debug.Log("Finished with the construction of the IslandStructures");
 
@@ -66,8 +66,6 @@ namespace OsgiViz.SideThreadConstructors
 
         private CartographicIsland constructIslandFromBundle(Bundle b)
         {
-            Debug.Log("Starting Construciton of Island " + b.getName());
-
             int rngSeed = b.getName().GetHashCode() + 200;
             RNG = new System.Random(rngSeed);
 

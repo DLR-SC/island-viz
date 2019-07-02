@@ -24,8 +24,10 @@ namespace OsgiViz.Unity.MainThreadConstructors
         private Status status;
         private bool waiting = true;
 
+        private System.Diagnostics.Stopwatch stopwatch;
 
-        // Use this for initialization
+
+        // This Method is called by Unity when the application is started.
         void Start()
         {
             UnityEngine.XR.XRSettings.eyeTextureResolutionScale = 1f;
@@ -41,6 +43,8 @@ namespace OsgiViz.Unity.MainThreadConstructors
             isConstructor = new IslandStructureConstructor(1, 2, 8);
             bdConstructor = new Graph_Layout_Constructor();
 
+            stopwatch = new System.Diagnostics.Stopwatch();
+
             //LayoutTester
             //lt = gameObject.AddComponent<LayoutTester>();
 
@@ -51,83 +55,68 @@ namespace OsgiViz.Unity.MainThreadConstructors
         IEnumerator Construction ()
         {
             status = Status.Working;
+            stopwatch.Start();
 
-            // Read & generate the Json Object 
-            jConstructor.Construct(projectModelFile, Done);
-            
-            // Wait for jConstructor.Construct
+            // Read & construct a Json Object.
+            jConstructor.Construct(projectModelFile, Done);            
+            // Wait for jConstructor.Construct.
             while (waiting)
                 yield return null;
 
-            // 
+            // Construct a osgi Object from the Json Object.
             yield return osgiConstructor.Construct(jConstructor.getJsonModel());
 
-            Debug.Log("Project has a total of " + osgiConstructor.getProject().getNumberOfCUs() + " compilation units!");
-            
-            //Start IslandStructure construction
+            //Debug.Log("Project has a total of " + osgiConstructor.getProject().getNumberOfCUs() + " compilation units!");
+
+            //Construct islands from bundles in the osgi Object.
             yield return isConstructor.Construct(osgiConstructor.getProject());
-            
-            //Start the spatial distribution of islands    
+
             //Vector3 minBounds = new Vector3(-10.5f, 1.31f, -10.5f);
             //Vector3 maxBounds = new Vector3(10.5f, 1.31f, 10.5f);
             //bdConstructor.ConstructRndLayout(osgiConstructor.getProject().getDependencyGraph(), Done, minBounds, maxBounds, 0.075f, 10000);
-            waiting = true;
-            bdConstructor.ConstructFDLayout(osgiConstructor.getProject(), Done, 0.25f, 70000);
 
-            // Wait for spatial distribution of islands
+            waiting = true;
+            // Construct the spatial distribution of the islands.
+            bdConstructor.ConstructFDLayout(osgiConstructor.getProject(), Done, 0.25f, 70000);
+            // Wait for bdConstructor.ConstructFDLayout.
             while (waiting)
                 yield return null;
 
-            //Start IslandGO construction
             GlobalVar.islandNumber = osgiConstructor.getProject().getBundles().Count;
             List<CartographicIsland> islandStructures = isConstructor.getIslandStructureList();
-            waiting = true;
-            islandGOConstructor.Construct(islandStructures, Done);
-
-            // Wait for islandGOConstructor.Construct
-            while (waiting)
-                yield return null;
+            // Construct the island GameObjects.
+            yield return islandGOConstructor.Construct(islandStructures);
                         
             OsgiProject project = osgiConstructor.getProject();
-            waiting = true;
-            serviceGOConstructor.Construct(project.getServices(), islandGOConstructor.getIslandGOs(), Done);
+            // Construct the connections between the islands from services in the osgi Object.
+            yield return serviceGOConstructor.Construct(project.getServices(), islandGOConstructor.getIslandGOs());
 
-            // Wait for serviceGOConstructor.Construct
-            while (waiting)
-                yield return null;
+            // Construct the ports between the islands from services in the osgi Object.
+            yield return dockGOConstructor.Construct(islandGOConstructor.getIslandGOs());
+            
+            yield return hierarchyConstructor.Construct(islandGOConstructor.getIslandGOs());
 
-            waiting = true;
-            dockGOConstructor.Construct(islandGOConstructor.getIslandGOs(), Done);
-
-            // Wait for dockGOConstructor.Construct
-            while (waiting)
-                yield return null;
-
-            waiting = true;
-            hierarchyConstructor.Construct(islandGOConstructor.getIslandGOs(), Done);
-
-            // Wait for hierarchyConstructor.Construct
-            while (waiting)
-                yield return null;
-                        
+                                    
             status = Status.Finished;
-            afterConstructionTasks();
+            stopwatch.Stop();
+            Debug.Log("Construction finished after " + stopwatch.Elapsed.TotalSeconds.ToString("0.00") + " seconds!");
 
-            yield return null;
+            yield return afterConstructionTasks();
         }
 
 
-
-
-        private void afterConstructionTasks()
+        IEnumerator afterConstructionTasks ()
         {
+            yield return null;
+
             InverseMultiTouchController mtController = GameObject.Find("MapNavigationArea").AddComponent<InverseMultiTouchController>();
             mtController.drag = 7.5f;
 
             AddHighlightToAllInteractables();
-
+            
             BroadcastMessage("MainConstructorFinished");
         }
+        
 
         private void AddHighlightToAllInteractables()
         {

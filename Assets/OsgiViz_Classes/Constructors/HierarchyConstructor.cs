@@ -13,7 +13,6 @@ namespace OsgiViz.Unity.MainThreadConstructors
     public class HierarchyConstructor : MonoBehaviour {
 
         private Status status;
-        private callbackMethod cb;
 
         private Material holomaterial;
         private List<GameObject> CULod1Prefabs;
@@ -65,12 +64,11 @@ namespace OsgiViz.Unity.MainThreadConstructors
         }
 
 
-        public void Construct(List<IslandGO> islands, callbackMethod m)
+        public IEnumerator Construct(List<IslandGO> islands)
         {
-            cb = m;
             status = Status.Working;
             Debug.Log("Started with Island-Hierarchy injection!");
-            StartCoroutine(constructAll(islands));
+            yield return StartCoroutine(constructAll(islands));
         }
 
         private void Add_HC_TLC(GameObject go, float sdq)
@@ -152,7 +150,6 @@ namespace OsgiViz.Unity.MainThreadConstructors
 
             Debug.Log("Finished with Island-Hierarchy injection!");
             status = Status.Finished;
-            cb();
         }
 
         private void Deactivate(IslandGO islandGO)

@@ -13,7 +13,6 @@ namespace OsgiViz.Unity.MainThreadConstructors
     {
 
         private Status status;
-        private callbackMethod cb;
         private ServiceVolume serviceVolume;
 
         private Material defaultMaterial;
@@ -37,14 +36,14 @@ namespace OsgiViz.Unity.MainThreadConstructors
             VisualizationContainer = GameObject.Find("DataManager").GetComponent<GlobalContainerHolder>().VisualizationContainer;
         }
 
-        public void Construct(List<Service> services, List<IslandGO> islandGOs, callbackMethod m)
+        public IEnumerator Construct(List<Service> services, List<IslandGO> islandGOs)
         {
-            cb = m;
             status = Status.Working;
             serviceVolume = new ServiceVolume();
             Debug.Log("Started with Service-GameObject construction!");
-            StartCoroutine(constructAll(services, islandGOs));
+            yield return StartCoroutine(constructAll(services, islandGOs));
         }
+
 
         private Dictionary<ServiceSlice, List<Service>> distributeServicesToSlices(List<Service> services)
         {
@@ -113,7 +112,6 @@ namespace OsgiViz.Unity.MainThreadConstructors
 
             Debug.Log("Finished with Service-GameObject construction!");
             status = Status.Finished;
-            cb();
         }
 
         private void constructServicesAndComponents(List<Service> services, ServiceSlice serviceSlice )

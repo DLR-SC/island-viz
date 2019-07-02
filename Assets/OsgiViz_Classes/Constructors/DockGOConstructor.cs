@@ -14,7 +14,6 @@ namespace OsgiViz.Unity.MainThreadConstructors
     {
 
         private Status status;
-        private callbackMethod cb;
         private GameObject VisualizationContainer;
         private List<GameObject> dockList;
 
@@ -30,12 +29,11 @@ namespace OsgiViz.Unity.MainThreadConstructors
             VisualizationContainer = GetComponent<GlobalContainerHolder>().VisualizationContainer;
         }
 
-        public void Construct(List<IslandGO> islands, callbackMethod m)
+        public IEnumerator Construct(List<IslandGO> islands)
         {
-            cb = m;
             status = Status.Working;
             Debug.Log("Started with Dock-GameObject construction!");
-            StartCoroutine(constructAll(islands));
+            yield return StartCoroutine(constructAll(islands));
         }
 
         IEnumerator constructAll(List<IslandGO> islands)
@@ -66,7 +64,6 @@ namespace OsgiViz.Unity.MainThreadConstructors
 
             Debug.Log("Finished with Dock-GameObject construction!");
             status = Status.Finished;
-            cb();
         }
 
         

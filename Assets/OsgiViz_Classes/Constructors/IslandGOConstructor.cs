@@ -62,13 +62,14 @@ namespace OsgiViz.Unity.MainThreadConstructors
         }
 
 
-        public void Construct(List<CartographicIsland> structures, callbackMethod m)
+        public IEnumerator Construct(List<CartographicIsland> structures)
         {
-            cb = m;
             status = Status.Working;
             Debug.Log("Started with Island-GameObject construction!");
-            StartCoroutine(constructAll(structures));
+            yield return StartCoroutine(constructAll(structures));
         }
+
+        
 
         IEnumerator constructAll(List<CartographicIsland> structures)
         {
@@ -87,7 +88,6 @@ namespace OsgiViz.Unity.MainThreadConstructors
 
             Debug.Log("Finished with Island-GameObject construction!");
             status = Status.Finished;
-            cb();
         }
 
         private void setUVsToSingularCoord(Vector2 newUV, MeshFilter mesh)
