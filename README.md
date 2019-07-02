@@ -11,4 +11,5 @@ All of these are included as sub-modules and are obtained automatically when the
 Additionally, TextMesh Pro has to be downloaded from the Unity Assetstore and placed inside the IslandViz/Assets folder.
 "https://assetstore.unity.com/packages/essentials/beta-projects/textmesh-pro-84126"
 
+
 Tested with Unity 2018.1.9f1
