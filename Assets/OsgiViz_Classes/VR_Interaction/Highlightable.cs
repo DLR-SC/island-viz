@@ -47,7 +47,14 @@ public class Highlightable : MonoBehaviour {
 
     public void deHighlight()
     {
-        highlightedGOVersion.SetActive(false);
+        if (highlightedGOVersion != null)
+        {
+            highlightedGOVersion.SetActive(false);
+        }
+        else
+        {
+            Debug.LogWarning("Highlightable.deHighlight(): highlightedGOVersion is null!");
+        }
     }
 
     private void OnHandHoverBegin(Hand hand)
