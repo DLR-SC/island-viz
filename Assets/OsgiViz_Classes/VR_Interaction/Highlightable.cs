@@ -8,15 +8,20 @@ using Valve.VR.InteractionSystem;
 //TODO: Merge all Submeshes into a single Mesh since we only need to apply one material => one Mesh is enough
 public class Highlightable : MonoBehaviour {
 
-    public Material highlightMaterial;
-    private GameObject highlightedGOVersion;
+    public static Material highlightMaterial; // This variable is static, so you only have to 
+                                              // load the material once from the Resources.
+
+    private GameObject highlightedGOVersion; 
 
 	// Use this for initialization
 	void Start () {
 
         if (highlightMaterial == null)
+        {
             highlightMaterial = (Material)Resources.Load("Materials/WireFrame");
             //highlightMaterial = (Material)Resources.Load("Materials/Highlight_large");
+        }
+
 
         highlightedGOVersion = new GameObject(gameObject.name + " - Highlight");
         highlightedGOVersion.tag = "Highlight";
@@ -47,13 +52,9 @@ public class Highlightable : MonoBehaviour {
 
     public void deHighlight()
     {
-        if (highlightedGOVersion != null)
+        if (highlightedGOVersion != null && highlightedGOVersion.activeSelf)
         {
             highlightedGOVersion.SetActive(false);
-        }
-        else
-        {
-            Debug.LogWarning("Highlightable.deHighlight(): highlightedGOVersion is null!");
         }
     }
 

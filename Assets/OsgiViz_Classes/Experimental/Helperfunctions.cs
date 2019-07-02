@@ -242,6 +242,9 @@ namespace OsgiViz
             SweepLine sl = new SweepLine();
             List<Vertex> vertices = new List<Vertex>();
 
+            Vertex newCentroid;
+            int vertexCount;
+
             TnetMesh tMesh = (TnetMesh)sl.Triangulate(startingVertices, conf);
             BoundedVoronoi voronoi = new BoundedVoronoi(tMesh);
 
@@ -251,8 +254,8 @@ namespace OsgiViz
                 {
                     if (checkCell(face))
                     {
-                        Vertex newCentroid = new Vertex(0, 0);
-                        int vertexCount = 0;
+                        newCentroid = new Vertex(0, 0);
+                        vertexCount = 0;
                         foreach (VHEdge edge in face.EnumerateEdges())
                         {
                             newCentroid.X += edge.Origin.X;

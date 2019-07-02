@@ -16,10 +16,8 @@ namespace OsgiViz.SideThreadConstructors
     public class OsgiProjectConstructor
     {
 
-        private callbackMethod cb;
         private OsgiProject currentProject;
         private Status status;
-        Thread _thread;
         private readonly string redundantString_A = "http://www.example.org/OSGiApplicationModel#//";
         private JSONObject jsonObj;
 
@@ -28,15 +26,6 @@ namespace OsgiViz.SideThreadConstructors
             currentProject = null;
             status = Status.Idle;
             jsonObj = null;
-        }
-
-        //Public method to construct an OsgiProject from a JSONObject in a separate thread
-        public void Construct(JSONObject jObj, callbackMethod m)
-        {
-            cb = m;
-            jsonObj = jObj;
-            _thread = new Thread(ConstructProject);
-            _thread.Start();  
         }
 
         public OsgiProject getProject()
@@ -53,13 +42,18 @@ namespace OsgiViz.SideThreadConstructors
         {
             status = newStatus;
         }
+                
 
-        private void ConstructProject()
+        public IEnumerator Construct(JSONObject jObj)
         {
+            jsonObj = jObj;
 
-            #region OsgiProject
             status = Status.Working;
             Debug.Log("Starting OSGi-Project construction!");
+
+            yield return null;
+
+            #region OsgiProject            
             JSONObject tmp = jsonObj.GetField("name");
             Assert.IsNotNull(tmp, "Projectname could not be found!");
             currentProject = new OsgiProject(tmp.str);
@@ -108,6 +102,7 @@ namespace OsgiViz.SideThreadConstructors
                             }
                         }
                         currentBundle.addPackage(currentFragment);
+                        yield return null;
                     }
                 }
                 currentProject.addBundle(currentBundle);
@@ -118,16 +113,16 @@ namespace OsgiViz.SideThreadConstructors
             #region Services
             List<Bundle> bundles = currentProject.getBundles();
             tmp = jsonObj.GetField("services");
-            if(tmp != null)
+            if (tmp != null)
             {
                 List<JSONObject> serviceJsonList = tmp.list;
-                foreach(JSONObject jsonService in serviceJsonList)
+                foreach (JSONObject jsonService in serviceJsonList)
                 {
-                    
+
                     string serviceName = jsonService.GetField("interfaceName").str;
                     tmp = jsonService.GetField("interface");
                     CompilationUnit serviceCU = null;
-                    if(tmp != null)
+                    if (tmp != null)
                     {
                         Vector3 cuIdx = resolveCompilationUnitRef(tmp);
                         serviceCU = bundles[(int)cuIdx.x].getPackages()[(int)cuIdx.y].getCompilationUnits()[(int)cuIdx.z];
@@ -135,6 +130,7 @@ namespace OsgiViz.SideThreadConstructors
                     }
                     Service service = new Service(serviceName, serviceCU);
                     currentProject.addService(service);
+                    yield return null;
                 }
             }
             #endregion
@@ -145,10 +141,10 @@ namespace OsgiViz.SideThreadConstructors
             {
                 //Resolve Exports for Bundle
                 tmp = jsonBundle.GetField("exports");
-                if(tmp != null)
+                if (tmp != null)
                 {
                     List<Vector2> exportList = resolvePckgFragmentRefList(tmp.list);
-                    foreach(Vector2 indexVec in exportList)
+                    foreach (Vector2 indexVec in exportList)
                     {
                         Package resolvedFragment = bundles[(int)indexVec.x].getPackages()[(int)indexVec.y];
                         resolvedFragment.setExport(true);
@@ -164,7 +160,7 @@ namespace OsgiViz.SideThreadConstructors
                     {
                         Package resolvedFragment = bundles[(int)indexVec.x].getPackages()[(int)indexVec.y];
                         // Ignore self Import redundancy
-                        if (string.Compare(bundles[i].getName(), resolvedFragment.getBundle().getName()) != 0 )
+                        if (string.Compare(bundles[i].getName(), resolvedFragment.getBundle().getName()) != 0)
                         {
                             bundles[i].addImportedPackage(resolvedFragment);
 
@@ -174,9 +170,9 @@ namespace OsgiViz.SideThreadConstructors
                             GraphVertex vert1 = allVertices.Find(v => (string.Equals(v.getName(), bundles[i].getName())));
                             GraphVertex vert2 = allVertices.Find(v => (string.Equals(v.getName(), bundles[(int)indexVec.x].getName())));
 
-                            if(vert1 == null)
+                            if (vert1 == null)
                                 vert1 = new GraphVertex(bundles[i].getName());
-                            if(vert2 == null)
+                            if (vert2 == null)
                                 vert2 = new GraphVertex(bundles[(int)indexVec.x].getName());
 
                             dependencyGraph.AddVertex(vert1);
@@ -208,16 +204,17 @@ namespace OsgiViz.SideThreadConstructors
                         }
                         else
                         {
-                            Debug.Log("Spotted import redundancy in: " + bundles[i].getName() );
+                            Debug.Log("Spotted import redundancy in: " + bundles[i].getName());
                         }
+                        //yield return null;
                     }
                 }
                 //Construct and resolve ServiceComponents
                 List<Service> serviceList = currentProject.getServices();
                 tmp = jsonBundle.GetField("components");
-                if(tmp != null)
+                if (tmp != null)
                 {
-                    foreach(JSONObject jsonComponent in tmp.list)
+                    foreach (JSONObject jsonComponent in tmp.list)
                     {
                         string scName = jsonComponent.GetField("name").str;
                         Vector3 implIdx = resolveCompilationUnitRef(jsonComponent.GetField("implementation"));
@@ -226,7 +223,7 @@ namespace OsgiViz.SideThreadConstructors
                         ServiceComponent sc = new ServiceComponent(scName, resolvedCu);
 
                         tmp = jsonComponent.GetField("providedServices");
-                        if(tmp != null)
+                        if (tmp != null)
                         {
                             List<int> serviceRefs = resolveServiceReferenceIdxList(tmp);
                             foreach (int s in serviceRefs)
@@ -246,18 +243,17 @@ namespace OsgiViz.SideThreadConstructors
                             }
                         }
                         bundles[i].addServiceComponent(sc);
+                        yield return null;
                     }
                 }
-
-
                 i++;
             }
             #endregion
-            Debug.Log("Max Import-count: " + currentProject.getMaxImportCount()); 
+            Debug.Log("Max Import-count: " + currentProject.getMaxImportCount());
             status = Status.Finished;
             Debug.Log("Finished OSGi-Project construction!");
-            cb();
         }
+
 
 
         //Input: A list of JSONObjects containing a $ref string of the format "//@bundles.X/@packageFragments.Y"

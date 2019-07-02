@@ -44,30 +44,29 @@ namespace OsgiViz.SideThreadConstructors
             maxCohesion = maxCoh;
         }
 
-        //Public method to construct IslandStructures from an OsgiProject in a separate thread
-        public void Construct( OsgiProject proj, callbackMethod m)
+        public IEnumerator Construct (OsgiProject proj)
         {
-            cb = m;
             osgiProject = proj;
-            _thread = new Thread(ConstructIslands);
-            _thread.Start();
-        }
 
-        private void ConstructIslands()
-        {
             status = Status.Working;
             Debug.Log("Starting with the construction of the IslandStructures");
             foreach (Bundle bundle in osgiProject.getBundles())
+            {
                 islands.Add(constructIslandFromBundle(bundle));
+                yield return null;
+            }
 
             status = Status.Finished;
             Debug.Log("Finished with the construction of the IslandStructures");
-            cb();
+
+            yield return null;
         }
 
+        
 
         private CartographicIsland constructIslandFromBundle(Bundle b)
         {
+            Debug.Log("Starting Construciton of Island " + b.getName());
 
             int rngSeed = b.getName().GetHashCode() + 200;
             RNG = new System.Random(rngSeed);
@@ -109,7 +108,6 @@ namespace OsgiViz.SideThreadConstructors
                 updateAndFuseCandidates(startingCandidates, newCandidates);
             }
             #endregion
-
 
             #region Shape island coast
             //Advance startingCandidates X cells outwards and ajdust the height of all vertices
@@ -166,6 +164,8 @@ namespace OsgiViz.SideThreadConstructors
             }
 
             #endregion
+
+            Debug.Log("Finished Construciton of Island " + b.getName());
 
             return island;
         }

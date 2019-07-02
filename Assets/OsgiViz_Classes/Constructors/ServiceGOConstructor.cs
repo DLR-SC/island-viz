@@ -6,6 +6,7 @@ using OsgiViz.Core;
 using OsgiViz.SoftwareArtifact;
 using OsgiViz.Unity.Island;
 
+
 namespace OsgiViz.Unity.MainThreadConstructors
 {
     public class ServiceGOConstructor : MonoBehaviour
