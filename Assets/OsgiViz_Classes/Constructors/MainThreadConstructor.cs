@@ -10,29 +10,32 @@ namespace OsgiViz.Unity.MainThreadConstructors
 
     public class MainThreadConstructor : MonoBehaviour
     {
+        public string projectModelFile = GlobalVar.projectmodelPath;
+
         private IslandGOConstructor islandGOConstructor;
         private ServiceGOConstructor serviceGOConstructor;
         private DockGOConstructor dockGOConstructor;
         private HierarchyConstructor hierarchyConstructor;
-
-        public string projectModelFile = GlobalVar.projectmodelPath;
         private JsonObjConstructor jConstructor;
         private OsgiProjectConstructor osgiConstructor;
         private IslandStructureConstructor isConstructor;
         private Graph_Layout_Constructor bdConstructor;
-
+                
         private Status status;
         private bool waiting = true;
 
         private System.Diagnostics.Stopwatch stopwatch;
 
 
-        // This Method is called by Unity when the application is started.
+        /// <summary>
+        /// This Method is called when the application is started.
+        /// </summary>
         void Start()
         {
             UnityEngine.XR.XRSettings.eyeTextureResolutionScale = 1f;
             Shader.SetGlobalFloat("hologramOutlineWidth", GlobalVar.hologramOutlineWidth);
             Shader.SetGlobalVector("hologramOutlineColor", GlobalVar.hologramOutlineColor);
+
             islandGOConstructor = gameObject.AddComponent<IslandGOConstructor>();
             serviceGOConstructor = gameObject.AddComponent<ServiceGOConstructor>();
             dockGOConstructor = gameObject.AddComponent<DockGOConstructor>();
@@ -51,10 +54,13 @@ namespace OsgiViz.Unity.MainThreadConstructors
             StartCoroutine(Construction());                       
         }
 
-
+        /// <summary>
+        /// This Coroutine creates the OSGI visualization from a JSON file located at projectModelFile.
+        /// </summary>
         IEnumerator Construction ()
         {
             status = Status.Working;
+            // Start the timer to measure total construction time.
             stopwatch.Start();
 
             // Read & construct a Json Object.
@@ -66,14 +72,16 @@ namespace OsgiViz.Unity.MainThreadConstructors
             // Construct a osgi Object from the Json Object.
             yield return osgiConstructor.Construct(jConstructor.getJsonModel());
 
-            //Debug.Log("Project has a total of " + osgiConstructor.getProject().getNumberOfCUs() + " compilation units!");
+            Debug.Log("Project has a total of " + osgiConstructor.getProject().getNumberOfCUs() + " compilation units!");
 
             //Construct islands from bundles in the osgi Object.
             yield return isConstructor.Construct(osgiConstructor.getProject());
 
+            #region alternative layout
             //Vector3 minBounds = new Vector3(-10.5f, 1.31f, -10.5f);
             //Vector3 maxBounds = new Vector3(10.5f, 1.31f, 10.5f);
             //bdConstructor.ConstructRndLayout(osgiConstructor.getProject().getDependencyGraph(), Done, minBounds, maxBounds, 0.075f, 10000);
+            #endregion
 
             waiting = true;
             // Construct the spatial distribution of the islands.
@@ -91,21 +99,24 @@ namespace OsgiViz.Unity.MainThreadConstructors
             // Construct the connections between the islands from services in the osgi Object.
             yield return serviceGOConstructor.Construct(project.getServices(), islandGOConstructor.getIslandGOs());
 
-            // Construct the ports between the islands from services in the osgi Object.
+            // Construct the dock GameObjects.
             yield return dockGOConstructor.Construct(islandGOConstructor.getIslandGOs());
-            
+
+            // Construct the island hierarchy.
             yield return hierarchyConstructor.Construct(islandGOConstructor.getIslandGOs());
 
-                                    
+            
             status = Status.Finished;
             stopwatch.Stop();
             Debug.Log("Construction finished after " + stopwatch.Elapsed.TotalSeconds.ToString("0.00") + " seconds!");
 
-            yield return afterConstructionTasks();
+            yield return AfterConstructionTasks();
         }
 
-
-        IEnumerator afterConstructionTasks ()
+        /// <summary>
+        /// Called after the construction of the OSGI visualization is done.
+        /// </summary>
+        IEnumerator AfterConstructionTasks ()
         {
             yield return null;
 
@@ -116,8 +127,10 @@ namespace OsgiViz.Unity.MainThreadConstructors
             
             BroadcastMessage("MainConstructorFinished");
         }
-        
 
+        /// <summary>
+        /// Adds a Highlightable component to all GameObjects containing a Interactable component.
+        /// </summary>
         private void AddHighlightToAllInteractables()
         {
             Valve.VR.InteractionSystem.Interactable[] interactablesComponents = GameObject.FindObjectsOfType<Valve.VR.InteractionSystem.Interactable>();
@@ -134,6 +147,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
             }
         }
 
+        // get & set
         public Status getStatus()
         {
             return status;
@@ -147,7 +161,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
             return dockGOConstructor;
         }
 
-        // Helper Functions
+        // Helper function
         public void Done ()
         {
             waiting = false;

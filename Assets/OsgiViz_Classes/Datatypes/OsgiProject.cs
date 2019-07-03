@@ -16,9 +16,9 @@ namespace OsgiViz.Core
         private int maximalImportCount;
         private int sizeInMemory;
 
-        public OsgiProject(string pn)
+        public OsgiProject(string projectName)
         {
-            projectName = pn;
+            this.projectName = projectName;
             bundles = new List<Bundle>();
             services = new List<Service>();
             dependencyGraph = new BidirectionalGraph<GraphVertex, GraphEdge>(true);

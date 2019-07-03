@@ -22,7 +22,6 @@ namespace OsgiViz.Unity.MainThreadConstructors
     {
 
         private Status status;
-        private callbackMethod cb;
         private List<IslandGO> islandGOs;
         private Material combinedHoloMaterial;
         private GameObject VisualizationContainer;
@@ -66,13 +65,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
         {
             status = Status.Working;
             Debug.Log("Started with Island-GameObject construction!");
-            yield return StartCoroutine(constructAll(structures));
-        }
-
-        
-
-        IEnumerator constructAll(List<CartographicIsland> structures)
-        {
+            
             for (int i = 0; i < structures.Count; i++)
             {
                 GraphVertex vert = structures[i].getDependencyVertex();
@@ -80,10 +73,9 @@ namespace OsgiViz.Unity.MainThreadConstructors
                 {
                     Vector3 placementPosition = vert.getPosition();
                     placementPosition.y = VisualizationContainer.transform.position.y - GlobalVar.islandHeightProfile[GlobalVar.islandHeightProfile.Length-1];
-                    islandGOs.Add(constructIslandGO(structures[i], placementPosition));
+                    islandGOs.Add(ConstructIslandGO(structures[i], placementPosition));
+                    yield return null;
                 }
-
-                yield return null;
             }
 
             Debug.Log("Finished with Island-GameObject construction!");
@@ -100,7 +92,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
             mesh.sharedMesh.uv = newUVs;
         }
 
-        private IslandGO constructIslandGO(CartographicIsland island, Vector3 pos)
+        private IslandGO ConstructIslandGO(CartographicIsland island, Vector3 pos)
         {
             int rngSeed = island.getName().GetHashCode() + 200;
             RNG = new System.Random(rngSeed);
@@ -208,18 +200,6 @@ namespace OsgiViz.Unity.MainThreadConstructors
             }
 
 
-            #endregion
-
-            #region Combine CU meshes
-            /*
-            GameObject combinedCUs = new GameObject("Combined CUs");
-            MeshFilter mFilterCU = combinedCUs.AddComponent<MeshFilter>();
-            MeshRenderer mRenderCU = combinedCUs.AddComponent<MeshRenderer>();
-            mRenderCU.material = defaultMaterial;
-            mFilterCU.mesh = new Mesh();
-            mFilterCU.mesh.CombineMeshes(combineCuMeshes, true, true);
-            combinedCUs.transform.SetParent(islandGO.transform);
-            */
             #endregion
 
             #region create coastline

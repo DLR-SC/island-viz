@@ -12,7 +12,9 @@ using OsgiViz.Relations;
 namespace OsgiViz.SideThreadConstructors
 {
 
-
+    /// <summary>
+    /// This class creates a OsgiProject from a JSONObject.
+    /// </summary>
     public class OsgiProjectConstructor
     {
 
@@ -21,37 +23,28 @@ namespace OsgiViz.SideThreadConstructors
         private readonly string redundantString_A = "http://www.example.org/OSGiApplicationModel#//";
         private JSONObject jsonObj;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public OsgiProjectConstructor()
         {
             currentProject = null;
             status = Status.Idle;
             jsonObj = null;
-        }
-
-        public OsgiProject getProject()
-        {
-            return currentProject;
-        }
-
-        public Status getStatus()
-        {
-            return status;
-        }
-
-        public void setStatus(Status newStatus)
-        {
-            status = newStatus;
-        }
-                
-
+        }                
+        
+        /// <summary>
+        /// The Coroutine, that creates the OsgiProject from a JSONObject.
+        /// This method is called by the MainThreadConstructor.
+        /// The OsgiProject is stored in the local variable "currentProject".
+        /// </summary>
+        /// <param name="jObj">The JSONObject from which the OsgiProject is generated.</param>
         public IEnumerator Construct(JSONObject jObj)
         {
             jsonObj = jObj;
 
             status = Status.Working;
             Debug.Log("Starting OSGi-Project construction!");
-
-            yield return null;
 
             #region OsgiProject            
             JSONObject tmp = jsonObj.GetField("name");
@@ -77,7 +70,7 @@ namespace OsgiViz.SideThreadConstructors
                     foreach (JSONObject frag in fragList)
                     {
                         JSONObject jsonPkg = frag.GetField("package");
-                        int pkgIdx = resolvePackageReferenceIdx(jsonPkg);
+                        int pkgIdx = ResolvePackageReferenceIdx(jsonPkg);
                         string fragName = jsonPackageList[pkgIdx].GetField("qualifiedName").str;
                         Package currentFragment = new Package(currentBundle, fragName);
                         //Create Compilation Units
@@ -124,7 +117,7 @@ namespace OsgiViz.SideThreadConstructors
                     CompilationUnit serviceCU = null;
                     if (tmp != null)
                     {
-                        Vector3 cuIdx = resolveCompilationUnitRef(tmp);
+                        Vector3 cuIdx = ResolveCompilationUnitRef(tmp);
                         serviceCU = bundles[(int)cuIdx.x].getPackages()[(int)cuIdx.y].getCompilationUnits()[(int)cuIdx.z];
                         serviceCU.setServiceDeclaration(true);
                     }
@@ -143,7 +136,7 @@ namespace OsgiViz.SideThreadConstructors
                 tmp = jsonBundle.GetField("exports");
                 if (tmp != null)
                 {
-                    List<Vector2> exportList = resolvePckgFragmentRefList(tmp.list);
+                    List<Vector2> exportList = ResolvePckgFragmentRefList(tmp.list);
                     foreach (Vector2 indexVec in exportList)
                     {
                         Package resolvedFragment = bundles[(int)indexVec.x].getPackages()[(int)indexVec.y];
@@ -155,7 +148,7 @@ namespace OsgiViz.SideThreadConstructors
                 tmp = jsonBundle.GetField("imports");
                 if (tmp != null)
                 {
-                    List<Vector2> importList = resolvePckgFragmentRefList(tmp.list);
+                    List<Vector2> importList = ResolvePckgFragmentRefList(tmp.list);
                     foreach (Vector2 indexVec in importList)
                     {
                         Package resolvedFragment = bundles[(int)indexVec.x].getPackages()[(int)indexVec.y];
@@ -217,7 +210,7 @@ namespace OsgiViz.SideThreadConstructors
                     foreach (JSONObject jsonComponent in tmp.list)
                     {
                         string scName = jsonComponent.GetField("name").str;
-                        Vector3 implIdx = resolveCompilationUnitRef(jsonComponent.GetField("implementation"));
+                        Vector3 implIdx = ResolveCompilationUnitRef(jsonComponent.GetField("implementation"));
                         CompilationUnit resolvedCu = bundles[(int)implIdx.x].getPackages()[(int)implIdx.y].getCompilationUnits()[(int)implIdx.z];
                         resolvedCu.setServiceComponentImpl(true);
                         ServiceComponent sc = new ServiceComponent(scName, resolvedCu);
@@ -225,7 +218,7 @@ namespace OsgiViz.SideThreadConstructors
                         tmp = jsonComponent.GetField("providedServices");
                         if (tmp != null)
                         {
-                            List<int> serviceRefs = resolveServiceReferenceIdxList(tmp);
+                            List<int> serviceRefs = ResolveServiceReferenceIdxList(tmp);
                             foreach (int s in serviceRefs)
                             {
                                 sc.addProvidedService(serviceList[s]);
@@ -235,7 +228,7 @@ namespace OsgiViz.SideThreadConstructors
                         tmp = jsonComponent.GetField("referencedServices");
                         if (tmp != null)
                         {
-                            List<int> serviceRefs = resolveServiceReferenceIdxList(tmp);
+                            List<int> serviceRefs = ResolveServiceReferenceIdxList(tmp);
                             foreach (int s in serviceRefs)
                             {
                                 sc.addReferencedService(serviceList[s]);
@@ -254,11 +247,14 @@ namespace OsgiViz.SideThreadConstructors
             Debug.Log("Finished OSGi-Project construction!");
         }
 
+        
 
-
-        //Input: A list of JSONObjects containing a $ref string of the format "//@bundles.X/@packageFragments.Y"
-        //Output: A list of Vector2(X,Y) representing Bundle and Packagefragment number
-        private List<Vector2> resolvePckgFragmentRefList( List<JSONObject> pckgFragmentRefList)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pckgFragmentRefList">A list of JSONObjects containing a $ref string of the format "//@bundles.X/@packageFragments.Y".</param>
+        /// <returns>A list of Vector2(X,Y) representing Bundle and Packagefragment number.</returns>
+        private List<Vector2> ResolvePckgFragmentRefList(List<JSONObject> pckgFragmentRefList)
         {
             List<Vector2> result = new List<Vector2>();
             foreach (JSONObject reference in pckgFragmentRefList)
@@ -273,10 +269,13 @@ namespace OsgiViz.SideThreadConstructors
 
             return result;
         }
-
-        //Input: A JSONObject containing a $ref string of the format "//@bundles.X/@packageFragments.Y"
-        //Output: A Vector2(X,Y) representing Bundle and Packagefragment number
-        private Vector2 resolvePckgFragmentRef(JSONObject pckgFragment)
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pckgFragment">A JSONObject containing a $ref string of the format "//@bundles.X/@packageFragments.Y".</param>
+        /// <returns>A Vector2(X,Y) representing Bundle and Packagefragment number.</returns>
+        private Vector2 ResolvePckgFragmentRef(JSONObject pckgFragment)
         {
             Vector2 result = new Vector2();
             string rawRefString = pckgFragment.GetField("$ref").str;
@@ -288,10 +287,13 @@ namespace OsgiViz.SideThreadConstructors
 
             return result;
         }
-
-        //Input: A JSONObject containing a $ref string of the format "//@bundles.X/@packageFragments.Y/@compilationUnits.Z..."
-        //Output: A Vector3(X,Y,Z) representing Bundle, Packagefragment and CompilationUnit number
-        private Vector3 resolveCompilationUnitRef(JSONObject CuRef)
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="CuRef">A JSONObject containing a $ref string of the format "//@bundles.X/@packageFragments.Y/@compilationUnits.Z..."</param>
+        /// <returns>A Vector3(X,Y,Z) representing Bundle, Packagefragment and CompilationUnit number.</returns>
+        private Vector3 ResolveCompilationUnitRef(JSONObject CuRef)
         {
             Vector3 result = new Vector3();
             string rawRefString = CuRef.GetField("$ref").str;
@@ -308,11 +310,13 @@ namespace OsgiViz.SideThreadConstructors
 
             return result;
         }
-
-
-        //Input: A JSONObject containing a $ref string of the format "//@packages.X"
-        //Output: A int representing the Package number X
-        private int resolvePackageReferenceIdx(JSONObject pckg)
+               
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pckg">A JSONObject containing a $ref string of the format "//@packages.X".</param>
+        /// <returns>A int representing the Package number X.</returns>
+        private int ResolvePackageReferenceIdx(JSONObject pckg)
         {
             int result;
             string rawRefString = pckg.GetField("$ref").str;
@@ -322,10 +326,13 @@ namespace OsgiViz.SideThreadConstructors
 
             return result;
         }
-
-        //Input: A JSONObject containing a list of $ref strings of the format "//@packages.X"
-        //Output: A List<int> representing the Package numbers X
-        private List<int> resolvePackageReferenceIdxList(JSONObject pckg)
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pckg">A JSONObject containing a list of $ref strings of the format "//@packages.X".</param>
+        /// <returns>A List<int> representing the Package numbers X.</returns>
+        private List<int> ResolvePackageReferenceIdxList(JSONObject pckg)
         {
             List<int> result = new List<int>();
             foreach (JSONObject listEntry in pckg.list)
@@ -340,9 +347,13 @@ namespace OsgiViz.SideThreadConstructors
             return result;
         }
 
-        //Input: A JSONObject containing a list of $ref strings of the format "//@services.X"
-        //Output: A List<int> representing the service numbers X
-        private List<int> resolveServiceReferenceIdxList(JSONObject serviceRef)
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="serviceRef">A JSONObject containing a list of $ref strings of the format "//@services.X".</param>
+        /// <returns>A List<int> representing the service numbers X.</returns>
+        private List<int> ResolveServiceReferenceIdxList(JSONObject serviceRef)
         {
             List<int> result = new List<int>();
             foreach (JSONObject listEntry in serviceRef.list)
@@ -358,6 +369,20 @@ namespace OsgiViz.SideThreadConstructors
         }
 
 
+        // get & set
+
+        public OsgiProject getProject()
+        {
+            return currentProject;
+        }
+        public Status getStatus()
+        {
+            return status;
+        }
+        public void setStatus(Status newStatus)
+        {
+            status = newStatus;
+        }
     }
 
 
