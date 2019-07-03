@@ -14,7 +14,6 @@ namespace OsgiViz.SideThreadConstructors
 
     public class Graph_Layout_Constructor
     {
-
         private callbackMethod cb;
         Thread _thread;
         private Status status;
@@ -45,7 +44,7 @@ namespace OsgiViz.SideThreadConstructors
         {
             cb = m;
             graph = g;
-            _thread = new Thread(() => computeRNDGraphLayoutThreaded(min,max,minDis,maxIt));
+            _thread = new Thread(() => ComputeRNDGraphLayoutThreaded(min,max,minDis,maxIt));
             _thread.Start();
         }
 
@@ -54,13 +53,12 @@ namespace OsgiViz.SideThreadConstructors
             cb = m;
             project = proj;
             graph = proj.getDependencyGraph();
-            _thread = new Thread(() => computeForceDirectedLayoutThreaded(simulationSteps, stepSize));
+            _thread = new Thread(() => ComputeForceDirectedLayoutThreaded(simulationSteps, stepSize));
             _thread.Start();
         }
 
-        private void computeForceDirectedLayoutThreaded(int simulationSteps, float stepSize)
+        private void ComputeForceDirectedLayoutThreaded(int simulationSteps, float stepSize)
         {
-
             status = Status.Working;
             Debug.Log("Starting forcedirected graph layout construction.");
 
@@ -76,8 +74,7 @@ namespace OsgiViz.SideThreadConstructors
             float c6 = 0.105f;
             //TimeStep
             float t = stepSize;
-
-            
+                       
 
             Dictionary<GraphVertex, VertexPositionData> simulationData = new Dictionary<GraphVertex, VertexPositionData>();
             #region init start values
@@ -186,7 +183,7 @@ namespace OsgiViz.SideThreadConstructors
             cb();
         }
 
-        private void computeRNDGraphLayoutThreaded(Vector3 distrBoxBegin, Vector3 distrBoxEnd, float minDistance, float maxIterations)
+        private void ComputeRNDGraphLayoutThreaded(Vector3 distrBoxBegin, Vector3 distrBoxEnd, float minDistance, float maxIterations)
         {
             status = Status.Working;
             Debug.Log("Starting graph layout construction.");
@@ -200,7 +197,7 @@ namespace OsgiViz.SideThreadConstructors
                                                              diagonalVec.y * (float)RNG.NextDouble(),
                                                              diagonalVec.z * (float)RNG.NextDouble());
                 int iteration = 0;
-                while (!checkOverlap(rndVec, vertex.getIsland(), minDistance) && iteration <= maxIterations)
+                while (!CheckOverlap(rndVec, vertex.getIsland(), minDistance) && iteration <= maxIterations)
                 {
                     rndVec = distrBoxBegin + new Vector3(diagonalVec.x * (float)RNG.NextDouble(),
                                                          diagonalVec.y * (float)RNG.NextDouble(),
@@ -219,7 +216,7 @@ namespace OsgiViz.SideThreadConstructors
             cb();
         }
 
-        private Boolean checkOverlap(Vector3 newPosition, CartographicIsland newIsland, float minDistance)
+        private Boolean CheckOverlap(Vector3 newPosition, CartographicIsland newIsland, float minDistance)
         {
             int cc = 0;
             foreach(GraphVertex existingVertex in graph.Vertices)

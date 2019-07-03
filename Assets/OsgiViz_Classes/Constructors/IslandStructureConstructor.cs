@@ -19,20 +19,25 @@ using VVertex = TriangleNet.Topology.DCEL.Vertex;
 
 namespace OsgiViz.SideThreadConstructors
 {
+    /// <summary>
+    /// This class creates CartographicIslands from a OsgiProject.
+    /// </summary>
     public class IslandStructureConstructor
     {
-
-        private callbackMethod cb;
         private OsgiProject osgiProject;
         private List<CartographicIsland> islands;
-        Thread _thread;
         private Status status;
         private System.Random RNG;
         private int expansionFactor;
         private float minCohesion;
         private float maxCohesion;
         
-
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="expansionF"></param>
+        /// <param name="minCoh"></param>
+        /// <param name="maxCoh"></param>
         public IslandStructureConstructor(int expansionF, float minCoh, float maxCoh)
         {
             osgiProject = null;
@@ -44,12 +49,18 @@ namespace OsgiViz.SideThreadConstructors
             maxCohesion = maxCoh;
         }
 
+        /// <summary>
+        /// This Coroutine creates a list of CartographicIslands from a OsgiProject.
+        /// This method is called by the MainThreadConstructor.
+        /// </summary>
+        /// <param name="proj">The OsgiProject from which the CartographicIslands are created.</param>
         public IEnumerator Construct (OsgiProject proj)
         {
             osgiProject = proj;
 
             status = Status.Working;
             Debug.Log("Starting with the construction of the IslandStructures");
+
             foreach (Bundle bundle in osgiProject.getBundles())
             {
                 islands.Add(constructIslandFromBundle(bundle));
@@ -59,11 +70,11 @@ namespace OsgiViz.SideThreadConstructors
             status = Status.Finished;
             Debug.Log("Finished with the construction of the IslandStructures");
 
-            yield return null;
+            yield return null; // TODO remove
         }
 
         
-
+        // TODO move into the coroutine & optimize (GC)
         private CartographicIsland constructIslandFromBundle(Bundle b)
         {
             int rngSeed = b.getName().GetHashCode() + 200;
@@ -102,8 +113,8 @@ namespace OsgiViz.SideThreadConstructors
                 float cohesionMult = (float)package.getCuCount() / maxCUCountInIsland;
                 cohesionMult *= maxCohesion;
                 cohesionMult = Mathf.Max(minCohesion, cohesionMult);
-                Dictionary<int, VFace> newCandidates = constructRegionFromPackage(package, island, startingCandidates, cohesionMult);
-                updateAndFuseCandidates(startingCandidates, newCandidates);
+                Dictionary<int, VFace> newCandidates = ConstructRegionFromPackage(package, island, startingCandidates, cohesionMult);
+                UpdateAndFuseCandidates(startingCandidates, newCandidates);
             }
             #endregion
 
@@ -143,9 +154,9 @@ namespace OsgiViz.SideThreadConstructors
 
             #region TnetMeshesConstruction
             foreach (List<VFace> cellMap in island.getPackageCells())
-                island.addPackageMesh(constructTnetMeshFromCellmap(cellMap));
+                island.addPackageMesh(ConstructTnetMeshFromCellmap(cellMap));
 
-            island.setCoastlineMesh(constructTnetMeshFromCellmap(coastlineList));
+            island.setCoastlineMesh(ConstructTnetMeshFromCellmap(coastlineList));
             #endregion
 
             #region link dependency vertex
@@ -168,43 +179,60 @@ namespace OsgiViz.SideThreadConstructors
             return island;
         }
 
-        //Update dictA and fuse dictB into it
-        private void updateAndFuseCandidates(Dictionary<int, VFace> dictA, Dictionary<int, VFace> dictB)
+        /// <summary>
+        /// Update dictA and fuse dictB into it.
+        /// </summary>
+        /// <param name="dictA">A Dictionary containting TODO</param>
+        /// <param name="dictB">A Dictionary containting TODO</param>
+        private void UpdateAndFuseCandidates(Dictionary<int, VFace> dictA, Dictionary<int, VFace> dictB)
         {
             //update dictA
             List<int> keysToRemove = new List<int>();
             foreach (KeyValuePair<int, VFace> kvp in dictA)
+            {
                 if (kvp.Value.mark != 0)
+                {
                     keysToRemove.Add(kvp.Key);
+                }
+            }                
             foreach (int key in keysToRemove)
+            {
                 dictA.Remove(key);
-
+            }
 
             //Fuse dictB into dictA
             foreach (KeyValuePair<int, VFace> kvp in dictB)
             {
                 if (!dictA.ContainsKey(kvp.Key))
+                {
                     dictA.Add(kvp.Key, kvp.Value);
+                }
             }
-
         }
 
-        //return: the unused candidates
-        //b[1, 10]: cohesion factor. higher b -> more compact "cohesive" islands
-        private Dictionary<int, VFace> constructRegionFromPackage(Package package, CartographicIsland island, Dictionary<int, VFace> startingCandidates, float b)
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="package"></param>
+        /// <param name="island"></param>
+        /// <param name="startingCandidates"></param>
+        /// <param name="b">b[1, 10]: cohesion factor. higher b -> more compact "cohesive" islands.</param>
+        /// <returns>The unused candidates.</returns>
+        private Dictionary<int, VFace> ConstructRegionFromPackage(Package package, CartographicIsland island, Dictionary<int, VFace> startingCandidates, float b)
         {
             BoundedVoronoi islandVoronoi = island.getVoronoi();
             List<CompilationUnit> cuList = package.getCompilationUnits();
             List<VFace> cellMap = new List<VFace>();
             Dictionary<int, VFace> newCandidates = new Dictionary<int, VFace>();          
-            VFace startingCell = selectFromCandidates(startingCandidates, b).Value;
+            VFace startingCell = SelectFromCandidates(startingCandidates, b).Value;
             
             int maxIterations = 10;
             int counter = 0;
-            while (expandCountries(cuList, cellMap, newCandidates, startingCell, b) == false && counter < maxIterations)
+            while (ExpandCountries(cuList, cellMap, newCandidates, startingCell, b) == false && counter < maxIterations)
             {
                 //Debug.Log("Backtracking");
-                startingCell = selectFromCandidates(startingCandidates, b).Value;
+                startingCell = SelectFromCandidates(startingCandidates, b).Value;
                 counter++;
             }
 
@@ -213,8 +241,16 @@ namespace OsgiViz.SideThreadConstructors
             return newCandidates;
         }
 
-        //writes into cellMap and endCandidates
-        private bool expandCountries(List<CompilationUnit> cuList, List<VFace> cellMap, Dictionary<int, VFace> endCandidates, VFace startingCell, float b)
+        /// <summary>
+        /// Writes into cellMap and endCandidates.
+        /// </summary>
+        /// <param name="cuList"></param>
+        /// <param name="cellMap"></param>
+        /// <param name="endCandidates"></param>
+        /// <param name="startingCell"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        private bool ExpandCountries(List<CompilationUnit> cuList, List<VFace> cellMap, Dictionary<int, VFace> endCandidates, VFace startingCell, float b)
         {
             Dictionary<int, VFace> candidates = new Dictionary<int, VFace>();
             candidates.Add(startingCell.ID, startingCell);
@@ -230,7 +266,7 @@ namespace OsgiViz.SideThreadConstructors
                 }
 
                     //Select cell from candidates
-                KeyValuePair<int, VFace> selectedCell = selectFromCandidates(candidates, b);
+                KeyValuePair<int, VFace> selectedCell = SelectFromCandidates(candidates, b);
                     //Mark cell in islandVoronoi
                 selectedCell.Value.mark = i;
                     //Add cell to package dictionary
@@ -258,7 +294,12 @@ namespace OsgiViz.SideThreadConstructors
         }
 
 
-        private List<TnetMesh> constructTnetMeshFromCellmap(List<VFace> cellmap)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cellmap"></param>
+        /// <returns></returns>
+        private List<TnetMesh> ConstructTnetMeshFromCellmap(List<VFace> cellmap)
         {
             List<Vertex> vertices = new List<Vertex>();
             List<TnetMesh> result = new List<TnetMesh>();
@@ -282,7 +323,13 @@ namespace OsgiViz.SideThreadConstructors
             return result;
         }
 
-        private KeyValuePair<int, VFace> selectFromCandidates(Dictionary<int, VFace> candidates, float b)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="candidates"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        private KeyValuePair<int, VFace> SelectFromCandidates(Dictionary<int, VFace> candidates, float b)
         {
             KeyValuePair<int, VFace> selectedCandidate = new KeyValuePair<int,VFace>();
             List<float> candidateScores = new List<float>();
@@ -325,6 +372,65 @@ namespace OsgiViz.SideThreadConstructors
 
             return selectedCandidate;
         }
+
+
+        /// <summary>
+        /// Expands the coastlineCells outwards by hp.length cells and applies the height profile hp during expansion.
+        /// </summary>
+        /// <param name="coastline"></param>
+        /// <param name="hp"></param>
+        private void shapeCoastArea(Dictionary<int, VFace> coastline, float[] hp)
+        {
+            Dictionary<int, VFace> newestCoastline = new Dictionary<int, VFace>(coastline);
+
+            for (int i = 0; i < hp.Length; i++)
+            {
+                //Expand cells
+                newestCoastline.Clear();
+                foreach (KeyValuePair<int, VFace> kvp in coastline)
+                {
+                    foreach (VHEdge edge in kvp.Value.EnumerateEdges())
+                    {
+                        VFace nCell = edge.twin.face;
+                        if (Helperfunctions.checkCell(nCell, -GlobalVar.voronoiCellScalefactor * 0.4f, GlobalVar.voronoiCellScalefactor * 0.4f,
+                            -GlobalVar.voronoiCellScalefactor * 0.4f, GlobalVar.voronoiCellScalefactor * 0.4f) && nCell.mark == 0 && !coastline.ContainsKey(nCell.ID)
+                            && !newestCoastline.ContainsKey(nCell.ID))
+                            newestCoastline.Add(nCell.ID, nCell);
+                    }
+                }
+                //Adjust height and Add to coastline
+                foreach (KeyValuePair<int, VFace> kvp in newestCoastline)
+                {
+                    coastline.Add(kvp.Key, kvp.Value);
+                    foreach (VHEdge edge in kvp.Value.EnumerateEdges())
+                    {
+                            edge.Origin.Z += hp[i];
+                    }
+                }
+                
+            }
+            //Remove the last expansion from the coastline, due to artifacts
+            foreach (KeyValuePair<int, VFace> kvp in newestCoastline)
+                coastline.Remove(kvp.Key);
+        }
+
+        // get & set
+        public List<CartographicIsland> getIslandStructureList()
+        {
+            return islands;
+        }
+        public Status getStatus()
+        {
+            return status;
+        }
+        public void setStatus(Status newStatus)
+        {
+            status = newStatus;
+        }
+
+
+
+
 
         /*
         private void populateIslandCoastDistance(CartographicIsland island, int hf)
@@ -396,61 +502,6 @@ namespace OsgiViz.SideThreadConstructors
 
         }
         */
-         
-        //Expands the coastlineCells outwards by hp.length cells and applies the height profile hp during expansion
-        private void shapeCoastArea(Dictionary<int, VFace> coastline, float[] hp)
-        {
-            Dictionary<int, VFace> newestCoastline = new Dictionary<int, VFace>(coastline);
-
-            for (int i = 0; i < hp.Length; i++)
-            {
-                //Expand cells
-                newestCoastline.Clear();
-                foreach (KeyValuePair<int, VFace> kvp in coastline)
-                {
-                    foreach (VHEdge edge in kvp.Value.EnumerateEdges())
-                    {
-                        VFace nCell = edge.twin.face;
-                        if (Helperfunctions.checkCell(nCell, -GlobalVar.voronoiCellScalefactor * 0.4f, GlobalVar.voronoiCellScalefactor * 0.4f,
-                            -GlobalVar.voronoiCellScalefactor * 0.4f, GlobalVar.voronoiCellScalefactor * 0.4f) && nCell.mark == 0 && !coastline.ContainsKey(nCell.ID)
-                            && !newestCoastline.ContainsKey(nCell.ID))
-                            newestCoastline.Add(nCell.ID, nCell);
-                    }
-                }
-                //Adjust height and Add to coastline
-                foreach (KeyValuePair<int, VFace> kvp in newestCoastline)
-                {
-                    coastline.Add(kvp.Key, kvp.Value);
-                    foreach (VHEdge edge in kvp.Value.EnumerateEdges())
-                    {
-                            edge.Origin.Z += hp[i];
-                    }
-                }
-                
-            }
-            //Remove the last expansion from the coastline, due to artifacts
-            foreach (KeyValuePair<int, VFace> kvp in newestCoastline)
-                coastline.Remove(kvp.Key);
-
-        }
-
-        public List<CartographicIsland> getIslandStructureList()
-        {
-            return islands;
-        }
-
-
-        public Status getStatus()
-        {
-            return status;
-        }
-
-        public void setStatus(Status newStatus)
-        {
-            status = newStatus;
-        }
-
-       
     }
 
 }
