@@ -6,19 +6,19 @@ using System.Linq;
 
 
 
-namespace Neo4JExample
+namespace Neo4JDriver
 {
     // This example is using the movie example neo4j database.
 
     public class Neo4J_Example : MonoBehaviour
     {
 
-        Neo4JExample.Neo4J dataBase;
+        Neo4JDriver.Neo4J dataBase;
 
         // Start is called before the first frame update
         void Start()
         {
-            dataBase = new Neo4JExample.Neo4J("bolt://localhost:7687", "neo4j", "123", true);
+            dataBase = new Neo4JDriver.Neo4J("bolt://localhost:7687", "neo4j", "123");
         }
 
         // An example with a Cypher statement returning one release date.

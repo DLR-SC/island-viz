@@ -20,7 +20,9 @@ namespace OsgiViz.Unity.MainThreadConstructors
         private OsgiProjectConstructor osgiConstructor;
         private IslandStructureConstructor isConstructor;
         private Graph_Layout_Constructor bdConstructor;
-                
+        private Neo4jObjConstructor neo4jConstructor;
+
+
         private Status status;
         private bool waiting = true;
 
@@ -40,6 +42,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
             serviceGOConstructor = gameObject.AddComponent<ServiceGOConstructor>();
             dockGOConstructor = gameObject.AddComponent<DockGOConstructor>();
             hierarchyConstructor = gameObject.AddComponent<HierarchyConstructor>();
+            neo4jConstructor = gameObject.AddComponent<Neo4jObjConstructor>();
 
             jConstructor = new JsonObjConstructor();
             osgiConstructor = new OsgiProjectConstructor();
@@ -63,14 +66,18 @@ namespace OsgiViz.Unity.MainThreadConstructors
             // Start the timer to measure total construction time.
             stopwatch.Start();
 
+            yield return neo4jConstructor.Construct();
+
+            #region Remove in future
             // Read & construct a Json Object.
             jConstructor.Construct(projectModelFile, Done);            
             // Wait for jConstructor.Construct.
             while (waiting)
                 yield return null;
+            #endregion
 
             // Construct a osgi Object from the Json Object.
-            yield return osgiConstructor.Construct(jConstructor.getJsonModel());
+            yield return osgiConstructor.Construct(jConstructor.getJsonModel()); // neo4jConstructor.GetNeo4JModel()
 
             Debug.Log("Project has a total of " + osgiConstructor.getProject().getNumberOfCUs() + " compilation units!");
 

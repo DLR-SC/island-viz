@@ -3,7 +3,7 @@ using Neo4j.Driver;
 using System;
 using Neo4j.Driver.V1;
 
-namespace Neo4JExample
+namespace Neo4JDriver
 {
     // The following example is based on the HelloWorldExample on https://neo4j.com/developer/dotnet/.
 
@@ -12,19 +12,23 @@ namespace Neo4JExample
         // Connection with a Neo4J database, providing a access point via the ISession method. 
         private readonly IDriver driver;
         private bool debug;
+        private ConnectionStatus status;
+       
 
         // The class constructor.
-        public Neo4J(string uri, string user, string password, bool debugLogs)
+        public Neo4J(string uri, string user, string password)
         {
-            // New IDriver instance.
+            status = ConnectionStatus.Connecting;
+
             driver = GraphDatabase.Driver(uri, AuthTokens.Basic(user, password));
-            // Optional debug lines
-            debug = debugLogs;
-            if (debug)
-            {
-                Debug.Log("Neo4j .NET driver: Connected to Neo4J database " + driver.Uri + " with username " 
-                    + user);
-            }
+
+            // TODO Test & Set ConnectionStatus
+            // Debug.LogError("Could not connect to " + uri + "!");
+            // status = ConnectionStatus.Fail;
+            // return;
+            
+            //status = ConnectionStatus.Sucess;
+            //Debug.Log("Neo4j .NET driver: Connected to Neo4J database " + driver.Uri + " with username " + user);
         }
 
         // Executes a given command and returns the result in a IStatementResult.
@@ -52,6 +56,21 @@ namespace Neo4JExample
         {
             // Dispose managed resources.
             driver?.Dispose();
+        }
+
+
+
+
+
+        public ConnectionStatus GetCurrentStatus ()
+        {
+            return status;
+        }
+        public enum ConnectionStatus
+        {
+            Connecting,
+            Sucess,
+            Fail
         }
     }
 }
