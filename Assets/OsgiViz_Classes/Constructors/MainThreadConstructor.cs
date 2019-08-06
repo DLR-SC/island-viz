@@ -66,6 +66,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
             // Start the timer to measure total construction time.
             stopwatch.Start();
 
+            // TODO
             yield return neo4jConstructor.Construct();
 
             #region Remove in future

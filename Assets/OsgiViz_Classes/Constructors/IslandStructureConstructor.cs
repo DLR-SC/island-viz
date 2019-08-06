@@ -101,19 +101,22 @@ namespace OsgiViz.SideThreadConstructors
             #endregion
             //Compute maximal compilation unit count in bundle
             float maxCUCountInIsland = 0;
+            long cuCount = 0;
             foreach (Package package in packages)
             {
-                long cuCount = package.getCuCount();
+                cuCount = package.getCuCount();
                 if (cuCount > maxCUCountInIsland)
                     maxCUCountInIsland = cuCount;
             }
             #region construct regions
+            float cohesionMult;
+            Dictionary<int, VFace> newCandidates;
             foreach (Package package in packages)
             {
-                float cohesionMult = (float)package.getCuCount() / maxCUCountInIsland;
+                cohesionMult = (float)package.getCuCount() / maxCUCountInIsland;
                 cohesionMult *= maxCohesion;
                 cohesionMult = Mathf.Max(minCohesion, cohesionMult);
-                Dictionary<int, VFace> newCandidates = ConstructRegionFromPackage(package, island, startingCandidates, cohesionMult);
+                newCandidates = ConstructRegionFromPackage(package, island, startingCandidates, cohesionMult);
                 UpdateAndFuseCandidates(startingCandidates, newCandidates);
             }
             #endregion
@@ -129,10 +132,7 @@ namespace OsgiViz.SideThreadConstructors
             foreach (KeyValuePair<int, VFace> kvp in startingCandidates)
             {
                 coastlineList.Add(kvp.Value);
-                float x = (float)kvp.Value.generator.X;
-                float z = (float)kvp.Value.generator.Y;
-                Vector3 tilePos = new Vector3(x, 0, z);
-                weightedCenter += tilePos;
+                weightedCenter += new Vector3((float)kvp.Value.generator.X, 0, (float)kvp.Value.generator.Y);
             }
             weightedCenter /= startingCandidates.Count;
             island.setWeightedCenter(weightedCenter);
@@ -141,15 +141,15 @@ namespace OsgiViz.SideThreadConstructors
 
             #region conservative Radius
             List<float> radii = new List<float>();
+            float x_;
+            float z_;
             foreach (KeyValuePair<int, VFace> kvp in startingCandidates)
             {
-                float x = (float)kvp.Value.generator.X - island.getWeightedCenter().x;
-                float z = (float)kvp.Value.generator.Y - island.getWeightedCenter().z;
-                float radius = Mathf.Sqrt(x * x + z * z);
-                radii.Add(radius);
+                x_ = (float)kvp.Value.generator.X - island.getWeightedCenter().x;
+                z_ = (float)kvp.Value.generator.Y - island.getWeightedCenter().z;
+                radii.Add(Mathf.Sqrt(x_ * x_ + z_ * z_));
             }
-            float maxRadius = Helperfunctions.computeMax(radii);
-            island.setRadius(maxRadius);
+            island.setRadius(Helperfunctions.computeMax(radii));
             #endregion
 
             #region TnetMeshesConstruction

@@ -108,78 +108,72 @@ namespace OsgiViz.Unity.MainThreadConstructors
 
             float maximumBuildingBoundSize = 0;
             int counter = 0;
+            GameObject regionObject;
+            Region regionComponent;
             foreach (List<TnetMesh> tmesh in tmeshList)
             {
-                Package pckg = packageList[counter];
+                regionObject = new GameObject(packageList[counter].getName());
 
-                GameObject region = new GameObject(pckg.getName());
-
-                Region regionComponent = region.AddComponent<Region>();
+                regionComponent = regionObject.AddComponent<Region>();
                 regionComponent.setParentIsland(islandGOComponent);
-                region.transform.SetParent(islandGO.transform);
+                regionObject.transform.SetParent(islandGO.transform);
                 islandGOComponent.addRegion(regionComponent);
 
                 #region RegionArea
                 GameObject regionArea = new GameObject("Region area");
-                regionArea.transform.SetParent(region.transform);
+                regionArea.transform.SetParent(regionObject.transform);
                 MeshFilter mFilter = regionArea.AddComponent<MeshFilter>();
                 MeshRenderer mRender = regionArea.AddComponent<MeshRenderer>();
                 mRender.sharedMaterial = combinedHoloMaterial;
                 
                 regionComponent.setRegionArea(regionArea);
-                regionComponent.setPackage(pckg);
+                regionComponent.setPackage(packageList[counter]);
                 #endregion
 
-                List<VFace> packageCells = islandCells[counter];
                 CombineInstance[] combineCellMeshes = new CombineInstance[tmesh.Count];
                 int cc = 0;
                 #region Combine package cell meshes
                 foreach (TnetMesh tm in tmesh)
                 {
-                    Mesh m = Helperfunctions.convertTriangleNETMesh(tm);
-                    combineCellMeshes[cc].mesh = m;
+                    combineCellMeshes[cc].mesh = Helperfunctions.convertTriangleNETMesh(tm);
                     cc++;
                 }
                 mFilter.mesh = new Mesh();
                 mFilter.mesh.CombineMeshes(combineCellMeshes, true, false);
 
-                float rndU = (float)RNG.NextDouble();
-                float rndV = (float)RNG.NextDouble()*0.4f;
-
-                Vector2 rndUV = new Vector2(rndU, rndV);
+                Vector2 rndUV = new Vector2((float)RNG.NextDouble(), (float)RNG.NextDouble() * 0.4f);
                 setUVsToSingularCoord(rndUV, mFilter);
                 #endregion
 
                 cc = 0;
+                int heightLevel;
+                GameObject building;
                 #region Create CUs
-                foreach (CompilationUnit cu in pckg.getCompilationUnits())
-                {
-                    float x = (float)packageCells[cc].generator.X;
-                    float y = (float)packageCells[cc].generator.Z;
-                    float z = (float)packageCells[cc].generator.Y;
-                    int heightLevel = Helperfunctions.mapLOCtoLevel(cu.getLoc());
-
-                    GameObject building;
+                foreach (CompilationUnit cu in packageList[counter].getCompilationUnits())
+                {                    
+                    heightLevel = Helperfunctions.mapLOCtoLevel(cu.getLoc());
+                                        
                     if (cu.implementsServiceComponent())
                     {
-                        building = GameObject.Instantiate(SIPrefabs[heightLevel], region.transform);
+                        building = GameObject.Instantiate(SIPrefabs[heightLevel], regionObject.transform);
                         building.AddComponent<ServiceLayerGO>();
                     }
                     else if (cu.declaresService())
                     {
-                        building = GameObject.Instantiate(SDPrefabs[heightLevel], region.transform);
+                        building = GameObject.Instantiate(SDPrefabs[heightLevel], regionObject.transform);
                         building.AddComponent<ServiceLayerGO>();
                     }
                     else
-                        building = GameObject.Instantiate(CUPrefabs[heightLevel], region.transform);
+                    {
+                        building = GameObject.Instantiate(CUPrefabs[heightLevel], regionObject.transform);
+                    }
 
                     building.name = cu.getName();
-                    Vector3 randomRotation = new Vector3(0f, UnityEngine.Random.Range(-180, 180), 0f);
-                    building.transform.localEulerAngles = randomRotation;
+                    building.transform.localEulerAngles = new Vector3(0f, UnityEngine.Random.Range(-180, 180), 0f); // Random Rotation
                     Building buildingComponent = building.AddComponent<Building>();
                     buildingComponent.setCU(cu);
                     cu.setGameObject(building);
-                    building.transform.position = new Vector3(x, y, z);
+                    building.transform.position = new Vector3((float)islandCells[counter][cc].generator.X, (float)islandCells[counter][cc].generator.Z, (float)islandCells[counter][cc].generator.Y);
                     building.transform.localScale = new Vector3(GlobalVar.cuScale, GlobalVar.cuScale, GlobalVar.cuScale);
                     regionComponent.addBuilding(buildingComponent);
                     //////////////////////////
@@ -214,8 +208,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
             counter = 0;
             foreach (TnetMesh tmesh in tmeshCoastList)
             {
-                Mesh m = Helperfunctions.convertTriangleNETMesh(tmesh);
-                combineCoastInstance[counter].mesh = m;
+                combineCoastInstance[counter].mesh = Helperfunctions.convertTriangleNETMesh(tmesh);
                 counter++;
             }
             coastMFilter.mesh = new Mesh();
@@ -274,12 +267,10 @@ namespace OsgiViz.Unity.MainThreadConstructors
             List<Region> regions = islandGOComponent.getRegions();
             foreach(Region region in regions)
             {
-                GameObject countryGO = region.gameObject;
-                countryGO.layer = LayerMask.NameToLayer("InteractionSystemLayer");
-                MeshCollider cColliderCountry = countryGO.AddComponent<MeshCollider>();
-                MeshFilter mFilter = region.getRegionArea().GetComponent<MeshFilter>();
+                region.gameObject.layer = LayerMask.NameToLayer("InteractionSystemLayer");
+                MeshCollider cColliderCountry = region.gameObject.AddComponent<MeshCollider>();
 
-                cColliderCountry.sharedMesh = mFilter.sharedMesh;
+                cColliderCountry.sharedMesh = region.getRegionArea().GetComponent<MeshFilter>().sharedMesh;
                 cColliderCountry.convex = true;
                 cColliderCountry.isTrigger = true;
             }
