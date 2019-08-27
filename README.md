@@ -1,3 +1,8 @@
+**<h1>IslandViz Virtual Reality</h1>**
+
+
+![IslandViz Virtual Reality](Logo_IslandViz-1b_RGB.png)
+
 
 [![Licence](https://img.shields.io/hexpm/l/plug.svg)](https://github.com/DLR-SC/island-viz/blob/master/LICENSE)
 
