@@ -12,7 +12,7 @@ namespace OsgiViz.Unity.Island
         private Package package;
         private IslandGO parentIsland;
         private List<Building> buildings;
-        private GameObject regionArea;
+        private MeshFilter regionArea;
 
         private void Awake()
         {
@@ -47,9 +47,6 @@ namespace OsgiViz.Unity.Island
             gameObject.GetComponent<PdaInspectable>().sendContentToPda(contentText);
         }
 
-        void Start()
-        {  
-        }
 
         public Package getPackage()
         {
@@ -63,7 +60,7 @@ namespace OsgiViz.Unity.Island
         {
             return buildings;
         }
-        public GameObject getRegionArea()
+        public MeshFilter getRegionMesh()
         {
             return regionArea;
         }
@@ -81,7 +78,7 @@ namespace OsgiViz.Unity.Island
         {
             parentIsland = parent;
         }
-        public void setRegionArea(GameObject area)
+        public void setRegionArea(MeshFilter area)
         {
             regionArea = area;
         }

@@ -17,7 +17,7 @@ namespace OsgiViz.SideThreadConstructors
         private callbackMethod cb;
         Thread _thread;
         private Status status;
-        private BidirectionalGraph<GraphVertex, GraphEdge> graph;
+        private BidirectionalGraph<GraphVertex, GraphEdge> dependencyGraph;
         private OsgiProject project;
         private System.Random RNG;
 
@@ -43,18 +43,16 @@ namespace OsgiViz.SideThreadConstructors
         public void ConstructRndLayout(BidirectionalGraph<GraphVertex, GraphEdge> g, callbackMethod m, Vector3 min, Vector3 max, float minDis, int maxIt)
         {
             cb = m;
-            graph = g;
-            _thread = new Thread(() => ComputeRNDGraphLayoutThreaded(min,max,minDis,maxIt));
-            _thread.Start();
+            dependencyGraph = g;
+            ComputeRNDGraphLayoutThreaded(min,max,minDis,maxIt);
         }
 
         public void ConstructFDLayout(OsgiProject proj, callbackMethod m, float stepSize, int simulationSteps)
         {
             cb = m;
             project = proj;
-            graph = proj.getDependencyGraph();
-            _thread = new Thread(() => ComputeForceDirectedLayoutThreaded(simulationSteps, stepSize));
-            _thread.Start();
+            dependencyGraph = proj.getDependencyGraph();
+            ComputeForceDirectedLayoutThreaded(simulationSteps, stepSize);
         }
 
         private void ComputeForceDirectedLayoutThreaded(int simulationSteps, float stepSize)
@@ -78,12 +76,11 @@ namespace OsgiViz.SideThreadConstructors
 
             Dictionary<GraphVertex, VertexPositionData> simulationData = new Dictionary<GraphVertex, VertexPositionData>();
             #region init start values
-            foreach (GraphVertex vert in graph.Vertices)
+            foreach (GraphVertex vert in dependencyGraph.Vertices)
             {
                 float rr = 20f;
                 Vector2 startPos = new Vector2((float)RNG.NextDouble() * rr, (float)RNG.NextDouble() * rr);
-                VertexPositionData vpd = new VertexPositionData(startPos, startPos);
-                simulationData.Add(vert, vpd);
+                simulationData.Add(vert, new VertexPositionData(startPos, startPos));
             }
             #endregion
             int stepCounter = 0;
@@ -91,14 +88,14 @@ namespace OsgiViz.SideThreadConstructors
             while (stepCounter < simulationSteps)
             {
 
-                foreach (GraphVertex thisVert in graph.Vertices)
+                foreach (GraphVertex thisVert in dependencyGraph.Vertices)
                 {
                     // total force affecting "thisVert"
                     Vector2 netForce = Vector2.zero; 
 
                     #region Attraction
                     IEnumerable<GraphEdge> outEdges;
-                    graph.TryGetOutEdges(thisVert, out outEdges);
+                    dependencyGraph.TryGetOutEdges(thisVert, out outEdges);
                     List<GraphEdge> edgeList = outEdges.ToList();
                     Vector2 springForce = Vector2.zero;
                     foreach (GraphEdge importEdge in edgeList)
@@ -111,7 +108,7 @@ namespace OsgiViz.SideThreadConstructors
                         springForce += c1 * direction.normalized * Mathf.Log((direction.magnitude / springEquilibriumLength));
                     }
                     IEnumerable<GraphEdge> inEdges;
-                    graph.TryGetInEdges(thisVert, out inEdges);
+                    dependencyGraph.TryGetInEdges(thisVert, out inEdges);
                     edgeList = inEdges.ToList();
                     /*
                     foreach (GraphEdge exportEdge in edgeList)
@@ -129,7 +126,7 @@ namespace OsgiViz.SideThreadConstructors
 
                     
                     #region Repulsion
-                    foreach (GraphVertex otherVert in graph.Vertices)
+                    foreach (GraphVertex otherVert in dependencyGraph.Vertices)
                     {
                         if (otherVert == thisVert || (edgeList.Find(x => (x.Source == otherVert) || (x.Target == otherVert))) != null)
                             continue;
@@ -169,7 +166,7 @@ namespace OsgiViz.SideThreadConstructors
             }
 
             #region assign computed positions to graph vertices
-            foreach (GraphVertex vert in graph.Vertices)
+            foreach (GraphVertex vert in dependencyGraph.Vertices)
             {
                 VertexPositionData vpd = simulationData[vert];
                 Vector3 pos = new Vector3(vpd.position.x, 0, vpd.position.y);
@@ -189,7 +186,7 @@ namespace OsgiViz.SideThreadConstructors
             Debug.Log("Starting graph layout construction.");
             int overlappingBundles = 0;
             
-            foreach (GraphVertex vertex in graph.Vertices)
+            foreach (GraphVertex vertex in dependencyGraph.Vertices)
             {
                 
                 Vector3 diagonalVec = distrBoxEnd - distrBoxBegin;
@@ -219,7 +216,7 @@ namespace OsgiViz.SideThreadConstructors
         private Boolean CheckOverlap(Vector3 newPosition, CartographicIsland newIsland, float minDistance)
         {
             int cc = 0;
-            foreach(GraphVertex existingVertex in graph.Vertices)
+            foreach(GraphVertex existingVertex in dependencyGraph.Vertices)
             {
                 Vector3 existingPos = existingVertex.getPosition();
                 float distance = Vector3.Distance(existingPos, newPosition);
@@ -243,7 +240,7 @@ namespace OsgiViz.SideThreadConstructors
 
         public BidirectionalGraph<GraphVertex, GraphEdge> getGraph()
         {
-            return graph;
+            return dependencyGraph;
         }
 
     }

@@ -10,8 +10,8 @@ namespace OsgiViz.Unity.MainThreadConstructors
 
     public class MainThreadConstructor : MonoBehaviour
     {
-        public string projectModelFile = GlobalVar.projectmodelPath;
-
+        private string projectModelFile = GlobalVar.projectmodelPath;
+               
         private IslandGOConstructor islandGOConstructor;
         private ServiceGOConstructor serviceGOConstructor;
         private DockGOConstructor dockGOConstructor;
@@ -67,7 +67,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
             stopwatch.Start();
 
             // TODO
-            yield return neo4jConstructor.Construct();
+            //yield return neo4jConstructor.Construct();
 
             #region Remove in future
             // Read & construct a Json Object.
@@ -103,15 +103,14 @@ namespace OsgiViz.Unity.MainThreadConstructors
             // Construct the island GameObjects.
             yield return islandGOConstructor.Construct(islandStructures);
                         
-            OsgiProject project = osgiConstructor.getProject();
             // Construct the connections between the islands from services in the osgi Object.
-            yield return serviceGOConstructor.Construct(project.getServices(), islandGOConstructor.getIslandGOs());
+            yield return serviceGOConstructor.Construct(osgiConstructor.getProject().getServices(), islandGOConstructor.getIslandGOs());
 
             // Construct the dock GameObjects.
             yield return dockGOConstructor.Construct(islandGOConstructor.getIslandGOs());
 
-            // Construct the island hierarchy.
-            yield return hierarchyConstructor.Construct(islandGOConstructor.getIslandGOs());
+            // Construct the island hierarchy. TODO enable in the future
+            //yield return hierarchyConstructor.Construct(islandGOConstructor.getIslandGOs());
 
             
             status = Status.Finished;
@@ -131,9 +130,10 @@ namespace OsgiViz.Unity.MainThreadConstructors
             InverseMultiTouchController mtController = GameObject.Find("MapNavigationArea").AddComponent<InverseMultiTouchController>();
             mtController.drag = 7.5f;
 
-            AddHighlightToAllInteractables();
+            // TODO
+            // AddHighlightToAllInteractables();
             
-            BroadcastMessage("MainConstructorFinished");
+            //BroadcastMessage("MainConstructorFinished");
         }
 
         /// <summary>
@@ -150,8 +150,6 @@ namespace OsgiViz.Unity.MainThreadConstructors
                     if (childComponent.gameObject.GetComponent<MeshFilter>() != null)
                         childComponent.gameObject.AddComponent<Highlightable>();
                 }
-
-
             }
         }
 

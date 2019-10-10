@@ -47,6 +47,8 @@ namespace OsgiViz.Unity.MainThreadConstructors
             CUPrefabs = Resources.LoadAll<GameObject>("Prefabs/CU/LOD0").ToList<GameObject>();
             SIPrefabs = Resources.LoadAll<GameObject>("Prefabs/ServiceImpl/LOD0").ToList<GameObject>();
             SDPrefabs = Resources.LoadAll<GameObject>("Prefabs/ServiceDeclare/LOD0").ToList<GameObject>();
+
+            // TODO make more scalable
             if (CUPrefabs.Count < GlobalVar.numLocLevels)
                 throw new Exception("For the selected number of discreet LOC levels, there are not enough CU prefabs!");
             if (SIPrefabs.Count < GlobalVar.numLocLevels)
@@ -61,25 +63,23 @@ namespace OsgiViz.Unity.MainThreadConstructors
         }
 
 
-        public IEnumerator Construct(List<CartographicIsland> structures)
+        public IEnumerator Construct(List<CartographicIsland> islandStructures)
         {
-            status = Status.Working;
             Debug.Log("Started with Island-GameObject construction!");
             
-            for (int i = 0; i < structures.Count; i++)
+            for (int i = 0; i < islandStructures.Count; i++)
             {
-                GraphVertex vert = structures[i].getDependencyVertex();
-                if (vert != null)
+                GraphVertex vertex = islandStructures[i].getDependencyVertex(); // TODO rename "vertex"
+                if (vertex != null)
                 {
-                    Vector3 placementPosition = vert.getPosition();
+                    Vector3 placementPosition = vertex.getPosition();
                     placementPosition.y = VisualizationContainer.transform.position.y - GlobalVar.islandHeightProfile[GlobalVar.islandHeightProfile.Length-1];
-                    islandGOs.Add(ConstructIslandGO(structures[i], placementPosition));
+                    islandGOs.Add(ConstructIslandGO(islandStructures[i], placementPosition));
                     yield return null;
                 }
             }
 
             Debug.Log("Finished with Island-GameObject construction!");
-            status = Status.Finished;
         }
 
         private void setUVsToSingularCoord(Vector2 newUV, MeshFilter mesh)
@@ -92,25 +92,25 @@ namespace OsgiViz.Unity.MainThreadConstructors
             mesh.sharedMesh.uv = newUVs;
         }
 
-        private IslandGO ConstructIslandGO(CartographicIsland island, Vector3 pos)
+        private IslandGO ConstructIslandGO(CartographicIsland islandStructure, Vector3 placementPosition)
         {
-            int rngSeed = island.getName().GetHashCode() + 200;
+            int rngSeed = islandStructure.getName().GetHashCode() + 200;
             RNG = new System.Random(rngSeed);
-            GameObject islandGO = new GameObject(island.getName());
+            GameObject islandGO = new GameObject(islandStructure.getName());
             IslandGO islandGOComponent = islandGO.AddComponent<IslandGO>();
-            islandGOComponent.setIslandStructure(island);
-            island.setIslandGO(islandGO);
+            islandGOComponent.setIslandStructure(islandStructure);
+            islandStructure.setIslandGO(islandGO);
 
-            #region create countries
-            List<List<TnetMesh>> tmeshList = island.getPackageMeshes();
-            List<List<VFace>> islandCells = island.getPackageCells();
-            List<Package> packageList = island.getPackages();
+            #region create regions
+            List<List<TnetMesh>> tmeshListList = islandStructure.getPackageMeshes();
+            List<List<VFace>> islandCells = islandStructure.getPackageCells();
+            List<Package> packageList = islandStructure.getPackages();
 
             float maximumBuildingBoundSize = 0;
             int counter = 0;
             GameObject regionObject;
             Region regionComponent;
-            foreach (List<TnetMesh> tmesh in tmeshList)
+            foreach (List<TnetMesh> tmeshList in tmeshListList)
             {
                 regionObject = new GameObject(packageList[counter].getName());
 
@@ -119,30 +119,38 @@ namespace OsgiViz.Unity.MainThreadConstructors
                 regionObject.transform.SetParent(islandGO.transform);
                 islandGOComponent.addRegion(regionComponent);
 
-                #region RegionArea
-                GameObject regionArea = new GameObject("Region area");
-                regionArea.transform.SetParent(regionObject.transform);
-                MeshFilter mFilter = regionArea.AddComponent<MeshFilter>();
-                MeshRenderer mRender = regionArea.AddComponent<MeshRenderer>();
-                mRender.sharedMaterial = combinedHoloMaterial;
-                
-                regionComponent.setRegionArea(regionArea);
-                regionComponent.setPackage(packageList[counter]);
+                #region RegionArea (obsolete)
+                // Extra GameObject for region
+                //GameObject regionArea = new GameObject("Region area");
+                //regionArea.transform.SetParent(regionObject.transform);
+                //MeshFilter mFilter = regionArea.AddComponent<MeshFilter>();
+                //MeshRenderer mRender = regionArea.AddComponent<MeshRenderer>();
+                //mRender.sharedMaterial = combinedHoloMaterial;
+
+                //regionComponent.setRegionArea(regionArea);
+                //regionComponent.setPackage(packageList[counter]);                
                 #endregion
 
-                CombineInstance[] combineCellMeshes = new CombineInstance[tmesh.Count];
+                MeshFilter regionMeshFilter = regionObject.AddComponent<MeshFilter>();
+                MeshRenderer regionMeshRenderer = regionObject.AddComponent<MeshRenderer>();
+                regionMeshRenderer.sharedMaterial = combinedHoloMaterial;
+
+                regionComponent.setRegionArea(regionMeshFilter);
+                regionComponent.setPackage(packageList[counter]);
+
+                CombineInstance[] combineCellMeshes = new CombineInstance[tmeshList.Count];
                 int cc = 0;
                 #region Combine package cell meshes
-                foreach (TnetMesh tm in tmesh)
+                foreach (TnetMesh tm in tmeshList)
                 {
                     combineCellMeshes[cc].mesh = Helperfunctions.convertTriangleNETMesh(tm);
                     cc++;
                 }
-                mFilter.mesh = new Mesh();
-                mFilter.mesh.CombineMeshes(combineCellMeshes, true, false);
+                regionMeshFilter.mesh = new Mesh();
+                regionMeshFilter.mesh.CombineMeshes(combineCellMeshes, true, false);
 
                 Vector2 rndUV = new Vector2((float)RNG.NextDouble(), (float)RNG.NextDouble() * 0.4f);
-                setUVsToSingularCoord(rndUV, mFilter);
+                setUVsToSingularCoord(rndUV, regionMeshFilter);
                 #endregion
 
                 cc = 0;
@@ -203,7 +211,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
             MeshFilter coastMFilter = coastline.AddComponent<MeshFilter>();
             MeshRenderer coastMRender = coastline.AddComponent<MeshRenderer>();
             coastMRender.sharedMaterial = combinedHoloMaterial;
-            List<TnetMesh> tmeshCoastList = island.getCoastlineMeshes();
+            List<TnetMesh> tmeshCoastList = islandStructure.getCoastlineMeshes();
             CombineInstance[] combineCoastInstance = new CombineInstance[tmeshCoastList.Count];
             counter = 0;
             foreach (TnetMesh tmesh in tmeshCoastList)
@@ -215,26 +223,24 @@ namespace OsgiViz.Unity.MainThreadConstructors
             coastMFilter.mesh.CombineMeshes(combineCoastInstance, true, false);
 
             setUVsToSingularCoord(new Vector2(0f, 0.7f), coastMFilter);
-
             #endregion
 
-            #region init docks
-            
+            #region init docks            
             //get graph vertex associated with the island
-            GraphVertex vert = island.getDependencyVertex();
+            GraphVertex vert = islandStructure.getDependencyVertex();
             if (vert != null)
             {
                 //Relative dock position
                 Vector3 dockDirection = new Vector3(UnityEngine.Random.value, 0, UnityEngine.Random.value);
                 dockDirection.Normalize();
-                dockDirection *= island.getRadius();
+                dockDirection *= islandStructure.getRadius();
 
                 //Import Dock
-                Vector3 dockPosition = island.getWeightedCenter() + dockDirection;
+                Vector3 dockPosition = islandStructure.getWeightedCenter() + dockDirection;
                 dockPosition.y -= Mathf.Abs(GlobalVar.islandHeightProfile[GlobalVar.islandHeightProfile.Length - 1]) * GlobalVar.islandAboveOcean;
                 GameObject importD = Instantiate(importDockPrefab, dockPosition, Quaternion.identity);
                 importD.layer = LayerMask.NameToLayer("InteractionSystemLayer");
-                importD.name = island.getName() + " import dock";
+                importD.name = islandStructure.getName() + " import dock";
                 importD.transform.localScale = new Vector3(1, 1, 1);
                 importD.transform.SetParent(islandGO.transform);
                 islandGOComponent.setImportDock(importD);
@@ -243,7 +249,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
                 //Export Dock
                 GameObject exportD = Instantiate(exportDockPrefab, dockPosition, Quaternion.identity);
                 exportD.layer = LayerMask.NameToLayer("InteractionSystemLayer");
-                exportD.name = island.getName() + " export dock";
+                exportD.name = islandStructure.getName() + " export dock";
                 exportD.transform.localScale = new Vector3(1, 1, 1);
                 exportD.transform.SetParent(islandGO.transform);
                 islandGOComponent.setExportDock(exportD);
@@ -251,7 +257,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
             }
             #endregion
 
-            islandGO.transform.position = pos;
+            islandGO.transform.position = placementPosition;
             islandGO.transform.SetParent(VisualizationContainer.transform);
 
             #region rise Islands above ocean
@@ -263,28 +269,28 @@ namespace OsgiViz.Unity.MainThreadConstructors
 
             #region Create colliders
 
-            #region CountryCollider
+            #region RegionCollider
             List<Region> regions = islandGOComponent.getRegions();
             foreach(Region region in regions)
             {
                 region.gameObject.layer = LayerMask.NameToLayer("InteractionSystemLayer");
                 MeshCollider cColliderCountry = region.gameObject.AddComponent<MeshCollider>();
+                cColliderCountry.sharedMesh = region.getRegionMesh().sharedMesh;
+                // TODO
+                //cColliderCountry.convex = true;
+                //cColliderCountry.isTrigger = true;
 
-                cColliderCountry.sharedMesh = region.getRegionArea().GetComponent<MeshFilter>().sharedMesh;
-                cColliderCountry.convex = true;
-                cColliderCountry.isTrigger = true;
+                //cColliderCountry.sharedMesh = region.getRegionArea().GetComponent<MeshFilter>().sharedMesh;
             }
             #endregion
 
             #region IslandCollider
             islandGO.layer = LayerMask.NameToLayer("InteractionSystemLayer");
             CapsuleCollider cColliderIsland = islandGO.AddComponent<CapsuleCollider>();
-            float b = island.getRadius();
-            cColliderIsland.radius = b;
-            float newColliderHeight = islandGOComponent.getCoast().GetComponent<MeshFilter>().sharedMesh.bounds.size.y;
-            cColliderIsland.height = newColliderHeight;
-            Vector3 newCenter = island.getWeightedCenter();
-            newCenter.y = -islandGOComponent.getCoast().GetComponent<MeshFilter>().sharedMesh.bounds.size.y + (newColliderHeight * 0.5f);
+            cColliderIsland.radius = islandStructure.getRadius();
+            cColliderIsland.height = islandGOComponent.getCoast().GetComponent<MeshFilter>().sharedMesh.bounds.size.y;
+            Vector3 newCenter = islandStructure.getWeightedCenter();
+            newCenter.y = -islandGOComponent.getCoast().GetComponent<MeshFilter>().sharedMesh.bounds.size.y + (cColliderIsland.height * 0.5f);
             cColliderIsland.center = newCenter;
             cColliderIsland.isTrigger = true;
             #endregion

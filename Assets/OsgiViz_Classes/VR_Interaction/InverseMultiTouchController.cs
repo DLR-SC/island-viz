@@ -58,8 +58,8 @@ namespace OsgiViz
             {
                 serviceSlices.Add(child.GetComponent<ServiceSlice>());
             }
-
-            if (drag == null)
+                       
+            if (drag <= 0)
             {
                 drag = 5.0f;
                 effectiveDrag = drag;
@@ -67,22 +67,12 @@ namespace OsgiViz
 
             effectiveTranslationSpeedCutoff = translationSpeedCutoff;
             effectivePivotTransferCutoff = pivotTransferCutoff;
-
         }
-
-        // Use this for initialization
-        void Start()
-        {
-           
-        }
-
-
+        
 
         void OnTriggerEnter(Collider collider)
         {
-            if (collider.gameObject.tag != "GameController")
-                return;
-            else
+            if (collider.gameObject.tag == "GameController")
             {
                 //Must be the Hand/Controller
                 if (collider.gameObject.GetComponent<Hand>() != null)

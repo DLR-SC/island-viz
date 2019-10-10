@@ -112,10 +112,10 @@ namespace OsgiViz.Unity.MainThreadConstructors
                         regionHC.childrenComponents.Add(buildingHC);
                     }
 
-                    #region RegionArea
-                    HierarchicalComponent regionAreaHC = regions[c].getRegionArea().AddComponent<HierarchicalComponent>();
-                    regionAreaHC.parentComponent = regionHC;
-                    regionHC.childrenComponents.Add(regionAreaHC);
+                    #region RegionArea // TODO
+                    //HierarchicalComponent regionAreaHC = regions[c].getRegionMesh().AddComponent<HierarchicalComponent>();
+                    //regionAreaHC.parentComponent = regionHC;
+                    //regionHC.childrenComponents.Add(regionAreaHC);
                     #endregion
 
 
@@ -182,8 +182,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
                 CombineInstance ci = new CombineInstance();
 
                 CompilationUnit cu = building.GetComponent<Building>().getCU();
-                long loc = cu.getLoc();
-                int modelIdx = Helperfunctions.mapLOCtoLevel(loc);
+                int modelIdx = Helperfunctions.mapLOCtoLevel(cu.getLoc());
 
                 if (cu.implementsServiceComponent())
                     ci.mesh = SILod1Prefabs[modelIdx].GetComponent<MeshFilter>().sharedMesh;
@@ -199,7 +198,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
             #endregion
             #region Add country area to FinalCombineList
             CombineInstance ciCountry = new CombineInstance();
-            ciCountry.mesh = reg.getRegionArea().GetComponent<MeshFilter>().sharedMesh;
+            ciCountry.mesh = reg.getRegionMesh().sharedMesh;
             ciCountry.subMeshIndex = 0;
             ciCountry.transform = Matrix4x4.identity;
             currentCiList.Add(ciCountry);
@@ -226,8 +225,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
                 {
                     CombineInstance ci = new CombineInstance();
                     CompilationUnit cu = b.getCU();
-                    long loc = cu.getLoc();
-                    int modelIdx = Helperfunctions.mapLOCtoLevel(loc);
+                    int modelIdx = Helperfunctions.mapLOCtoLevel(cu.getLoc());
 
                     if (cu.implementsServiceComponent())
                         ci.mesh = SILod2Prefabs[modelIdx].GetComponent<MeshFilter>().sharedMesh;
@@ -242,7 +240,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
                 }
 
                 CombineInstance ciCountry = new CombineInstance();
-                ciCountry.mesh = region.getRegionArea().GetComponent<MeshFilter>().sharedMesh;
+                ciCountry.mesh = region.getRegionMesh().sharedMesh;
                 ciCountry.subMeshIndex = 0;
                 ciCountry.transform = Matrix4x4.identity;
                 currentCiList.Add(ciCountry);

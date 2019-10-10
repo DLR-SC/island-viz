@@ -28,8 +28,7 @@ namespace OsgiViz
             Vector3 tempPos = transform.position;
             tempPos.y = GlobalVar.hologramTableHeight;
             previousHeight = GlobalVar.hologramTableHeight;
-            transform.position = tempPos;
-            
+            transform.position = tempPos;            
         }
 
     }
