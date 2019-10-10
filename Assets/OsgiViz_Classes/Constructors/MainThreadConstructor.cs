@@ -10,7 +10,14 @@ namespace OsgiViz.Unity.MainThreadConstructors
 
     public class MainThreadConstructor : MonoBehaviour
     {
-        private string projectModelFile = GlobalVar.projectmodelPath;
+        [Header("Settings")]
+        public int RandomSeed;
+        public Graph_Layout Graph_Layout;
+
+        [Header("Tranforms")]
+        public Transform VisualizationContainer;
+
+        
                
         private IslandGOConstructor islandGOConstructor;
         private ServiceGOConstructor serviceGOConstructor;
@@ -22,11 +29,12 @@ namespace OsgiViz.Unity.MainThreadConstructors
         private Graph_Layout_Constructor bdConstructor;
         private Neo4jObjConstructor neo4jConstructor;
 
-
-        private Status status;
         private bool waiting = true;
 
+        private System.Random RNG;
         private System.Diagnostics.Stopwatch stopwatch;
+
+
 
 
         /// <summary>
@@ -49,6 +57,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
             isConstructor = new IslandStructureConstructor(1, 2, 8);
             bdConstructor = new Graph_Layout_Constructor();
 
+            RNG = new System.Random(RandomSeed);
             stopwatch = new System.Diagnostics.Stopwatch();
 
             //LayoutTester
@@ -62,16 +71,15 @@ namespace OsgiViz.Unity.MainThreadConstructors
         /// </summary>
         IEnumerator Construction ()
         {
-            status = Status.Working;
             // Start the timer to measure total construction time.
             stopwatch.Start();
 
-            // TODO
+            // TODO add in future
             //yield return neo4jConstructor.Construct();
 
             #region Remove in future
             // Read & construct a Json Object.
-            jConstructor.Construct(projectModelFile, Done);            
+            jConstructor.Construct(GlobalVar.projectmodelPath, Done);            
             // Wait for jConstructor.Construct.
             while (waiting)
                 yield return null;
@@ -79,27 +87,26 @@ namespace OsgiViz.Unity.MainThreadConstructors
 
             // Construct a osgi Object from the Json Object.
             yield return osgiConstructor.Construct(jConstructor.getJsonModel()); // neo4jConstructor.GetNeo4JModel()
-
             Debug.Log("Project has a total of " + osgiConstructor.getProject().getNumberOfCUs() + " compilation units!");
 
             //Construct islands from bundles in the osgi Object.
             yield return isConstructor.Construct(osgiConstructor.getProject());
 
-            #region alternative layout
-            //Vector3 minBounds = new Vector3(-10.5f, 1.31f, -10.5f);
-            //Vector3 maxBounds = new Vector3(10.5f, 1.31f, 10.5f);
-            //bdConstructor.ConstructRndLayout(osgiConstructor.getProject().getDependencyGraph(), Done, minBounds, maxBounds, 0.075f, 10000);
-            #endregion
-
-            waiting = true;
             // Construct the spatial distribution of the islands.
-            bdConstructor.ConstructFDLayout(osgiConstructor.getProject(), Done, 0.25f, 70000);
-            // Wait for bdConstructor.ConstructFDLayout.
-            while (waiting)
-                yield return null;
+            if (Graph_Layout == Graph_Layout.ForceDirected)
+            {
+                yield return bdConstructor.ConstructFDLayout(osgiConstructor.getProject(), 0.25f, 70000, RNG);
+            }
+            else
+            {
+                Vector3 minBounds = new Vector3(-10.5f, 1.31f, -10.5f);
+                Vector3 maxBounds = new Vector3(10.5f, 1.31f, 10.5f);
+                yield return bdConstructor.ConstructRndLayout(osgiConstructor.getProject().getDependencyGraph(), minBounds, maxBounds, 0.075f, 10000, RNG);
+            }
 
             GlobalVar.islandNumber = osgiConstructor.getProject().getBundles().Count;
             List<CartographicIsland> islandStructures = isConstructor.getIslandStructureList();
+
             // Construct the island GameObjects.
             yield return islandGOConstructor.Construct(islandStructures);
                         
@@ -111,9 +118,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
 
             // Construct the island hierarchy. TODO enable in the future
             //yield return hierarchyConstructor.Construct(islandGOConstructor.getIslandGOs());
-
-            
-            status = Status.Finished;
+                        
             stopwatch.Stop();
             Debug.Log("Construction finished after " + stopwatch.Elapsed.TotalSeconds.ToString("0.00") + " seconds!");
 
@@ -127,13 +132,42 @@ namespace OsgiViz.Unity.MainThreadConstructors
         {
             yield return null;
 
-            InverseMultiTouchController mtController = GameObject.Find("MapNavigationArea").AddComponent<InverseMultiTouchController>();
-            mtController.drag = 7.5f;
+            yield return AutoZoom();
 
-            // TODO
+            // TODO Redo
+            InverseMultiTouchController mtController = GameObject.Find("MapNavigationArea").AddComponent<InverseMultiTouchController>();
+            mtController.drag = 0f; // 7.5f;
+
+            // TODO Redo
             // AddHighlightToAllInteractables();
             
+            // TODO wichtig?
             //BroadcastMessage("MainConstructorFinished");
+        }
+
+
+        IEnumerator AutoZoom()
+        {
+            Transform furthestIslandTransform = null; // Transfrom of the island which is furthest away from the center.
+            float furthestDistance = 0; // Transfrom from the island which is furthest away to the center.
+            float distance_temp = 0;
+
+            float maxDistance = 0.7f; // TODO move to Settings
+
+            // Search island which is furthest away from the center.
+            foreach (var islandGO in islandGOConstructor.getIslandGOs())
+            {
+                distance_temp = Vector3.Distance(islandGO.transform.position, Vector3.zero);
+                if (furthestIslandTransform == null || distance_temp > furthestDistance)
+                {
+                    furthestDistance = distance_temp;
+                    furthestIslandTransform = islandGO.transform; 
+                }
+            }
+
+            yield return null;
+
+            VisualizationContainer.localScale *= maxDistance / furthestDistance; // Scales the islands to make all of them fit on the table.
         }
 
         /// <summary>
@@ -153,11 +187,8 @@ namespace OsgiViz.Unity.MainThreadConstructors
             }
         }
 
+
         // get & set
-        public Status getStatus()
-        {
-            return status;
-        }
         public IslandGOConstructor getIslandGOConstructor()
         {
             return islandGOConstructor;
@@ -173,6 +204,13 @@ namespace OsgiViz.Unity.MainThreadConstructors
             waiting = false;
         }
 
+    }
+
+
+    public enum Graph_Layout
+    {
+        ForceDirected,
+        Random
     }
 
 }

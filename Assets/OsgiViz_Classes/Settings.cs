@@ -71,7 +71,7 @@ namespace OsgiViz.Core
         public const float translationCutoff = 1f + 1.25f;
 
         // 1.0 = Zoom-Level to fit entire island-world into hologram
-        public const float minZoomCutoff = 0.005f;
+        public const float minZoomCutoff = 0.00005f;
         public const float maxZoomCutoff = 1.25f;
 
         //Service-Nodes

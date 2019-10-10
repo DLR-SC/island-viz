@@ -48,7 +48,9 @@ namespace OsgiViz
             clippingCenterShaderID = Shader.PropertyToID("hologramCenter");
             hologramScaleShaderID = Shader.PropertyToID("hologramScale");
 
-            transformCandidate = GameObject.Find("RealWorld");
+//            transformCandidate = GameObject.Find("RealWorld");
+            transformCandidate = GameObject.Find("VisualizationContainer");            
+
             mainLight = GameObject.Find("MainLight").GetComponent<Light>();
             originalLightRange = mainLight.range;
 
@@ -58,12 +60,8 @@ namespace OsgiViz
             {
                 serviceSlices.Add(child.GetComponent<ServiceSlice>());
             }
-                       
-            if (drag <= 0)
-            {
-                drag = 5.0f;
-                effectiveDrag = drag;
-            }
+
+            effectiveDrag = drag;
 
             effectiveTranslationSpeedCutoff = translationSpeedCutoff;
             effectivePivotTransferCutoff = pivotTransferCutoff;
@@ -74,7 +72,6 @@ namespace OsgiViz
         {
             if (collider.gameObject.tag == "GameController")
             {
-                //Must be the Hand/Controller
                 if (collider.gameObject.GetComponent<Hand>() != null)
                 {
                     if (!touchingControllerList.Contains(collider.gameObject))
@@ -85,11 +82,8 @@ namespace OsgiViz
 
         void OnTriggerExit(Collider collider)
         {
-            if (collider.gameObject.tag != "GameController")
-                return;
-            else
+            if (collider.gameObject.tag == "GameController")
             {
-                //Must be the Hand/Controller
                 if (collider.gameObject.GetComponent<Hand>() != null)
                 {
                     if (touchingControllerList.Contains(collider.gameObject))
@@ -98,18 +92,22 @@ namespace OsgiViz
             }
         }
 
-        private void updateTranslation(bool useDrag)
+        private void UpdateTranslation(bool useDrag)
         {
-
             #region translation constraint
             bool boundaryHit = false;
-            Vector3 currentDifferenceFromCenter = GlobalVar.worldCenter - hologramCenter.transform.position;
+            //Vector3 currentDifferenceFromCenter = GlobalVar.worldCenter - hologramCenter.transform.position;
+            Vector3 currentDifferenceFromCenter = GlobalVar.worldCenter - transformCandidate.transform.position;
+            
             if (currentDifferenceFromCenter.magnitude > (GlobalVar.worldRadius + GlobalVar.translationCutoff))
             {
+                Debug.Log("currentDifferenceFromCenter.magnitude = " + currentDifferenceFromCenter.magnitude);
+                Debug.Log("(GlobalVar.worldRadius + GlobalVar.translationCutoff) = " + (GlobalVar.worldRadius + GlobalVar.translationCutoff));
+                Debug.LogError("recenterForce");
                 boundaryHit = true;
                 Vector3 recenterForce = 100f * (1.0f / GlobalVar.inverseHologramScale) * currentDifferenceFromCenter;
-                currentTranslationVelocity.x = recenterForce.x;
-                currentTranslationVelocity.z = recenterForce.z;
+                currentTranslationVelocity.x = -recenterForce.x;
+                currentTranslationVelocity.z = -recenterForce.z;
             }
             #endregion
 
@@ -121,6 +119,11 @@ namespace OsgiViz
                     float z = currentTranslationVelocity.z;
                     currentTranslationVelocity.x = x - Mathf.Sign(x) * effectiveDrag * Time.deltaTime * x * x;
                     currentTranslationVelocity.z = z - Mathf.Sign(z) * effectiveDrag * Time.deltaTime * z * z;
+                    Debug.Log(currentTranslationVelocity);
+                    Debug.Log("x = " + x);
+                    Debug.Log("Mathf.Sign(x) = " + Mathf.Sign(x));
+                    Debug.Log("effectiveDrag = " + effectiveDrag);
+                    Debug.Log("Time.deltaTime = " + Time.deltaTime);
                 }
                 else
                 {
@@ -128,25 +131,23 @@ namespace OsgiViz
                 }
             }
 
-            transformCandidate.transform.Translate(currentTranslationVelocity * Time.deltaTime * translationMult, Space.World);
+            transformCandidate.transform.Translate(-currentTranslationVelocity * Time.deltaTime * translationMult, Space.World);
         }
 
         // Update is called once per frame
         void Update()
         {
-
             //Identify which controllers are using the object from the touching list
             usingControllerList.Clear();
             if (touchingControllerList.Count > 0)
             {
-                foreach (GameObject go in touchingControllerList)
+                foreach (GameObject touchingController in touchingControllerList)
                 {
-                    Hand h = go.GetComponent<Hand>();
-                    if (h != null)
-                        if (h.GetStandardInteractionButton())
-                        {
-                            usingControllerList.Add(h);
-                        }
+                    Hand hand = touchingController.GetComponent<Hand>();
+                    if (hand != null && hand.GetStandardInteractionButton())
+                    {
+                        usingControllerList.Add(hand);
+                    }
                 }
             }
 
@@ -156,7 +157,7 @@ namespace OsgiViz
                 Vector3 controllerVelocity = usingControllerList[0].GetTrackedObjectVelocity();
                 currentTranslationVelocity = -controllerVelocity;
                 currentTranslationVelocity.y = 0f;
-                updateTranslation(false);
+                UpdateTranslation(false);
             }
             else if (usingControllerList.Count == 2)
             {
@@ -187,17 +188,15 @@ namespace OsgiViz
                     float rotationAngle = -Mathf.Rad2Deg * (radNext - radCurrent) * rotationMult;
 
                     RotateAndScale(scaleRotPivot, rotationAngle, scalingFactor);
-
                 }
-
             }
             else
             {
-                updateTranslation(true);
+                UpdateTranslation(true);
             }
 
-            Shader.SetGlobalVector(clippingCenterShaderID, hologramCenter.transform.position);
-            Shader.SetGlobalFloat(hologramScaleShaderID, GlobalVar.inverseHologramScale * 0.8f);
+            //Shader.SetGlobalVector(clippingCenterShaderID, hologramCenter.transform.position);
+            //Shader.SetGlobalFloat(hologramScaleShaderID, GlobalVar.inverseHologramScale * 0.8f);
 
         }
 
@@ -212,7 +211,7 @@ namespace OsgiViz
 
             Vector3 scaleVec = new Vector3(amountScale, amountScale, amountScale);
             Helperfunctions.scaleFromPivot(transformCandidate.transform, origin, scaleVec);
-            transformCandidate.transform.RotateAround(origin, Vector3.up, amountRot);
+            transformCandidate.transform.RotateAround(origin, Vector3.up, -amountRot);
 
             #region Update due to scale change
             GlobalVar.inverseHologramScale = transformCandidate.transform.localScale.x;

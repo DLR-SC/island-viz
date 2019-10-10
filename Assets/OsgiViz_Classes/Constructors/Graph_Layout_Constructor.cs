@@ -19,7 +19,6 @@ namespace OsgiViz.SideThreadConstructors
         private Status status;
         private BidirectionalGraph<GraphVertex, GraphEdge> dependencyGraph;
         private OsgiProject project;
-        private System.Random RNG;
 
         private struct VertexPositionData
         {
@@ -36,28 +35,14 @@ namespace OsgiViz.SideThreadConstructors
         public Graph_Layout_Constructor()
         {
             status = Status.Idle;
-            RNG = new System.Random(0);
         }
 
-        //Public method to construct the physical distribution of islands in a certain volume
-        public void ConstructRndLayout(BidirectionalGraph<GraphVertex, GraphEdge> g, callbackMethod m, Vector3 min, Vector3 max, float minDis, int maxIt)
-        {
-            cb = m;
-            dependencyGraph = g;
-            ComputeRNDGraphLayoutThreaded(min,max,minDis,maxIt);
-        }
+        
 
-        public void ConstructFDLayout(OsgiProject proj, callbackMethod m, float stepSize, int simulationSteps)
+        public IEnumerator ConstructFDLayout(OsgiProject project, float stepSize, int simulationSteps, System.Random rng)
         {
-            cb = m;
-            project = proj;
-            dependencyGraph = proj.getDependencyGraph();
-            ComputeForceDirectedLayoutThreaded(simulationSteps, stepSize);
-        }
-
-        private void ComputeForceDirectedLayoutThreaded(int simulationSteps, float stepSize)
-        {
-            status = Status.Working;
+            dependencyGraph = project.getDependencyGraph();
+            
             Debug.Log("Starting forcedirected graph layout construction.");
 
             //Attract Strength multi
@@ -79,7 +64,7 @@ namespace OsgiViz.SideThreadConstructors
             foreach (GraphVertex vert in dependencyGraph.Vertices)
             {
                 float rr = 20f;
-                Vector2 startPos = new Vector2((float)RNG.NextDouble() * rr, (float)RNG.NextDouble() * rr);
+                Vector2 startPos = new Vector2((float)rng.NextDouble() * rr, (float)rng.NextDouble() * rr);
                 simulationData.Add(vert, new VertexPositionData(startPos, startPos));
             }
             #endregion
@@ -165,6 +150,8 @@ namespace OsgiViz.SideThreadConstructors
                 }
             }
 
+            yield return null;
+
             #region assign computed positions to graph vertices
             foreach (GraphVertex vert in dependencyGraph.Vertices)
             {
@@ -177,12 +164,11 @@ namespace OsgiViz.SideThreadConstructors
 
             status = Status.Finished;
             Debug.Log("Forcedirected Graph layout is computed!");
-            cb();
         }
 
-        private void ComputeRNDGraphLayoutThreaded(Vector3 distrBoxBegin, Vector3 distrBoxEnd, float minDistance, float maxIterations)
-        {
-            status = Status.Working;
+        //Public method to construct the physical distribution of islands in a certain volume
+        public IEnumerator ConstructRndLayout(BidirectionalGraph<GraphVertex, GraphEdge> dependencyGraph, Vector3 distrBoxBegin, Vector3 distrBoxEnd, float minDistance, int maxIterations, System.Random rng)
+        {            
             Debug.Log("Starting graph layout construction.");
             int overlappingBundles = 0;
             
@@ -190,27 +176,25 @@ namespace OsgiViz.SideThreadConstructors
             {
                 
                 Vector3 diagonalVec = distrBoxEnd - distrBoxBegin;
-                Vector3 rndVec = distrBoxBegin + new Vector3(diagonalVec.x * (float)RNG.NextDouble(),
-                                                             diagonalVec.y * (float)RNG.NextDouble(),
-                                                             diagonalVec.z * (float)RNG.NextDouble());
+                Vector3 rndVec = distrBoxBegin + new Vector3(diagonalVec.x * (float)rng.NextDouble(),
+                                                             diagonalVec.y * (float)rng.NextDouble(),
+                                                             diagonalVec.z * (float)rng.NextDouble());
                 int iteration = 0;
                 while (!CheckOverlap(rndVec, vertex.getIsland(), minDistance) && iteration <= maxIterations)
                 {
-                    rndVec = distrBoxBegin + new Vector3(diagonalVec.x * (float)RNG.NextDouble(),
-                                                         diagonalVec.y * (float)RNG.NextDouble(),
-                                                         diagonalVec.z * (float)RNG.NextDouble());
+                    rndVec = distrBoxBegin + new Vector3(diagonalVec.x * (float)rng.NextDouble(),
+                                                         diagonalVec.y * (float)rng.NextDouble(),
+                                                         diagonalVec.z * (float)rng.NextDouble());
                     iteration++;
                 }
 
                 vertex.setPosition(rndVec);
                 if (iteration >= maxIterations)
-                    overlappingBundles++;
-           
+                    overlappingBundles++;           
             }
 
-            status = Status.Finished;
             Debug.Log("Graph layout is computed! Number of overlapping bundles: " + overlappingBundles);
-            cb();
+            yield return null;
         }
 
         private Boolean CheckOverlap(Vector3 newPosition, CartographicIsland newIsland, float minDistance)

@@ -153,7 +153,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
                 doNotCollideList.Add(island.getCoast());
                 bool foundLocation = findSuitablePosition2D(importD, doNotCollideList, island.gameObject, 500);
                 if(!foundLocation)
-                    Debug.Log("Could not find suitable location for " + importD.name);
+                    Debug.LogWarning("Could not find suitable location for " + importD.name);
                 #endregion
                 
 
