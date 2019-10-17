@@ -57,16 +57,18 @@ namespace OsgiViz.Unity.MainThreadConstructors
                 throw new Exception("For the selected number of discreet LOC levels, there are not enough SD prefabs!");
             #endregion
 
-            VisualizationContainer = GetComponent<GlobalContainerHolder>().VisualizationContainer;
+            //VisualizationContainer = GetComponent<GlobalContainerHolder>().VisualizationContainer;
 
             RNG = new System.Random(0);
         }
 
 
-        public IEnumerator Construct(List<CartographicIsland> islandStructures)
+        public IEnumerator Construct(List<CartographicIsland> islandStructures, GameObject visualizationContainer)
         {
             Debug.Log("Started with Island-GameObject construction!");
-            
+
+            VisualizationContainer = visualizationContainer;
+
             for (int i = 0; i < islandStructures.Count; i++)
             {
                 GraphVertex vertex = islandStructures[i].getDependencyVertex(); // TODO rename "vertex"

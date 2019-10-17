@@ -111,22 +111,18 @@ namespace OsgiViz.Unity.MainThreadConstructors
             List<CartographicIsland> islandStructures = isConstructor.getIslandStructureList();
 
             // Construct the island GameObjects.
-            yield return islandGOConstructor.Construct(islandStructures);
+            yield return islandGOConstructor.Construct(islandStructures, VisualizationRoot.gameObject);
                         
             // Construct the connections between the islands from services in the osgi Object.
             yield return serviceGOConstructor.Construct(osgiConstructor.getProject().getServices(), islandGOConstructor.getIslandGOs());
 
             // Construct the dock GameObjects.
-            yield return dockGOConstructor.Construct(islandGOConstructor.getIslandGOs());
+            yield return dockGOConstructor.Construct(islandGOConstructor.getIslandGOs(), VisualizationRoot.gameObject);
 
             // Construct the island hierarchy. TODO enable in the future
             //yield return hierarchyConstructor.Construct(islandGOConstructor.getIslandGOs());
 
             yield return AutoZoom();
-
-            // TODO Redo
-            //InverseMultiTouchController mtController = GameObject.Find("MapNavigationArea").AddComponent<InverseMultiTouchController>();
-            //mtController.drag = 0f; // 7.5f;
 
             // Init Input Components
             foreach (var item in InputComponents)
@@ -134,8 +130,6 @@ namespace OsgiViz.Unity.MainThreadConstructors
                 item.Init();
                 yield return null;
             }
-
-            yield return null;
 
             stopwatch.Stop();
             Debug.Log("Construction finished after " + stopwatch.Elapsed.TotalSeconds.ToString("0.00") + " seconds!");

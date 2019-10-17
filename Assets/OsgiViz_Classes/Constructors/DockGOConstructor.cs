@@ -26,12 +26,12 @@ namespace OsgiViz.Unity.MainThreadConstructors
         {
             status = Status.Idle;
             dockList = new List<GameObject>();
-            VisualizationContainer = GetComponent<GlobalContainerHolder>().VisualizationContainer;
         }
 
-        public IEnumerator Construct(List<IslandGO> islands)
+        public IEnumerator Construct(List<IslandGO> islands, GameObject visualizationContainer)
         {
             status = Status.Working;
+            VisualizationContainer = visualizationContainer;
             Debug.Log("Started with Dock-GameObject construction!");
             yield return StartCoroutine(constructAll(islands));
         }

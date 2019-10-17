@@ -32,8 +32,8 @@ namespace OsgiViz.Unity.MainThreadConstructors
             referencePrefab = (GameObject)Resources.Load("Prefabs/ServiceReferenceNode");
             implementationPrefab = (GameObject)Resources.Load("Prefabs/ServiceImplementationNode");
 
-            ServiceSliceContainer = GameObject.Find("DataManager").GetComponent<GlobalContainerHolder>().ServiceSliceContainer;
-            VisualizationContainer = GameObject.Find("DataManager").GetComponent<GlobalContainerHolder>().VisualizationContainer;
+            ServiceSliceContainer = IslandVizBehaviour.IslandVizVisualization.ServiceSliceContainer.gameObject;
+            VisualizationContainer = IslandVizBehaviour.IslandVizVisualization.IslandContainer.gameObject;
         }
 
         public IEnumerator Construct(List<Service> services, List<IslandGO> islandGOs)

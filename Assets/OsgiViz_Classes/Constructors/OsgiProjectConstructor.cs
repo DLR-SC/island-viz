@@ -251,19 +251,6 @@ namespace OsgiViz.SideThreadConstructors
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
         /// <summary>
         /// The Coroutine, that creates the OsgiProject from a JSONObject.
         /// This method is called by the MainThreadConstructor.

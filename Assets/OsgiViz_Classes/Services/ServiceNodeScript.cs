@@ -23,7 +23,7 @@ namespace OsgiViz
         private GameObject connectionPrefab;
         private ConnectionPool connectionPool;
 
-        void Awake()
+        void Start()
         {
             connections = new List<GameObject>();
             connectionPrefab = (GameObject)Resources.Load("Prefabs/ServiceConnection");
@@ -41,11 +41,12 @@ namespace OsgiViz
             rotPivot.transform.position = transform.position;
             rotPivot.transform.SetParent(transform);
 
-            ConnectionPool[] pools = FindObjectsOfType(typeof(ConnectionPool)) as ConnectionPool[];
-            if (pools.Length == 1)
-                connectionPool = pools[0];
-            else
-                throw new Exception("No connection pool component found, or too many connection pools!");
+            //ConnectionPool[] pools = FindObjectsOfType(typeof(ConnectionPool)) as ConnectionPool[];
+            //if (pools.Length == 1)
+            //    connectionPool = pools[0];
+            //else
+            //    throw new Exception("No connection pool component found, or too many connection pools!");
+            connectionPool = IslandVizBehaviour.Instance.GetComponent<ConnectionPool>();
 
         }
 
@@ -102,6 +103,10 @@ namespace OsgiViz
 
         public void addConnectedServiceNode(ServiceNodeScript node)
         {
+            if (connectedServiceComponents == null)
+            {
+                connectedServiceComponents = new List<ServiceNodeScript>();
+            }
             connectedServiceComponents.Add(node);
         }
 
@@ -111,6 +116,7 @@ namespace OsgiViz
         //the connections going back to this ServiceNode
         public void hideAllServiceConnections()
         {
+            Debug.Log(connections == null);
             foreach (GameObject connection in connections)
             {
                 connection.SetActive(false);

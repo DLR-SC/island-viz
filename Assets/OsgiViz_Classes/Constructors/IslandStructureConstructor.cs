@@ -174,7 +174,7 @@ namespace OsgiViz.SideThreadConstructors
 
             #endregion
 
-            Debug.Log("Finished Construciton of Island " + b.getName());
+            //Debug.Log("Finished Construciton of Island " + b.getName());
 
             return island;
         }

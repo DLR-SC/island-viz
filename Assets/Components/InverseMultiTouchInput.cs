@@ -5,8 +5,6 @@ using UnityEngine;
 
 public class InverseMultiTouchInput : InputComponent {
 
-    public Mesh ColliderMesh;
-
     private GameObject mapNavigationArea;
     private MeshCollider meshCollider;
 
@@ -21,8 +19,8 @@ public class InverseMultiTouchInput : InputComponent {
         mapNavigationArea.transform.position = new Vector3(0f, OsgiViz.Core.GlobalVar.hologramTableHeight, 0f);
 
         // Remove Renderer & default collider 
-        mapNavigationArea.GetComponent<MeshRenderer>().enabled = false;
-        mapNavigationArea.GetComponent<CapsuleCollider>().enabled = false;
+        Destroy(mapNavigationArea.GetComponent<MeshRenderer>());
+        Destroy(mapNavigationArea.GetComponent<CapsuleCollider>());
 
         // Init Collider
         meshCollider = mapNavigationArea.AddComponent<MeshCollider>();

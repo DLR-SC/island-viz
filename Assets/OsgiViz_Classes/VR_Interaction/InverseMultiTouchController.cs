@@ -54,8 +54,8 @@ namespace OsgiViz
             //mainLight = GameObject.Find("MainLight").GetComponent<Light>();
             //originalLightRange = mainLight.range;
 
-            mainSliceContainer = GameObject.Find("DataManager").GetComponent<GlobalContainerHolder>().ServiceSliceContainer;
-            downwardConnectionContainer = GameObject.Find("DataManager").GetComponent<GlobalContainerHolder>().DownwardConnectionContainer;
+            mainSliceContainer = IslandVizBehaviour.IslandVizVisualization.ServiceSliceContainer.gameObject;
+            downwardConnectionContainer = IslandVizBehaviour.IslandVizVisualization.DownwardConnectionContainer.gameObject;
             foreach (Transform child in mainSliceContainer.transform)
             {
                 serviceSlices.Add(child.GetComponent<ServiceSlice>());
@@ -147,7 +147,7 @@ namespace OsgiViz
             }
 
             Shader.SetGlobalVector(clippingCenterShaderID, hologramCenter.transform.position);
-            //Shader.SetGlobalFloat(hologramScaleShaderID, GlobalVar.inverseHologramScale * 0.8f);
+            //Shader.SetGlobalFloat(hologramScaleShaderID, GlobalVar.CurrentZoomLevel * 0.8f);
         }
 
 
