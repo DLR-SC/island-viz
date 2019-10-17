@@ -65,14 +65,10 @@ namespace OsgiViz.Core
         //Height of the holotable
         public static float hologramTableHeight = 1.25f;
 
-        //Viewport-Manipulation
-        // The maximal distance the visualization can be draged from the island-world center.
-        // 1.0 = the distance of the furthest island from the island-world center
-        public const float translationCutoff = 1f + 1.25f;
-
-        // 1.0 = Zoom-Level to fit entire island-world into hologram
-        public const float minZoomCutoff = 0.00005f;
-        public const float maxZoomCutoff = 1.25f;
+        //Island Parent-Manipulation        
+        public const float translationCutoff = 1f + 1.25f; // The maximal distance the visualization can be draged from the island-world center.
+                                                           // 1.0 = the distance of the furthest island from the island-world center
+        public const float MaxZoomLevel = 0.2f; // The biggest possible scale of the island parent.
 
         //Service-Nodes
         public const float serviceNodeSize = 0.025f * voronoiCellScalefactor;
@@ -80,13 +76,19 @@ namespace OsgiViz.Core
         public const float startingHeight = 1.20f;
         public const float heightStep = 0.02f;
 
+
+
         //Dynamic Variables - written to by IslandViz - Modification is useless ;)
         public static int islandNumber = 100;
-        public static float inverseHologramScale = 1.0f;
+        public static float CurrentZoomLevel; // The current scale of the island parent.
+        public static float MinZoomLevel; // The smallest possible scale of the island parent and also the start 
+                                          // zoom level on island initiation.
         public static float worldRadius = 1f;
         public static Vector3 worldCenter = Vector3.zero;
         public static long maximumLOCinProject = 0;
         public static bool recenterValid = false;
+
+
     }
 
     public class JavaParser

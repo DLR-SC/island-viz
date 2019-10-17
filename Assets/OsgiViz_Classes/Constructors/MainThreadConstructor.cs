@@ -14,8 +14,11 @@ namespace OsgiViz.Unity.MainThreadConstructors
         public int RandomSeed;
         public Graph_Layout Graph_Layout;
 
+        [Header("Components")]
+        public InputComponent[] InputComponents; 
+
         [Header("Tranforms")]
-        public Transform VisualizationContainer;
+        public Transform VisualizationRoot;
 
         
                
@@ -118,38 +121,48 @@ namespace OsgiViz.Unity.MainThreadConstructors
 
             // Construct the island hierarchy. TODO enable in the future
             //yield return hierarchyConstructor.Construct(islandGOConstructor.getIslandGOs());
-                        
+
+            yield return AutoZoom();
+
+            // TODO Redo
+            //InverseMultiTouchController mtController = GameObject.Find("MapNavigationArea").AddComponent<InverseMultiTouchController>();
+            //mtController.drag = 0f; // 7.5f;
+
+            // Init Input Components
+            foreach (var item in InputComponents)
+            {
+                item.Init();
+                yield return null;
+            }
+
+            yield return null;
+
             stopwatch.Stop();
             Debug.Log("Construction finished after " + stopwatch.Elapsed.TotalSeconds.ToString("0.00") + " seconds!");
 
-            yield return AfterConstructionTasks();
+            //yield return AfterConstructionTasks();
         }
 
         /// <summary>
         /// Called after the construction of the OSGI visualization is done.
         /// </summary>
-        IEnumerator AfterConstructionTasks ()
-        {
-            yield return null;
-
-            yield return AutoZoom();
+        //IEnumerator AfterConstructionTasks ()
+        //{
+            //yield return null;            
 
             // TODO Redo
-            InverseMultiTouchController mtController = GameObject.Find("MapNavigationArea").AddComponent<InverseMultiTouchController>();
-            mtController.drag = 0f; // 7.5f;
-
-            // TODO Redo
-            // AddHighlightToAllInteractables();
+            //AddHighlightToAllInteractables();
             
             // TODO wichtig?
             //BroadcastMessage("MainConstructorFinished");
-        }
+        //}
 
 
+        // Scales the VisualizationContainer, so all islands are visible on start. The CurrentZoomLevel is saved in the GlobalVar.
         IEnumerator AutoZoom()
         {
             Transform furthestIslandTransform = null; // Transfrom of the island which is furthest away from the center.
-            float furthestDistance = 0; // Transfrom from the island which is furthest away to the center.
+            float furthestDistance = 0; // Furthest distance of a island to the center.
             float distance_temp = 0;
 
             float maxDistance = 0.7f; // TODO move to Settings
@@ -167,7 +180,9 @@ namespace OsgiViz.Unity.MainThreadConstructors
 
             yield return null;
 
-            VisualizationContainer.localScale *= maxDistance / furthestDistance; // Scales the islands to make all of them fit on the table.
+            VisualizationRoot.localScale *= maxDistance / furthestDistance; // Scales the islands to make all of them fit on the table.
+            GlobalVar.CurrentZoomLevel = VisualizationRoot.localScale.x; 
+            GlobalVar.MinZoomLevel = VisualizationRoot.localScale.x;
         }
 
         /// <summary>

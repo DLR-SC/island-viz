@@ -140,19 +140,19 @@ namespace OsgiViz
             Hand.HandType handType = hand.GuessCurrentHandType();
             if (handType == Hand.HandType.Left)
             {
-                temp += hand.transform.right * GlobalVar.inverseHologramScale * GlobalVar.labelOffset;
-                temp += observer.transform.up * GlobalVar.inverseHologramScale * GlobalVar.labelOffset;
+                temp += hand.transform.right * GlobalVar.CurrentZoomLevel * GlobalVar.labelOffset;
+                temp += observer.transform.up * GlobalVar.CurrentZoomLevel * GlobalVar.labelOffset;
             }
             else if (handType == Hand.HandType.Right)
             {
-                temp -= hand.transform.right * GlobalVar.inverseHologramScale * GlobalVar.labelOffset;
-                temp += observer.transform.up * GlobalVar.inverseHologramScale * GlobalVar.labelOffset;
+                temp -= hand.transform.right * GlobalVar.CurrentZoomLevel * GlobalVar.labelOffset;
+                temp += observer.transform.up * GlobalVar.CurrentZoomLevel * GlobalVar.labelOffset;
             }
             //If no sure which hand, use offset for Right.
             else if (handType == Hand.HandType.Any)
             {
-                temp -= hand.transform.right * GlobalVar.inverseHologramScale * GlobalVar.labelOffset;
-                temp += observer.transform.up * GlobalVar.inverseHologramScale * GlobalVar.labelOffset;
+                temp -= hand.transform.right * GlobalVar.CurrentZoomLevel * GlobalVar.labelOffset;
+                temp += observer.transform.up * GlobalVar.CurrentZoomLevel * GlobalVar.labelOffset;
             }
 
             textLabel.transform.position = temp;

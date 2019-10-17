@@ -35,14 +35,13 @@ namespace OsgiViz.Unity.Island
 
         private void handleActivationDeactivation(Hand hand)
         {
-            string contentText = "";
-            contentText += "<b><color=green>Name</b></color>";
-            contentText += "\n";
-            contentText += cUnit.getName();
-            contentText += "\n";
-            contentText += "<b><color=green>#LOC</b></color>";
-            contentText += "\n";
-            contentText += cUnit.getLoc();
+            string contentText = "<b><color=green>Name</b></color>"
+            + "\n"
+            + cUnit.getName()
+            + "\n"
+            + "<b><color=green>#LOC</b></color>"
+            + "\n"
+            + cUnit.getLoc();
 
 
             gameObject.GetComponent<PdaInspectable>().sendContentToPda(contentText);

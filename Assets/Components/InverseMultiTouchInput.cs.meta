@@ -1,0 +1,12 @@
+fileFormatVersion: 2
+guid: e54be91c68039af4dbaf07b91293098d
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - ColliderMesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

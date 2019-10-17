@@ -200,7 +200,14 @@ namespace OsgiViz.SideThreadConstructors
         private Boolean CheckOverlap(Vector3 newPosition, CartographicIsland newIsland, float minDistance)
         {
             int cc = 0;
-            foreach(GraphVertex existingVertex in dependencyGraph.Vertices)
+
+            if (dependencyGraph == null)
+            {
+                Debug.LogWarning("Graph_Layout_Constructor.CheckOverlap: dependencyGraph is null!");
+                return true;
+            }
+
+            foreach (GraphVertex existingVertex in dependencyGraph.Vertices)
             {
                 Vector3 existingPos = existingVertex.getPosition();
                 float distance = Vector3.Distance(existingPos, newPosition);

@@ -74,7 +74,7 @@ namespace OsgiViz
             if (h == true)
             {
                 Vector3 newBeamScale = beamObj.transform.localScale;
-                newBeamScale.z = hit.distance / GlobalVar.inverseHologramScale;
+                newBeamScale.z = hit.distance / GlobalVar.CurrentZoomLevel;
                 beamObj.transform.localScale = newBeamScale;
                 beamObj.transform.localPosition = Vector3.zero + Vector3.forward * 0.5f * newBeamScale.z;
 
