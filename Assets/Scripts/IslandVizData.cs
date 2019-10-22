@@ -14,7 +14,7 @@ public class IslandVizData : MonoBehaviour
     public static IslandVizData Instance; // The instance of this class.
 
     [HideInInspector]
-    public OsgiProject osgiProject;
+    public OsgiProject OsgiProject;
 
     private Neo4jObjConstructor neo4jConstructor;
     private JsonObjConstructor jConstructor;
@@ -61,8 +61,8 @@ public class IslandVizData : MonoBehaviour
         yield return osgiConstructor.Construct(jConstructor.getJsonModel()); // neo4jConstructor.GetNeo4JModel()
 
         // Store the osgi data
-        osgiProject = osgiConstructor.getProject();
-        GlobalVar.islandNumber = osgiProject.getBundles().Count;
+        OsgiProject = osgiConstructor.getProject();
+        GlobalVar.islandNumber = OsgiProject.getBundles().Count;
         
         stopwatch.Stop();
         Debug.Log("IslandVizData Construction finished after " + stopwatch.Elapsed.TotalSeconds.ToString("0.00") + " seconds!");

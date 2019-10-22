@@ -38,7 +38,7 @@ namespace OsgiViz
             connectionArrows = new List<GameObject>();
             connectedDocks = new List<DependencyDock>();
             dockWeights = new List<float>();
-            dependencyContainer = IslandVizVisualization.Instance.DependencyContainer.gameObject;
+            dependencyContainer = IslandVizVisualization.Instance.TransformContainer.DependencyContainer.gameObject;
 
             #region clickable
             InteractableViaClickTouch ict = gameObject.GetComponent<InteractableViaClickTouch>();

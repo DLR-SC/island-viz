@@ -11,41 +11,43 @@ public class IslandVizBehaviour : MonoBehaviour
     public static IslandVizBehaviour Instance; // The instance of this class.
 
     /// <summary>
-    /// Called by Unity on application stat up before the Start() method.
+    /// Called by Unity when the application is started. 
+    /// Note: Awake() is called before Start().
     /// </summary>
     private void Awake()
     {
         Instance = this;
     }
 
-    // Use this for initialization
+    /// <summary>
+    /// Called by Unity when the application is started.
+    /// </summary>
     void Start ()
     {
-        // Reset Shader Settings
+        // Reset shader settings.
         UnityEngine.XR.XRSettings.eyeTextureResolutionScale = 1f;
         Shader.SetGlobalFloat("hologramOutlineWidth", GlobalVar.hologramOutlineWidth);
         Shader.SetGlobalVector("hologramOutlineColor", GlobalVar.hologramOutlineColor);        
         Shader.SetGlobalVector("hologramCenter", new Vector3(0, 0, 0));
         Shader.SetGlobalFloat("hologramScale", 0.8f);
-
-        //float3 hologramCenter = float3(0, 0, -1.42f);
-        //float hologramScale = 0.8f;
-        //float hologramOutlineWidth = 0.5f;
-        //float3 hologramOutlineColor;
-
-
+        
+        // Start the islandviz coroutine.
         StartCoroutine(IslandVizRoutine());
 	}
 
-
+    /// <summary>
+    /// The main routine of the islandviz application.
+    /// </summary>
     IEnumerator IslandVizRoutine ()
     {
+        // Load the data we want to visualize.
         yield return IslandVizData.Instance.ConstructOsgiProject();
 
-        yield return IslandVizVisualization.Instance.Construction();
+        // Construct the basic visualization.
+        yield return IslandVizVisualization.Instance.ConstructVisualization();
 
+        // Load additional components
+        yield return IslandVizVisualization.Instance.InitVisualizationComponents();
         yield return IslandVizInteraction.Instance.InitInputComponents();
     }
-	
-	
 }

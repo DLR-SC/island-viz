@@ -24,7 +24,7 @@ namespace OsgiViz
             serviceNodes = new List<ServiceNodeScript>();
             downwardConnections = new List<GameObject>();
             connectionPrefab = (GameObject)Resources.Load("Prefabs/ServiceConnection");
-            DownwardConnectionContainer = IslandVizVisualization.Instance.DownwardConnectionContainer.gameObject;
+            DownwardConnectionContainer = IslandVizVisualization.Instance.TransformContainer.DownwardConnectionContainer.gameObject;
 
             #region clickable
             InteractableViaClickTouch ict = gameObject.GetComponent<InteractableViaClickTouch>();

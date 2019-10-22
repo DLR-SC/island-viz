@@ -5,6 +5,7 @@ using OsgiViz.SideThreadConstructors;
 using OsgiViz.Core;
 using OsgiViz.Island;
 using OsgiViz.Unity.MainThreadConstructors;
+using OsgiViz.Unity.Island;
 
 /// <summary>
 /// This class handles the basic software visualization. 
@@ -28,17 +29,15 @@ public class IslandVizVisualization : MonoBehaviour
     [Header("Additional Components Container")]
     public GameObject VisualizationComponentsGameObject;
 
+    [HideInInspector]
+    public VisualizationTransformContainer TransformContainer;
 
     [HideInInspector]
     public Transform VisualizationRoot;
-    [HideInInspector]
-    public Transform IslandContainer;
-    [HideInInspector]
-    public Transform DependencyContainer;
-    [HideInInspector]
-    public Transform ServiceSliceContainer;
-    [HideInInspector]
-    public Transform DownwardConnectionContainer;    
+
+    public List<CartographicIsland> IslandStructures;
+    public List<IslandGO> IslandGameObjects;
+
 
     // Mandatory coomonents for visualization.
     private IslandGOConstructor islandGOConstructor;
@@ -57,6 +56,9 @@ public class IslandVizVisualization : MonoBehaviour
     private bool waiting = true; // TODO: Remove in future
 
 
+    // ################
+    // Initiation
+    // ################
 
     /// <summary>
     /// Called by Unity on application stat up before the Start() method.
@@ -79,19 +81,20 @@ public class IslandVizVisualization : MonoBehaviour
         bdConstructor = new Graph_Layout_Constructor();
 
         // Create root transforms and add some stuff
+        TransformContainer = new VisualizationTransformContainer();
         VisualizationRoot = new GameObject("Visualization").transform;
-        IslandContainer = new GameObject("VisualizationContainer").transform;
-        IslandContainer.SetParent(VisualizationRoot);
+        TransformContainer.IslandContainer = new GameObject("VisualizationContainer").transform;
+        TransformContainer.IslandContainer.SetParent(VisualizationRoot);
         //IslandContainer.position = Vector3.up;
         //IslandContainer.gameObject.AddComponent<OsgiViz.HologramHeightAdjuster>();
-        DependencyContainer = new GameObject("DependencyContainer").transform;
-        DependencyContainer.SetParent(VisualizationRoot);
-        ServiceSliceContainer = new GameObject("ServiceSliceContainer").transform;
-        ServiceSliceContainer.SetParent(VisualizationRoot);
-        DownwardConnectionContainer = new GameObject("DownwardConnectionContainer").transform;
-        DownwardConnectionContainer.SetParent(VisualizationRoot);
+        TransformContainer.DependencyContainer = new GameObject("DependencyContainer").transform;
+        TransformContainer.DependencyContainer.SetParent(VisualizationRoot);
+        TransformContainer.ServiceSliceContainer = new GameObject("ServiceSliceContainer").transform;
+        TransformContainer.ServiceSliceContainer.SetParent(VisualizationRoot);
+        TransformContainer.DownwardConnectionContainer = new GameObject("DownwardConnectionContainer").transform;
+        TransformContainer.DownwardConnectionContainer.SetParent(VisualizationRoot);
 
-        GameObject water = (GameObject)Instantiate(Water_Plane_Prefab, IslandContainer);
+        GameObject water = (GameObject)Instantiate(Water_Plane_Prefab, TransformContainer.IslandContainer);
         water.transform.localPosition = Vector3.zero;
         water.transform.localScale = new Vector3(1000, 1, 1000);
 
@@ -102,7 +105,7 @@ public class IslandVizVisualization : MonoBehaviour
     /// <summary>
     /// This Coroutine creates the OSGI visualization from a JSON file located at projectModelFile.
     /// </summary>
-    public IEnumerator Construction()
+    public IEnumerator ConstructVisualization()
     {
         yield return null;
 
@@ -110,31 +113,32 @@ public class IslandVizVisualization : MonoBehaviour
         stopwatch.Start();
                 
         //Construct islands from bundles in the osgi Object.
-        yield return isConstructor.Construct(IslandVizData.Instance.osgiProject);
+        yield return isConstructor.Construct(IslandVizData.Instance.OsgiProject);
 
         // Construct the spatial distribution of the islands.
         if (Graph_Layout == Graph_Layout.ForceDirected)
         {
-            yield return bdConstructor.ConstructFDLayout(IslandVizData.Instance.osgiProject, 0.25f, 70000, RNG);
+            yield return bdConstructor.ConstructFDLayout(IslandVizData.Instance.OsgiProject, 0.25f, 70000, RNG);
         }
         else
         {
             Vector3 minBounds = new Vector3(-10.5f, 1.31f, -10.5f);
             Vector3 maxBounds = new Vector3(10.5f, 1.31f, 10.5f);
-            yield return bdConstructor.ConstructRndLayout(IslandVizData.Instance.osgiProject.getDependencyGraph(), minBounds, maxBounds, 0.075f, 10000, RNG);
+            yield return bdConstructor.ConstructRndLayout(IslandVizData.Instance.OsgiProject.getDependencyGraph(), minBounds, maxBounds, 0.075f, 10000, RNG);
         }
 
-        GlobalVar.islandNumber = IslandVizData.Instance.osgiProject.getBundles().Count;
-        List<CartographicIsland> islandStructures = isConstructor.getIslandStructureList();
+        GlobalVar.islandNumber = IslandVizData.Instance.OsgiProject.getBundles().Count;
+        IslandStructures = isConstructor.getIslandStructureList();
 
-        // Construct the island GameObjects.
-        yield return islandGOConstructor.Construct(islandStructures, IslandContainer.gameObject);
+        // Construct and store the island GameObjects.
+        yield return islandGOConstructor.Construct(IslandVizVisualization.Instance.IslandStructures, TransformContainer.IslandContainer.gameObject);
+        IslandGameObjects = islandGOConstructor.getIslandGOs();
 
         // Construct the connections between the islands from services in the osgi Object.
-        yield return serviceGOConstructor.Construct(IslandVizData.Instance.osgiProject.getServices(), islandGOConstructor.getIslandGOs());
+        //yield return serviceGOConstructor.Construct(IslandVizData.Instance.osgiProject.getServices(), islandGOConstructor.getIslandGOs());
 
         // Construct the dock GameObjects.
-        yield return dockGOConstructor.Construct(islandGOConstructor.getIslandGOs(), IslandContainer.gameObject);
+        yield return dockGOConstructor.Construct(islandGOConstructor.getIslandGOs(), TransformContainer.IslandContainer.gameObject);
 
         // Construct the island hierarchy. TODO enable in the future
         //yield return hierarchyConstructor.Construct(islandGOConstructor.getIslandGOs());
@@ -149,8 +153,34 @@ public class IslandVizVisualization : MonoBehaviour
         Debug.Log("IslandVizVisualization Construction finished after " + stopwatch.Elapsed.TotalSeconds.ToString("0.00") + " seconds!");
     }
 
+    
 
-    // Scales the VisualizationContainer, so all islands are visible on start. The CurrentZoomLevel is saved in the GlobalVar.
+    /// <summary>
+    /// Initialize all input components. Called by IslandVizBehavior.
+    /// </summary>
+    /// <returns></returns>
+    public IEnumerator InitVisualizationComponents()
+    {
+        foreach (var item in visualizationComponents)
+        {
+            item.Init();
+            yield return null;
+        }
+    }
+
+
+
+
+    // ################
+    // Helper Functions
+    // ################
+
+    #region HelperFunctions
+        
+    /// <summary>
+    /// Scales the VisualizationContainer, so all islands are visible on start. The CurrentZoomLevel is saved in the GlobalVar.
+    /// </summary>
+    /// <returns></returns>
     IEnumerator AutoZoom()
     {
         Transform furthestIslandTransform = null; // Transfrom of the island which is furthest away from the center.
@@ -172,23 +202,38 @@ public class IslandVizVisualization : MonoBehaviour
 
         yield return null;
 
-        IslandContainer.localScale *= maxDistance / furthestDistance; // Scales the islands to make all of them fit on the table.
-        GlobalVar.CurrentZoomLevel = IslandContainer.localScale.x;
-        GlobalVar.MinZoomLevel = IslandContainer.localScale.x;
+        VisualizationRoot.localScale *= maxDistance / furthestDistance;
+        //TransformContainer.IslandContainer.localScale *= maxDistance / furthestDistance; // Scales the islands to make all of them fit on the table.
+        GlobalVar.CurrentZoomLevel = VisualizationRoot.localScale.x;
+        GlobalVar.MinZoomLevel = VisualizationRoot.localScale.x;
+
+        // Debug
+        //TransformContainer.DependencyContainer.localScale *= GlobalVar.CurrentZoomLevel;
     }
 
-
-    // Helper functions
-
+    /// <summary>
+    /// Moves the table to a new hight.
+    /// </summary>
+    /// <param name="height">The new height (in meters) of the table.</param>
     public void UpdateTableHight (float height)
     {
         Table.transform.position = new Vector3(Table.transform.position.x, height, Table.transform.position.z);
         VisualizationRoot.transform.position = new Vector3(VisualizationRoot.transform.position.x, height, VisualizationRoot.transform.position.z);
     }
+
+    #endregion
 }
 
 public enum Graph_Layout
 {
     ForceDirected,
     Random
+}
+
+public class VisualizationTransformContainer
+{
+    public Transform IslandContainer;
+    public Transform DependencyContainer;
+    public Transform ServiceSliceContainer;
+    public Transform DownwardConnectionContainer;
 }

@@ -57,8 +57,6 @@ namespace OsgiViz.Unity.MainThreadConstructors
                 throw new Exception("For the selected number of discreet LOC levels, there are not enough SD prefabs!");
             #endregion
 
-            //VisualizationContainer = GetComponent<GlobalContainerHolder>().VisualizationContainer;
-
             RNG = new System.Random(0);
         }
 
