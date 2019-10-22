@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class InverseMultiTouchInput : InputComponent {
+public class InverseMultiTouchInput : AdditionalIslandVizComponent {
 
     private GameObject mapNavigationArea;
     private MeshCollider meshCollider;

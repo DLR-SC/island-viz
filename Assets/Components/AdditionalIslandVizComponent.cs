@@ -2,6 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class InputComponent : MonoBehaviour {
+public abstract class AdditionalIslandVizComponent : MonoBehaviour {
     public abstract void Init();
 }

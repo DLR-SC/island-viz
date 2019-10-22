@@ -3,34 +3,24 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// This is the main class of the IslandViz application. 
+/// </summary>
 public class IslandVizBehaviour : MonoBehaviour
 {
-    public static IslandVizBehaviour Instance;
-    public static IslandVizData IslandVizData;
-    public static IslandVizVisualization IslandVizVisualization;
+    public static IslandVizBehaviour Instance; // The instance of this class.
 
-
-    [Header("Additional Components")]
-    public GameObject InputComponents;
-    public GameObject VisualizationComponents;
-
-
-
-
-    private InputComponent[] inputComponents;
-    //private VisualizationComponent[] visualizationComponents;
-
-
+    /// <summary>
+    /// Called by Unity on application stat up before the Start() method.
+    /// </summary>
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     // Use this for initialization
     void Start ()
     {
-        Instance = this;
-        IslandVizData = GetComponent<IslandVizData>();
-        IslandVizVisualization = GetComponent<IslandVizVisualization>();
-
-        inputComponents = InputComponents.GetComponents<InputComponent>();
-
         // Reset Shader Settings
         UnityEngine.XR.XRSettings.eyeTextureResolutionScale = 1f;
         Shader.SetGlobalFloat("hologramOutlineWidth", GlobalVar.hologramOutlineWidth);
@@ -50,16 +40,11 @@ public class IslandVizBehaviour : MonoBehaviour
 
     IEnumerator IslandVizRoutine ()
     {
-        yield return IslandVizData.ConstructOsgiProject();
+        yield return IslandVizData.Instance.ConstructOsgiProject();
 
-        yield return IslandVizVisualization.Construction();
+        yield return IslandVizVisualization.Instance.Construction();
 
-        // Init Input Components
-        foreach (var item in inputComponents)
-        {
-            item.Init();
-            yield return null;
-        }
+        yield return IslandVizInteraction.Instance.InitInputComponents();
     }
 	
 	

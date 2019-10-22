@@ -6,11 +6,15 @@ using OsgiViz.Core;
 using OsgiViz.Island;
 using OsgiViz.Unity.MainThreadConstructors;
 
+/// <summary>
+/// This class handles all abstract data the IslandViz visualizes.
+/// </summary>
 public class IslandVizData : MonoBehaviour
 {
+    public static IslandVizData Instance; // The instance of this class.
+
     [HideInInspector]
     public OsgiProject osgiProject;
-
 
     private Neo4jObjConstructor neo4jConstructor;
     private JsonObjConstructor jConstructor;
@@ -20,9 +24,13 @@ public class IslandVizData : MonoBehaviour
     private System.Diagnostics.Stopwatch stopwatch;
 
 
-
-    void Start()
+    /// <summary>
+    /// Called by Unity on application stat up before the Start() method.
+    /// </summary>
+    void Awake()
     {
+        Instance = this;
+
         GameObject neo4jObject = new GameObject("Neo4jObject");
         neo4jConstructor = neo4jObject.AddComponent<Neo4jObjConstructor>();
         jConstructor = new JsonObjConstructor();

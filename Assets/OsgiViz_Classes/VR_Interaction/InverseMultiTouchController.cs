@@ -54,8 +54,8 @@ namespace OsgiViz
             //mainLight = GameObject.Find("MainLight").GetComponent<Light>();
             //originalLightRange = mainLight.range;
 
-            mainSliceContainer = IslandVizBehaviour.IslandVizVisualization.ServiceSliceContainer.gameObject;
-            downwardConnectionContainer = IslandVizBehaviour.IslandVizVisualization.DownwardConnectionContainer.gameObject;
+            mainSliceContainer = IslandVizVisualization.Instance.ServiceSliceContainer.gameObject;
+            downwardConnectionContainer = IslandVizVisualization.Instance.DownwardConnectionContainer.gameObject;
             foreach (Transform child in mainSliceContainer.transform)
             {
                 serviceSlices.Add(child.GetComponent<ServiceSlice>());

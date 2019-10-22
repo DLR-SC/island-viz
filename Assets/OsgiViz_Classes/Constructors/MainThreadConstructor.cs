@@ -15,7 +15,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
         public Graph_Layout Graph_Layout;
 
         [Header("Components")]
-        public InputComponent[] InputComponents; 
+        public AdditionalIslandVizComponent[] InputComponents; 
 
         [Header("Tranforms")]
         public Transform VisualizationRoot;
