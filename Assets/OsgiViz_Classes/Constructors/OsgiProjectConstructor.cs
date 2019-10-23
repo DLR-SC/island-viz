@@ -460,7 +460,7 @@ namespace OsgiViz.SideThreadConstructors
                 i++;
             }
             #endregion
-            Debug.Log("Max Import-count: " + currentProject.getMaxImportCount());
+            //Debug.Log("Max Import-count: " + currentProject.getMaxImportCount());
             status = Status.Finished;
             Debug.Log("Finished OSGi-Project construction!");
         }

@@ -20,18 +20,26 @@ public class IslandVizData : MonoBehaviour
     private JsonObjConstructor jConstructor;
     private OsgiProjectConstructor osgiConstructor;
 
-    private bool waiting = true;
+    private bool waiting = true; // This only exists for the JsonObjConstructor. TODO remove in future.
     private System.Diagnostics.Stopwatch stopwatch;
 
 
+
+    // ################
+    // Initiation
+    // ################
+
+    #region Initiation
+
     /// <summary>
-    /// Called by Unity on application stat up before the Start() method.
+    /// Called by Unity on application start up before the Start() method.
     /// </summary>
     void Awake()
     {
         Instance = this;
 
-        GameObject neo4jObject = new GameObject("Neo4jObject");
+        GameObject neo4jObject = new GameObject("Neo4j");
+        neo4jObject.transform.parent = IslandVizBehaviour.Instance.transform;
         neo4jConstructor = neo4jObject.AddComponent<Neo4jObjConstructor>();
         jConstructor = new JsonObjConstructor();
         osgiConstructor = new OsgiProjectConstructor();
@@ -68,10 +76,21 @@ public class IslandVizData : MonoBehaviour
         Debug.Log("IslandVizData Construction finished after " + stopwatch.Elapsed.TotalSeconds.ToString("0.00") + " seconds!");
     }
 
-    // Helper function -> Remove in future
+    #endregion
+
+
+    // ################
+    // Helper Functions
+    // ################
+
+    #region Helper Functions   
+
+    // Remove in future
     public void Done()
     {
         waiting = false;
     }
+
+    #endregion
 
 }

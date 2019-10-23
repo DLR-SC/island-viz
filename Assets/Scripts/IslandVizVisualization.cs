@@ -53,12 +53,12 @@ public class IslandVizVisualization : MonoBehaviour
     private System.Random RNG;
     private System.Diagnostics.Stopwatch stopwatch;
 
-    private bool waiting = true; // TODO: Remove in future
-
 
     // ################
     // Initiation
     // ################
+
+    #region Initiation
 
     /// <summary>
     /// Called by Unity on application stat up before the Start() method.
@@ -70,8 +70,8 @@ public class IslandVizVisualization : MonoBehaviour
         // Get all optimal additional visualization components
         visualizationComponents = VisualizationComponentsGameObject.GetComponents<AdditionalIslandVizComponent>();
 
-        // Since we saved all additional visualization components in "visualizationComponents", we can add the 
-        // remaining mandatory visualization components.
+        // Since we saved all additional visualization components in "visualizationComponents", we can add the remaining
+        // mandatory visualization components.
         islandGOConstructor = VisualizationComponentsGameObject.AddComponent<IslandGOConstructor>();
         serviceGOConstructor = VisualizationComponentsGameObject.AddComponent<ServiceGOConstructor>();
         dockGOConstructor = VisualizationComponentsGameObject.AddComponent<DockGOConstructor>();
@@ -85,8 +85,6 @@ public class IslandVizVisualization : MonoBehaviour
         VisualizationRoot = new GameObject("Visualization").transform;
         TransformContainer.IslandContainer = new GameObject("VisualizationContainer").transform;
         TransformContainer.IslandContainer.SetParent(VisualizationRoot);
-        //IslandContainer.position = Vector3.up;
-        //IslandContainer.gameObject.AddComponent<OsgiViz.HologramHeightAdjuster>();
         TransformContainer.DependencyContainer = new GameObject("DependencyContainer").transform;
         TransformContainer.DependencyContainer.SetParent(VisualizationRoot);
         TransformContainer.ServiceSliceContainer = new GameObject("ServiceSliceContainer").transform;
@@ -94,7 +92,9 @@ public class IslandVizVisualization : MonoBehaviour
         TransformContainer.DownwardConnectionContainer = new GameObject("DownwardConnectionContainer").transform;
         TransformContainer.DownwardConnectionContainer.SetParent(VisualizationRoot);
 
+        // Create water visual
         GameObject water = (GameObject)Instantiate(Water_Plane_Prefab, TransformContainer.IslandContainer);
+        water.name = Water_Plane_Prefab.name; // Just making shure since there are still a alot GameObject.Find... TODO: remove in future
         water.transform.localPosition = Vector3.zero;
         water.transform.localScale = new Vector3(1000, 1, 1000);
 
@@ -151,12 +151,10 @@ public class IslandVizVisualization : MonoBehaviour
 
         stopwatch.Stop();
         Debug.Log("IslandVizVisualization Construction finished after " + stopwatch.Elapsed.TotalSeconds.ToString("0.00") + " seconds!");
-    }
-
-    
+    }       
 
     /// <summary>
-    /// Initialize all input components. Called by IslandVizBehavior.
+    /// Initialize all additional input components. Called by IslandVizBehavior.
     /// </summary>
     /// <returns></returns>
     public IEnumerator InitVisualizationComponents()
@@ -168,7 +166,7 @@ public class IslandVizVisualization : MonoBehaviour
         }
     }
 
-
+    #endregion
 
 
     // ################
@@ -176,7 +174,7 @@ public class IslandVizVisualization : MonoBehaviour
     // ################
 
     #region HelperFunctions
-        
+
     /// <summary>
     /// Scales the VisualizationContainer, so all islands are visible on start. The CurrentZoomLevel is saved in the GlobalVar.
     /// </summary>

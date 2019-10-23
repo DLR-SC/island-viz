@@ -10,6 +10,12 @@ public class IslandVizBehaviour : MonoBehaviour
 {
     public static IslandVizBehaviour Instance; // The instance of this class.
 
+    // ################
+    // Initiation
+    // ################
+
+    #region Initiation
+
     /// <summary>
     /// Called by Unity when the application is started. 
     /// Note: Awake() is called before Start().
@@ -50,4 +56,6 @@ public class IslandVizBehaviour : MonoBehaviour
         yield return IslandVizVisualization.Instance.InitVisualizationComponents();
         yield return IslandVizInteraction.Instance.InitInputComponents();
     }
+
+    #endregion
 }

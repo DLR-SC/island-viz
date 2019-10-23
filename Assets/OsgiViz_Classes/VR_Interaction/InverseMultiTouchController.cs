@@ -28,7 +28,6 @@ namespace OsgiViz
         private float rotationMult = 1f;
 
         public float drag;
-        private GameObject hologramCenter;
         //private Light mainLight;
         private float originalLightRange;
         private int clippingCenterShaderID;
@@ -45,18 +44,9 @@ namespace OsgiViz
 
             clippingCenterShaderID = Shader.PropertyToID("hologramCenter");
             hologramScaleShaderID = Shader.PropertyToID("hologramScale");
-
-            hologramCenter = GameObject.Find("HologramCenter");
-            //transformCandidate = GameObject.Find("RealWorld");
-            //transformCandidate = GameObject.Find("VisualizationContainer");     
-            //transformCandidate = GameObject.Find("VisualizationRoot");
-
+            
             transformCandidate = IslandVizVisualization.Instance.VisualizationRoot.gameObject;
-            //transformCandidate = IslandVizVisualization.Instance.TransformContainer.IslandContainer.gameObject;
-
-            //mainLight = GameObject.Find("MainLight").GetComponent<Light>();
-            //originalLightRange = mainLight.range;
-
+                        
             mainSliceContainer = IslandVizVisualization.Instance.TransformContainer.ServiceSliceContainer.gameObject;
             downwardConnectionContainer = IslandVizVisualization.Instance.TransformContainer.DownwardConnectionContainer.gameObject;
             foreach (Transform child in mainSliceContainer.transform)
@@ -69,7 +59,7 @@ namespace OsgiViz
             effectiveTranslationSpeedCutoff = translationSpeedCutoff;
             effectivePivotTransferCutoff = pivotTransferCutoff;
         }
-        
+                
 
         void OnTriggerEnter(Collider collider)
         {
@@ -149,7 +139,7 @@ namespace OsgiViz
                 UpdateTranslation(true);
             }
 
-            Shader.SetGlobalVector(clippingCenterShaderID, hologramCenter.transform.position);
+            Shader.SetGlobalVector(clippingCenterShaderID, IslandVizVisualization.Instance.Table.transform.position); // TODO: nötig?
             //Shader.SetGlobalFloat(hologramScaleShaderID, GlobalVar.CurrentZoomLevel * 0.8f);
         }
 
