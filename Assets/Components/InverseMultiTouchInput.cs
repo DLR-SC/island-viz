@@ -7,31 +7,36 @@ using Valve.VR.InteractionSystem;
 
 public class InverseMultiTouchInput : AdditionalIslandVizComponent {
 
-    private GameObject mapNavigationArea;
-    private MeshCollider meshCollider;
+    [Header("Settings")]
+    public float PivotTransferCutoff = 1.25f;
+    public float TranslationMult = 1f;
+    public float ScaleMult = 2.0f;
+    public float RotationMult = 1f;
 
-    private InverseMultiTouchController inverseMultiTouchController;
+
+    private GameObject mapNavigationArea; // The GameObject which holds the collider.
+
     private List<Hand> touchingHandList;
     private List<Hand> usingHandList;
-    private Vector3 currentTranslationVelocity = new Vector3(0f, 0f, 0f);
-    private float pivotTransferCutoff = 1.25f;
-    private float translationSpeedCutoff = 0.5f;
-    private float effectivePivotTransferCutoff;
-    private float effectiveTranslationSpeedCutoff;
-    private float translationMult = 1f;
-    private float scaleMult = 2.0f;
-    private float rotationMult = 1f;
-    public float drag;
-    private float effectiveDrag;
+    private Vector3 currentTranslationVelocity;
+    private bool initiated = false;
 
 
 
-    // Use this for initialization
+    // ################
+    // Initiation
+    // ################
+
+    #region Initiation
+
+    /// <summary>
+    /// Initialize this input component. 
+    /// This method is called by the IslandVizInteraction class.
+    /// </summary>
     public override void Init () {
         // Init GameObject
         mapNavigationArea = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
         mapNavigationArea.name = "MapNavigationArea";
-        mapNavigationArea.tag = "MapNavigationArea";
         mapNavigationArea.transform.localScale = new Vector3(1.75f, 0.15f, 1.75f);
         mapNavigationArea.transform.position = new Vector3(0f, OsgiViz.Core.GlobalVar.hologramTableHeight, 0f);
 
@@ -40,19 +45,15 @@ public class InverseMultiTouchInput : AdditionalIslandVizComponent {
         Destroy(mapNavigationArea.GetComponent<CapsuleCollider>());
 
         // Init Collider
-        meshCollider = mapNavigationArea.AddComponent<MeshCollider>();
+        MeshCollider meshCollider = mapNavigationArea.AddComponent<MeshCollider>();
         meshCollider.convex = true;
         meshCollider.isTrigger = true;
 
         // Physics Settings
         mapNavigationArea.tag = "MapNavigationArea";
         mapNavigationArea.layer = LayerMask.NameToLayer("MapNavigationArea"); // TODO ?
-
-        // Add InverseMultiTouchController Component
-        //inverseMultiTouchController = mapNavigationArea.AddComponent<InverseMultiTouchController>();
-        //inverseMultiTouchController.drag = 0f; // 7.5f;
-
-        // Subscribe input function
+        
+        // Subscribe input methods
         IslandVizInteraction.Instance.OnControllerEnter += OnControllerEnterEvent;
         IslandVizInteraction.Instance.OnControllerExit += OnControllerExitEvent;
         IslandVizInteraction.Instance.OnControllerTriggerDown += OnControllerTriggerPressed;
@@ -60,12 +61,18 @@ public class InverseMultiTouchInput : AdditionalIslandVizComponent {
 
         touchingHandList = new List<Hand>();
         usingHandList = new List<Hand>();
-        effectivePivotTransferCutoff = pivotTransferCutoff;
-        effectiveTranslationSpeedCutoff = translationSpeedCutoff;
-        effectiveDrag = drag;
-
+        currentTranslationVelocity = new Vector3(0f, 0f, 0f);
+        initiated = true;
     }
 
+    #endregion
+
+
+    // ################
+    // Interaction - Event Handling
+    // ################
+
+    #region Interaction - Event Handling
 
     private void OnControllerEnterEvent(Collider collider, Hand hand)
     {
@@ -85,7 +92,7 @@ public class InverseMultiTouchInput : AdditionalIslandVizComponent {
 
     private void OnControllerTriggerPressed (Hand hand)
     {
-        if (touchingHandList.Contains(hand))
+        if (!usingHandList.Contains(hand) && touchingHandList.Contains(hand))
         {
             usingHandList.Add(hand);
         }
@@ -99,19 +106,24 @@ public class InverseMultiTouchInput : AdditionalIslandVizComponent {
         }
     }
 
+    #endregion
 
 
-    IEnumerator Movement ()
-    {
-        yield return null;
-    }
 
+    // ################
+    // Interaction - Movement
+    // ################
 
-    // Update is called once per frame
+    #region Interaction - Movement
+
+    // From InverseMultiTouchController.cs
     void Update()
     {
-        //Identify which controllers are using the object from the touching list
-        
+        if (!initiated)
+        {
+            return;
+        }
+
         //Handle Movement
         if (usingHandList.Count == 1)
         {
@@ -134,7 +146,7 @@ public class InverseMultiTouchInput : AdditionalIslandVizComponent {
 
             //For an ideal scale/rotate gesture the pivot would stay the same. For real world applications
             //the pivotTransferCutoff allows for some sloppiness in the gesture
-            if (Vector3.Distance(currentPivot, nextPivot) < effectivePivotTransferCutoff)
+            if (Vector3.Distance(currentPivot, nextPivot) < PivotTransferCutoff)
             {
                 Vector3 diffCurrent = origin1 - origin2;
                 Vector3 diffNext = nextOrigin1 - nextOrigin2;
@@ -144,7 +156,7 @@ public class InverseMultiTouchInput : AdditionalIslandVizComponent {
 
                 float radCurrent = Mathf.Atan2(diffCurrent.x, diffCurrent.z);
                 float radNext = Mathf.Atan2(diffNext.x, diffNext.z);
-                float rotationAngle = -Mathf.Rad2Deg * (radNext - radCurrent) * rotationMult;
+                float rotationAngle = -Mathf.Rad2Deg * (radNext - radCurrent) * RotationMult;
 
                 RotateAndScale(scaleRotPivot, rotationAngle, scalingFactor);
             }
@@ -155,10 +167,8 @@ public class InverseMultiTouchInput : AdditionalIslandVizComponent {
         }
 
         //Shader.SetGlobalVector(clippingCenterShaderID, IslandVizVisualization.Instance.Table.transform.position); // TODO: nötig?
-                                                                                                                  //Shader.SetGlobalFloat(hologramScaleShaderID, GlobalVar.CurrentZoomLevel * 0.8f);
+        //Shader.SetGlobalFloat(hologramScaleShaderID, GlobalVar.CurrentZoomLevel * 0.8f);
     }
-
-
 
     private void UpdateTranslation(bool useDrag)
     {
@@ -173,7 +183,7 @@ public class InverseMultiTouchInput : AdditionalIslandVizComponent {
         }
 
         currentTranslationVelocity = ClampTranslationVelocityVector(currentTranslationVelocity);
-        IslandVizVisualization.Instance.VisualizationRoot.Translate(-currentTranslationVelocity * Time.deltaTime * translationMult, Space.World);
+        IslandVizVisualization.Instance.VisualizationRoot.Translate(-currentTranslationVelocity * Time.deltaTime * TranslationMult, Space.World);
     }
 
     public void RotateAndScale(Vector3 origin, float amountRot, float amountScale)
@@ -191,19 +201,23 @@ public class InverseMultiTouchInput : AdditionalIslandVizComponent {
 
         #region Update due to scale change
         GlobalVar.CurrentZoomLevel = IslandVizVisualization.Instance.VisualizationRoot.localScale.x;
-        //mainLight.range = originalLightRange * GlobalVar.CurrentZoomLevel;
-        effectiveDrag = drag * 1.0f / GlobalVar.CurrentZoomLevel;
-        effectiveTranslationSpeedCutoff = translationSpeedCutoff * GlobalVar.CurrentZoomLevel;
-        effectivePivotTransferCutoff = pivotTransferCutoff * GlobalVar.CurrentZoomLevel;
         #endregion
-
     }
 
+    #endregion
 
-    // Tracking issues and the drag can cause the controller velocity to spike and cause problems, so we clamp the values.
+
+    // ################
+    // Helper Functions
+    // ################
+
+    #region Helper Functions
+
+    // Tracking issues and the velocity can cause the controller velocity to spike and cause problems, so we clamp the values.
     private Vector3 ClampTranslationVelocityVector(Vector3 vector)
     {
         return new Vector3(Mathf.Clamp(vector.x, -3f, 3f), 0f, Mathf.Clamp(vector.z, -3f, 3f));
     }
 
+    #endregion
 }

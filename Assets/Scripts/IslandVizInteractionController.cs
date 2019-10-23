@@ -3,9 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using Valve.VR.InteractionSystem;
 
+/// <summary>
+/// This class is attached to a SteamVR controller and is calling OnTriggerEnter and OnTriggerExit delegates from 
+/// the IslandVizInteraction class.
+/// </summary>
 public class IslandVizInteractionController : MonoBehaviour {
 
-    private Hand hand; 
+    private Hand hand; // The hand this script is attached.
 
     private void Awake()
     {

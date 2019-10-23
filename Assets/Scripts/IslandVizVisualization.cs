@@ -120,7 +120,7 @@ public class IslandVizVisualization : MonoBehaviour
         {
             yield return bdConstructor.ConstructFDLayout(IslandVizData.Instance.OsgiProject, 0.25f, 70000, RNG);
         }
-        else
+        else if (Graph_Layout == Graph_Layout.Random)
         {
             Vector3 minBounds = new Vector3(-10.5f, 1.31f, -10.5f);
             Vector3 maxBounds = new Vector3(10.5f, 1.31f, 10.5f);

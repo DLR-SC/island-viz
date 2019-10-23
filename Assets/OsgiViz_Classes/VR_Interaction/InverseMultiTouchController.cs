@@ -1,4 +1,8 @@
-﻿using System.Collections;
+﻿// #########################
+// This class is deprecated!
+// #########################
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Valve.VR.InteractionSystem;
