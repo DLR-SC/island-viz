@@ -8,6 +8,9 @@ using OsgiViz.SoftwareArtifact;
 using OsgiViz.Unity.Island;
 using OsgiViz;
 
+/// <summary>
+/// This component is work in progress ...
+/// </summary>
 public class ServiceVisualization : AdditionalIslandVizComponent
 {
 
@@ -16,9 +19,10 @@ public class ServiceVisualization : AdditionalIslandVizComponent
     public GameObject InterfacePrefab; // (GameObject)Resources.Load("Prefabs/ServiceInterfaceNode")
     public GameObject ReferencePrefab; // (GameObject)Resources.Load("Prefabs/ServiceReferenceNode")
     public GameObject ImplementationPrefab; // (GameObject)Resources.Load("Prefabs/ServiceImplementationNode")
+    public GameObject ServiceConnection; // (GameObject)Resources.Load("Prefabs/ServiceConnection");
 
-    
     private GameObject ServiceSliceContainer;
+    private GameObject DownwardConnectionContainer;
 
     private ServiceVolume serviceVolume;
 
@@ -31,6 +35,9 @@ public class ServiceVisualization : AdditionalIslandVizComponent
         ServiceSliceContainer = new GameObject("ServiceSliceContainer");
         ServiceSliceContainer.transform.SetParent(IslandVizVisualization.Instance.VisualizationRoot, false);
 
+        DownwardConnectionContainer = new GameObject("DownwardConnectionContainer");
+        DownwardConnectionContainer.transform.SetParent(IslandVizVisualization.Instance.VisualizationRoot, false);
+
         serviceVolume = new ServiceVolume();
 
         StartCoroutine(ConstructAll());
@@ -42,10 +49,10 @@ public class ServiceVisualization : AdditionalIslandVizComponent
     {
         Debug.Log("Started with Service-GameObject construction!");
 
-        Dictionary<ServiceSlice, List<Service>> serviceSliceMap = distributeServicesToSlices(IslandVizData.Instance.OsgiProject.getServices());
+        Dictionary<ServiceSlice, List<Service>> serviceSliceMap = DistributeServicesToSlices(IslandVizData.Instance.OsgiProject.getServices());
         foreach (KeyValuePair<ServiceSlice, List<Service>> kvp in serviceSliceMap)
         {
-            yield return constructServicesAndComponents(kvp.Value, kvp.Key);
+            yield return ConstructServicesAndComponents(kvp.Value, kvp.Key);
         }
 
         foreach (IslandGO islandGO in IslandVizVisualization.Instance.IslandGameObjects)
@@ -62,10 +69,10 @@ public class ServiceVisualization : AdditionalIslandVizComponent
                     if (building.GetComponent<ServiceLayerGO>() != null)
                     {
                         ServiceLayerGO serviceLayer = building.GetComponent<ServiceLayerGO>();
-                        serviceLayer.createDownwardConnections();
+                        serviceLayer.CreateDownwardConnections(DownwardConnectionContainer, ServiceConnection);
                         foreach (ServiceNodeScript sns in serviceLayer.getServiceNodes())
                         {
-                            sns.constructServiceConnections();
+                            sns.constructServiceConnections(ServiceConnection);
                         }
                     }
                 }
@@ -76,7 +83,7 @@ public class ServiceVisualization : AdditionalIslandVizComponent
     }
 
 
-    private Dictionary<ServiceSlice, List<Service>> distributeServicesToSlices(List<Service> services)
+    private Dictionary<ServiceSlice, List<Service>> DistributeServicesToSlices(List<Service> services)
     {
         Dictionary<ServiceSlice, List<Service>> result = new Dictionary<ServiceSlice, List<Service>>();
 
@@ -106,7 +113,7 @@ public class ServiceVisualization : AdditionalIslandVizComponent
         return result;
     }
 
-    private IEnumerator constructServicesAndComponents(List<Service> services, ServiceSlice serviceSlice)
+    private IEnumerator ConstructServicesAndComponents(List<Service> services, ServiceSlice serviceSlice)
     {
         foreach (Service service in services)
         {
@@ -119,21 +126,16 @@ public class ServiceVisualization : AdditionalIslandVizComponent
             serviceGO.name = service.getName();
             Vector3 cuPosition = serviceCU.getGameObject().transform.position;
             Vector3 cuScale = serviceCU.getGameObject().transform.localScale;
-            cuPosition.y = 0f;
-
-            Debug.Log(cuPosition);
-            Debug.Log(serviceCU.getGameObject().name);
-            Debug.Log(serviceGO.name);
-
             serviceGO.transform.SetParent(serviceSlice.transform);
             serviceGO.transform.localScale = Vector3.one * GlobalVar.serviceNodeSize;
-            serviceGO.transform.position = cuPosition + new Vector3(0f, serviceSlice.height, 0f);
+            serviceGO.transform.position = new Vector3(cuPosition.x, GlobalVar.hologramTableHeight + serviceSlice.height, cuPosition.z);
 
             ServiceNodeScript sns = serviceGO.AddComponent<ServiceNodeScript>();
             yield return null; // This is very important since otherwise the Start() method of the ServiceNodeScript is called to late!
             serviceGO.AddComponent<TextLabelComponent>();
             ServiceLayerGO slGO = serviceCU.getGameObject().GetComponent<ServiceLayerGO>();
             slGO.addServiceNode(sns);
+            
             #region construct ServiceComponents
             List<ServiceComponent> implementingComponents = service.getImplementingComponents();
             List<ServiceComponent> referencingComponents = service.getReferencingComponents();
@@ -143,11 +145,12 @@ public class ServiceVisualization : AdditionalIslandVizComponent
                 GameObject scGO = Instantiate(ImplementationPrefab, transform.position, Quaternion.identity);
                 scGO.layer = LayerMask.NameToLayer("InteractionSystemLayer");
                 scGO.name = sc.getName();
+
                 cuPosition = componentCU.getGameObject().transform.position;
-                cuPosition.y = 0f;
-                scGO.transform.position = cuPosition + new Vector3(0f, serviceSlice.height, 0f);
-                scGO.transform.localScale = new Vector3(GlobalVar.serviceNodeSize, GlobalVar.serviceNodeSize, GlobalVar.serviceNodeSize);
-                scGO.transform.SetParent(serviceSlice.transform, false);
+                scGO.transform.SetParent(serviceSlice.transform);
+                scGO.transform.localScale = Vector3.one * GlobalVar.serviceNodeSize;
+                scGO.transform.position = new Vector3(cuPosition.x, GlobalVar.hologramTableHeight + serviceSlice.height * 2, cuPosition.z);
+
                 ServiceNodeScript scGOcomponent = scGO.AddComponent<ServiceNodeScript>();
                 yield return null; // This is very important since otherwise the Start() method of the ServiceNodeScript is called to late!
                 scGO.AddComponent<TextLabelComponent>();
@@ -163,11 +166,12 @@ public class ServiceVisualization : AdditionalIslandVizComponent
                 GameObject scGO = Instantiate(ReferencePrefab, transform.position, Quaternion.identity);
                 scGO.layer = LayerMask.NameToLayer("InteractionSystemLayer");
                 scGO.name = sc.getName();
+
                 cuPosition = componentCU.getGameObject().transform.position;
-                cuPosition.y = 0f;
-                scGO.transform.position = cuPosition + new Vector3(0f, serviceSlice.height, 0f);
-                scGO.transform.localScale = new Vector3(GlobalVar.serviceNodeSize, GlobalVar.serviceNodeSize, GlobalVar.serviceNodeSize);
-                scGO.transform.SetParent(serviceSlice.transform, false);
+                scGO.transform.SetParent(serviceSlice.transform);
+                scGO.transform.localScale = Vector3.one * GlobalVar.serviceNodeSize;
+                scGO.transform.position = new Vector3(cuPosition.x, GlobalVar.hologramTableHeight + serviceSlice.height, cuPosition.z);
+
                 ServiceNodeScript scGOcomponent = scGO.AddComponent<ServiceNodeScript>();
                 yield return null; // This is very important since otherwise the Start() method of the ServiceNodeScript is called to late!
                 scGO.AddComponent<TextLabelComponent>();

@@ -5,6 +5,7 @@ using OsgiViz.SideThreadConstructors;
 using OsgiViz.Core;
 using OsgiViz.Island;
 using OsgiViz.Unity.MainThreadConstructors;
+using System.Linq;
 
 /// <summary>
 /// This class handles all abstract data the IslandViz visualizes.
@@ -71,7 +72,18 @@ public class IslandVizData : MonoBehaviour
         // Store the osgi data
         OsgiProject = osgiConstructor.getProject();
         GlobalVar.islandNumber = OsgiProject.getBundles().Count;
-        
+
+        // Debug
+        List<OsgiViz.Relations.GraphVertex> allVertices = OsgiProject.getDependencyGraph().Vertices.ToList();
+        foreach (var item in allVertices)
+        {
+            Debug.Log(item.getName());
+        }
+        Debug.Log(allVertices.Count);
+        Debug.Log(OsgiProject.getBundles().Count);
+        Debug.Log(OsgiProject.getServices().Count);
+
+
         stopwatch.Stop();
         Debug.Log("IslandVizData Construction finished after " + stopwatch.Elapsed.TotalSeconds.ToString("0.00") + " seconds!");
     }

@@ -102,11 +102,11 @@ namespace OsgiViz.Unity.MainThreadConstructors
                                 ServiceLayerGO serviceLayer = b.GetComponent<ServiceLayerGO>();
                                 if (serviceLayer != null)
                                 {
-                                    serviceLayer.createDownwardConnections();
+                                    serviceLayer.CreateDownwardConnections(new GameObject(), new GameObject());
 
                                     List<ServiceNodeScript> snsList = serviceLayer.getServiceNodes();
                                     foreach (ServiceNodeScript sns in snsList)
-                                        sns.constructServiceConnections();
+                                        sns.constructServiceConnections(new GameObject());
                                 }
                             }
                     }

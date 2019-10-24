@@ -16,15 +16,15 @@ namespace OsgiViz
         public List<GameObject> downwardConnections;
         private bool expanded = false;
 
-        private GameObject DownwardConnectionContainer;
-        private GameObject connectionPrefab;
+        //private GameObject DownwardConnectionContainer;
+        //private GameObject connectionPrefab;
 
         void Awake()
         {
             serviceNodes = new List<ServiceNodeScript>();
             downwardConnections = new List<GameObject>();
-            connectionPrefab = (GameObject)Resources.Load("Prefabs/ServiceConnection");
-            DownwardConnectionContainer = IslandVizVisualization.Instance.TransformContainer.DownwardConnectionContainer.gameObject;
+            //connectionPrefab = (GameObject)Resources.Load("Prefabs/ServiceConnection");
+                        
 
             #region clickable
             InteractableViaClickTouch ict = gameObject.GetComponent<InteractableViaClickTouch>();
@@ -42,7 +42,7 @@ namespace OsgiViz
         }
 
         //Should be called after all serviceNodes are added
-        public void createDownwardConnections()
+        public void CreateDownwardConnections(GameObject DownwardConnectionContainer, GameObject connectionPrefab)
         {
             if (serviceNodes.Count > 0)
             {
@@ -52,22 +52,26 @@ namespace OsgiViz
                 {
                     float length;
                     if (i == 0)
+                    {
                         length = serviceNodes[i].transform.parent.gameObject.GetComponent<ServiceSlice>().height - GlobalVar.hologramTableHeight;
+                    }
                     else
                     {
                         float sliceHeightPrevious = serviceNodes[i - 1].transform.parent.gameObject.GetComponent<ServiceSlice>().height - GlobalVar.hologramTableHeight;
                         float sliceHeightCurrent = serviceNodes[i].transform.parent.gameObject.GetComponent<ServiceSlice>().height - GlobalVar.hologramTableHeight;
-                        length = sliceHeightCurrent - sliceHeightPrevious ;
+                        length = sliceHeightCurrent - sliceHeightPrevious;
                     }
 
-                    GameObject connectionGO = Instantiate(connectionPrefab, serviceNodes[i].transform.position, Quaternion.identity);
+
+                    GameObject connectionGO = Instantiate(connectionPrefab, Vector3.zero, Quaternion.identity);
                     connectionGO.name = "Downward Connection";
-                    #region adjust transform
-                    Vector3 newScale = new Vector3(GlobalVar.serviceNodeSize * 0.25f, length, GlobalVar.serviceNodeSize * 0.25f);
+                    length = Mathf.Abs(length) / GlobalVar.CurrentZoomLevel;
+                    connectionGO.transform.SetParent(DownwardConnectionContainer.transform, false);
+                    Vector3 newScale = new Vector3(GlobalVar.serviceNodeSize * 0.03f, length, GlobalVar.serviceNodeSize * 0.03f);
+                    Vector3 newPosition = serviceNodes[i].transform.position;
+                    newPosition.y = GlobalVar.hologramTableHeight + (length * 0.5f * GlobalVar.CurrentZoomLevel);
                     connectionGO.transform.localScale = newScale;
-                    connectionGO.transform.position += new Vector3(0, -length / 2f, 0);
-                    connectionGO.transform.SetParent(DownwardConnectionContainer.transform);
-                    #endregion
+                    connectionGO.transform.position = newPosition;
                     connectionGO.SetActive(false);
                     downwardConnections.Add(connectionGO);
                 }

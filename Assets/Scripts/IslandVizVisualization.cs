@@ -88,9 +88,6 @@ public class IslandVizVisualization : MonoBehaviour
         TransformContainer.DependencyContainer = new GameObject("DependencyContainer").transform;
         TransformContainer.DependencyContainer.SetParent(VisualizationRoot);
         
-        TransformContainer.DownwardConnectionContainer = new GameObject("DownwardConnectionContainer").transform;
-        TransformContainer.DownwardConnectionContainer.SetParent(VisualizationRoot);
-
         // Create water visual
         GameObject water = (GameObject)Instantiate(Water_Plane_Prefab, TransformContainer.IslandContainer);
         water.name = Water_Plane_Prefab.name; // Just making shure since there are still a alot GameObject.Find... TODO: remove in future
@@ -231,5 +228,4 @@ public class VisualizationTransformContainer
 {
     public Transform IslandContainer;
     public Transform DependencyContainer;
-    public Transform DownwardConnectionContainer;
 }

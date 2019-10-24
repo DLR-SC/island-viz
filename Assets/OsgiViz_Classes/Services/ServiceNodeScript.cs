@@ -20,14 +20,13 @@ namespace OsgiViz
         private List<ServiceNodeScript> connectedServiceComponents;
 
 
-        private GameObject connectionPrefab;
         private ConnectionPool connectionPool;
 
 
         void Start()
         {
             connections = new List<GameObject>();
-            connectionPrefab = (GameObject)Resources.Load("Prefabs/ServiceConnection");
+            //connectionPrefab = (GameObject)Resources.Load("Prefabs/ServiceConnection");
             connectedServiceComponents = new List<ServiceNodeScript>();
 
             #region clickable
@@ -143,7 +142,7 @@ namespace OsgiViz
         }
 
         //Should be called after connections list is finished
-        public void constructServiceConnections()
+        public void constructServiceConnections(GameObject connectionPrefab)
         {
             foreach (ServiceNodeScript node in connectedServiceComponents)
             {
@@ -159,7 +158,7 @@ namespace OsgiViz
                     Vector3 dirVec = node.transform.position - transform.position;
                     dirVec.y = 0;
                     float distance = dirVec.magnitude;
-                    Vector3 newScale = new Vector3(distance, GlobalVar.serviceNodeSize * 0.25f, GlobalVar.serviceNodeSize * 0.25f);
+                    Vector3 newScale = new Vector3(distance, GlobalVar.serviceNodeSize * 0.0001f, GlobalVar.serviceNodeSize * 0.0001f);
                     connectionGO.transform.localScale = newScale;
                     connectionGO.transform.position += new Vector3(distance / 2f, 0, 0);
 

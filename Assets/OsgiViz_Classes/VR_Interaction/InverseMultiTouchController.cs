@@ -50,9 +50,9 @@ namespace OsgiViz
             hologramScaleShaderID = Shader.PropertyToID("hologramScale");
             
             transformCandidate = IslandVizVisualization.Instance.VisualizationRoot.gameObject;
-                        
+
             mainSliceContainer = GameObject.Find("ServiceSliceContainer");
-            downwardConnectionContainer = IslandVizVisualization.Instance.TransformContainer.DownwardConnectionContainer.gameObject;
+            downwardConnectionContainer = GameObject.Find("DownwardConnectionContainer");
             foreach (Transform child in mainSliceContainer.transform)
             {
                 serviceSlices.Add(child.GetComponent<ServiceSlice>());
