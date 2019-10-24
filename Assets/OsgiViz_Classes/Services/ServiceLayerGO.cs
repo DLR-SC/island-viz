@@ -33,7 +33,6 @@ namespace OsgiViz
 
             ict.handleActivationDeactivation.Add(handleActivationDeactivation);
             #endregion
-
         }
 
         void Start()
@@ -67,7 +66,7 @@ namespace OsgiViz
                     Vector3 newScale = new Vector3(GlobalVar.serviceNodeSize * 0.25f, length, GlobalVar.serviceNodeSize * 0.25f);
                     connectionGO.transform.localScale = newScale;
                     connectionGO.transform.position += new Vector3(0, -length / 2f, 0);
-                    connectionGO.transform.parent = DownwardConnectionContainer.transform;
+                    connectionGO.transform.SetParent(DownwardConnectionContainer.transform);
                     #endregion
                     connectionGO.SetActive(false);
                     downwardConnections.Add(connectionGO);

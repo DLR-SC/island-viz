@@ -1,4 +1,8 @@
-﻿using System.Collections;
+﻿// #########################
+// This class is deprecated! -> ServiceVisualization.cs
+// #########################
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Valve.VR.InteractionSystem;
@@ -32,7 +36,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
             referencePrefab = (GameObject)Resources.Load("Prefabs/ServiceReferenceNode");
             implementationPrefab = (GameObject)Resources.Load("Prefabs/ServiceImplementationNode");
 
-            ServiceSliceContainer = IslandVizVisualization.Instance.TransformContainer.ServiceSliceContainer.gameObject;
+            ServiceSliceContainer = GameObject.Find("ServiceSliceContainer");
             VisualizationContainer = IslandVizVisualization.Instance.TransformContainer.IslandContainer.gameObject;
         }
 

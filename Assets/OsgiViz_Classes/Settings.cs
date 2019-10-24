@@ -71,9 +71,9 @@ namespace OsgiViz.Core
         public const float MaxZoomLevel = 0.2f; // The biggest possible scale of the island parent.
 
         //Service-Nodes
-        public const float serviceNodeSize = 0.025f * voronoiCellScalefactor;
+        public const float serviceNodeSize = 0.5f * voronoiCellScalefactor;
         public const int groupsPerSlice = 4;
-        public const float startingHeight = 1.20f;
+        public const float startingHeight = 0.1f;
         public const float heightStep = 0.02f;
 
 

@@ -51,7 +51,7 @@ namespace OsgiViz
             
             transformCandidate = IslandVizVisualization.Instance.VisualizationRoot.gameObject;
                         
-            mainSliceContainer = IslandVizVisualization.Instance.TransformContainer.ServiceSliceContainer.gameObject;
+            mainSliceContainer = GameObject.Find("ServiceSliceContainer");
             downwardConnectionContainer = IslandVizVisualization.Instance.TransformContainer.DownwardConnectionContainer.gameObject;
             foreach (Transform child in mainSliceContainer.transform)
             {

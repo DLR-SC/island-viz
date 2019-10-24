@@ -87,8 +87,7 @@ public class IslandVizVisualization : MonoBehaviour
         TransformContainer.IslandContainer.SetParent(VisualizationRoot);
         TransformContainer.DependencyContainer = new GameObject("DependencyContainer").transform;
         TransformContainer.DependencyContainer.SetParent(VisualizationRoot);
-        TransformContainer.ServiceSliceContainer = new GameObject("ServiceSliceContainer").transform;
-        TransformContainer.ServiceSliceContainer.SetParent(VisualizationRoot);
+        
         TransformContainer.DownwardConnectionContainer = new GameObject("DownwardConnectionContainer").transform;
         TransformContainer.DownwardConnectionContainer.SetParent(VisualizationRoot);
 
@@ -232,6 +231,5 @@ public class VisualizationTransformContainer
 {
     public Transform IslandContainer;
     public Transform DependencyContainer;
-    public Transform ServiceSliceContainer;
     public Transform DownwardConnectionContainer;
 }
