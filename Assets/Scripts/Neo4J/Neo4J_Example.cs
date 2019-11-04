@@ -1,10 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Neo4j.Driver.V1;
+using Neo4j.Driver;
 using System.Linq;
-
-
+using Neo4j.Driver.V1;
 
 namespace Neo4JDriver
 {

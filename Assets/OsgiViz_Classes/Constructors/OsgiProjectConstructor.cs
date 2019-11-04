@@ -8,8 +8,8 @@ using System.Linq;
 using OsgiViz.Core;
 using OsgiViz.SoftwareArtifact;
 using OsgiViz.Relations;
+using Neo4j.Driver;
 using Neo4j.Driver.V1;
-
 
 namespace OsgiViz.SideThreadConstructors
 {
@@ -48,23 +48,23 @@ namespace OsgiViz.SideThreadConstructors
             Debug.Log("Starting OSGi-Project construction!");
 
             #region OsgiProject            
-            JSONObject tmp = jsonObj.GetField("name");
+            JSONObject tmp = jsonObj.GetField("name"); 
             Assert.IsNotNull(tmp, "Projectname could not be found!");
             currentProject = new OsgiProject(tmp.str);
             #endregion
             #region Bundle,Fragments,Compilation Units
-            tmp = jsonObj.GetField("bundles");
+            tmp = jsonObj.GetField("bundles"); // MATCH (b:Bundle) RETURN b.name
             Assert.IsNotNull(tmp, "Project does not contain any Bundles!");
             List<JSONObject> jsonBundleList = tmp.list;
-            List<JSONObject> jsonPackageList = jsonObj.GetField("packages").list;
+            List<JSONObject> jsonPackageList = jsonObj.GetField("packages").list; // MATCH (p:Package) RETURN p.name
             long maxLOC = 0;
             foreach (JSONObject jsonBundle in jsonBundleList)
             {
-                string name = jsonBundle.GetField("name").str;
-                string symbName = jsonBundle.GetField("symbolicName").str;
+                string name = jsonBundle.GetField("name").str; 
+                string symbName = jsonBundle.GetField("symbolicName").str; // MATCH (b:Bundle {name: 'name'}) RETURN b.symbolicName
                 Bundle currentBundle = new Bundle(name, symbName, currentProject);
                 //Create Fragments
-                tmp = jsonBundle.GetField("packageFragments");
+                tmp = jsonBundle.GetField("packageFragments"); // MATCH (b:Bundle {name: 'name'}) RETURN b.symbolicName
                 if (tmp != null)
                 {
                     List<JSONObject> fragList = tmp.list;
@@ -602,7 +602,6 @@ namespace OsgiViz.SideThreadConstructors
             status = newStatus;
         }
     }
-
 
 }
 

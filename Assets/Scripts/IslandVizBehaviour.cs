@@ -30,26 +30,26 @@ public class IslandVizBehaviour : MonoBehaviour
     /// </summary>
     void Start ()
     {
-        // Reset shader settings.
+        // Reset shader settings. TODO
         UnityEngine.XR.XRSettings.eyeTextureResolutionScale = 1f;
         Shader.SetGlobalFloat("hologramOutlineWidth", GlobalVar.hologramOutlineWidth);
         Shader.SetGlobalVector("hologramOutlineColor", GlobalVar.hologramOutlineColor);        
         Shader.SetGlobalVector("hologramCenter", new Vector3(0, 0, 0));
         Shader.SetGlobalFloat("hologramScale", 0.8f);
         
-        // Start the islandviz coroutine.
-        StartCoroutine(IslandVizRoutine());
+        // Start the islandviz construction coroutine.
+        StartCoroutine(IslandVizConstructionRoutine());
 	}
 
     /// <summary>
-    /// The main routine of the islandviz application.
+    /// The main construction routine of the islandviz application.
     /// </summary>
-    IEnumerator IslandVizRoutine ()
+    IEnumerator IslandVizConstructionRoutine ()
     {
         // Load the data we want to visualize.
         yield return IslandVizData.Instance.ConstructOsgiProject();
 
-        // Construct the basic visualization.
+        // Construct the basic visualization, i.e. islands, ports, and dependencies.
         yield return IslandVizVisualization.Instance.ConstructVisualization();
 
         // Load additional components
