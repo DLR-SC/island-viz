@@ -75,7 +75,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
         {
             HierarchicalComponent goHC = go.AddComponent<HierarchicalComponent>();
             goHC.subdivisionDistanceSquared = sdq;
-            TextLabelComponent goTLC = go.AddComponent<TextLabelComponent>();
+            //TextLabelComponent goTLC = go.AddComponent<TextLabelComponent>();
         }
 
         IEnumerator constructAll(List<IslandGO> islandGOs)

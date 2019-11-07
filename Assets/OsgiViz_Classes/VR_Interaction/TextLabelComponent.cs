@@ -27,17 +27,17 @@ namespace OsgiViz
         // Use this for initialization
         void Awake()
         {
-            hologramCenter = GameObject.Find("HologramCenter");
-            textLabelPrefab = (GameObject)Resources.Load("Prefabs/TextLabel");
-            GameObject observerGO = GameObject.FindGameObjectWithTag("Observer");
-            if (observerGO == null)
-                throw new System.Exception("No GameObject has the tag 'Observer'. TextLabels from the TextLabelComponent need to face an observer.");
-            observer = observerGO.transform;
+            //hologramCenter = GameObject.Find("HologramCenter");
+            //textLabelPrefab = (GameObject)Resources.Load("Prefabs/TextLabel");
+            //GameObject observerGO = GameObject.FindGameObjectWithTag("Observer");
+            //if (observerGO == null)
+            //    throw new System.Exception("No GameObject has the tag 'Observer'. TextLabels from the TextLabelComponent need to face an observer.");
+            //observer = observerGO.transform;
 
-            scaleToKeep = Vector3.one;
-            initTextLabel();
-            initTextLabelLine();
-            hideTextLabel();
+            //scaleToKeep = Vector3.one;
+            //initTextLabel();
+            //initTextLabelLine();
+            //hideTextLabel();
         }
 
         private void adjustTextLabelSize(Transform label, TMPro.TMP_Text txtObj, float width, float height, float depth)
@@ -205,10 +205,10 @@ namespace OsgiViz
         }
         */
         
-        void OnDisable()
-        {
-            hideTextLabel();
-        }
+        //void OnDisable()
+        //{
+        //    hideTextLabel();
+        //}
         
          
         public void hideTextLabel()

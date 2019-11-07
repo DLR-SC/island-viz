@@ -132,7 +132,7 @@ public class ServiceVisualization : AdditionalIslandVizComponent
 
             ServiceNodeScript sns = serviceGO.AddComponent<ServiceNodeScript>();
             yield return null; // This is very important since otherwise the Start() method of the ServiceNodeScript is called to late!
-            serviceGO.AddComponent<TextLabelComponent>();
+            //serviceGO.AddComponent<TextLabelComponent>();
             ServiceLayerGO slGO = serviceCU.getGameObject().GetComponent<ServiceLayerGO>();
             slGO.addServiceNode(sns);
             
@@ -153,7 +153,7 @@ public class ServiceVisualization : AdditionalIslandVizComponent
 
                 ServiceNodeScript scGOcomponent = scGO.AddComponent<ServiceNodeScript>();
                 yield return null; // This is very important since otherwise the Start() method of the ServiceNodeScript is called to late!
-                scGO.AddComponent<TextLabelComponent>();
+                //scGO.AddComponent<TextLabelComponent>();
                 scGOcomponent.addConnectedServiceNode(sns);
                 sns.addConnectedServiceNode(scGOcomponent);
                 scGOcomponent.disableServiceNode();
@@ -174,7 +174,7 @@ public class ServiceVisualization : AdditionalIslandVizComponent
 
                 ServiceNodeScript scGOcomponent = scGO.AddComponent<ServiceNodeScript>();
                 yield return null; // This is very important since otherwise the Start() method of the ServiceNodeScript is called to late!
-                scGO.AddComponent<TextLabelComponent>();
+                //scGO.AddComponent<TextLabelComponent>();
                 scGOcomponent.addConnectedServiceNode(sns);
                 sns.addConnectedServiceNode(scGOcomponent);
                 scGOcomponent.disableServiceNode();

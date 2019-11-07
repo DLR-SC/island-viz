@@ -135,7 +135,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
                     serviceGO.transform.localScale = new Vector3(GlobalVar.serviceNodeSize, GlobalVar.serviceNodeSize, GlobalVar.serviceNodeSize);
                     serviceGO.transform.SetParent(serviceSlice.transform);
                     ServiceNodeScript sns = serviceGO.AddComponent<ServiceNodeScript>();
-                    serviceGO.AddComponent<TextLabelComponent>();
+                    //serviceGO.AddComponent<TextLabelComponent>();
                     ServiceLayerGO slGO = serviceCU.getGameObject().GetComponent<ServiceLayerGO>();
                     slGO.addServiceNode(sns);
                     #region construct ServiceComponents
@@ -153,7 +153,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
                         scGO.transform.localScale = new Vector3(GlobalVar.serviceNodeSize, GlobalVar.serviceNodeSize, GlobalVar.serviceNodeSize);
                         scGO.transform.SetParent(serviceSlice.transform);
                         ServiceNodeScript scGOcomponent = scGO.AddComponent<ServiceNodeScript>();
-                        scGO.AddComponent<TextLabelComponent>();
+                        //scGO.AddComponent<TextLabelComponent>();
                         scGOcomponent.addConnectedServiceNode(sns);
                         sns.addConnectedServiceNode(scGOcomponent);
                         scGOcomponent.disableServiceNode();
@@ -172,7 +172,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
                         scGO.transform.localScale = new Vector3(GlobalVar.serviceNodeSize, GlobalVar.serviceNodeSize, GlobalVar.serviceNodeSize);
                         scGO.transform.SetParent(serviceSlice.transform);
                         ServiceNodeScript scGOcomponent = scGO.AddComponent<ServiceNodeScript>();
-                        scGO.AddComponent<TextLabelComponent>();
+                        //scGO.AddComponent<TextLabelComponent>();
                         scGOcomponent.addConnectedServiceNode(sns);
                         sns.addConnectedServiceNode(scGOcomponent);
 
