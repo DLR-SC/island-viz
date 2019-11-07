@@ -5,9 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Neo4j.Driver.V1;
 
-/// <summary>
-/// THIS ONLY WORKS IN UNITY 2019!
-/// </summary>
+
 namespace Neo4JDriver
 {
     // The following example is based on the HelloWorldExample on https://neo4j.com/developer/dotnet/.
@@ -16,7 +14,7 @@ namespace Neo4JDriver
     {
         // Connection with a Neo4J database, providing a access point via the ISession method. 
         private readonly IDriver driver;
-        private bool debug = true;
+        private bool debug = false;
         private ConnectionStatus status;
        
 

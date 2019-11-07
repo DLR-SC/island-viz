@@ -30,7 +30,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
         private OsgiProjectConstructor osgiConstructor;
         private IslandStructureConstructor isConstructor;
         private Graph_Layout_Constructor bdConstructor;
-        private Neo4jObjConstructor neo4jConstructor;
+        private Neo4jOsgiConstructor neo4jConstructor;
 
         private bool waiting = true;
 
@@ -53,7 +53,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
             serviceGOConstructor = gameObject.AddComponent<ServiceGOConstructor>();
             dockGOConstructor = gameObject.AddComponent<DockGOConstructor>();
             hierarchyConstructor = gameObject.AddComponent<HierarchyConstructor>();
-            neo4jConstructor = gameObject.AddComponent<Neo4jObjConstructor>();
+            neo4jConstructor = gameObject.AddComponent<Neo4jOsgiConstructor>();
 
             jConstructor = new JsonObjConstructor();
             osgiConstructor = new OsgiProjectConstructor();

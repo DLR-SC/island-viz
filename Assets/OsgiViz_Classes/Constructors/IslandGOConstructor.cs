@@ -158,7 +158,12 @@ namespace OsgiViz.Unity.MainThreadConstructors
                 GameObject building;
                 #region Create CUs
                 foreach (CompilationUnit cu in packageList[counter].getCompilationUnits())
-                {                    
+                {
+                    if (counter >= islandCells.Count || cc >= islandCells[counter].Count)
+                    {
+                        continue;
+                    }
+
                     heightLevel = Helperfunctions.mapLOCtoLevel(cu.getLoc());
                                         
                     if (cu.implementsServiceComponent())
@@ -180,7 +185,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
                     building.transform.localEulerAngles = new Vector3(0f, UnityEngine.Random.Range(-180, 180), 0f); // Random Rotation
                     Building buildingComponent = building.AddComponent<Building>();
                     buildingComponent.setCU(cu);
-                    cu.setGameObject(building);
+                    cu.setGameObject(building);                    
                     building.transform.position = new Vector3((float)islandCells[counter][cc].generator.X, (float)islandCells[counter][cc].generator.Z, (float)islandCells[counter][cc].generator.Y);
                     building.transform.localScale = new Vector3(GlobalVar.cuScale, GlobalVar.cuScale, GlobalVar.cuScale);
                     regionComponent.addBuilding(buildingComponent);

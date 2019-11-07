@@ -41,12 +41,12 @@ public class IslandVizVisualization : MonoBehaviour
 
     // Mandatory coomonents for visualization.
     private IslandGOConstructor islandGOConstructor;
-    private ServiceGOConstructor serviceGOConstructor;
+    //private ServiceGOConstructor serviceGOConstructor;
     private DockGOConstructor dockGOConstructor;
     private HierarchyConstructor hierarchyConstructor;
     private IslandStructureConstructor isConstructor;
     private Graph_Layout_Constructor bdConstructor;
-    private Neo4jObjConstructor neo4jConstructor;
+    private Neo4jOsgiConstructor neo4jConstructor;
 
     private AdditionalIslandVizComponent[] visualizationComponents; // Array of all additional input componets.
 
@@ -73,7 +73,7 @@ public class IslandVizVisualization : MonoBehaviour
         // Since we saved all additional visualization components in "visualizationComponents", we can add the remaining
         // mandatory visualization components.
         islandGOConstructor = VisualizationComponentsGameObject.AddComponent<IslandGOConstructor>();
-        serviceGOConstructor = VisualizationComponentsGameObject.AddComponent<ServiceGOConstructor>();
+        //serviceGOConstructor = VisualizationComponentsGameObject.AddComponent<ServiceGOConstructor>();
         dockGOConstructor = VisualizationComponentsGameObject.AddComponent<DockGOConstructor>();
         hierarchyConstructor = VisualizationComponentsGameObject.AddComponent<HierarchyConstructor>();
 
@@ -142,7 +142,7 @@ public class IslandVizVisualization : MonoBehaviour
         yield return AutoZoom();
 
         // Set table height
-        GlobalVar.hologramTableHeight = IslandVizInteraction.Instance.GetPlayerEyeHeight() - 0.75f;
+        //GlobalVar.hologramTableHeight = IslandVizInteraction.Instance.GetPlayerEyeHeight() - 0.75f;
         UpdateTableHight(GlobalVar.hologramTableHeight);
 
         stopwatch.Stop();

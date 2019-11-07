@@ -20,7 +20,7 @@ public class IslandVizData : MonoBehaviour
     [HideInInspector]
     public OsgiProject OsgiProject;
 
-    private Neo4jObjConstructor neo4jConstructor;
+    private Neo4jOsgiConstructor neo4jConstructor;
     private JsonObjConstructor jConstructor;
     private OsgiProjectConstructor osgiConstructor;
 
@@ -45,7 +45,7 @@ public class IslandVizData : MonoBehaviour
 
         GameObject neo4jObject = new GameObject("Neo4j");
         neo4jObject.transform.parent = IslandVizBehaviour.Instance.transform;
-        neo4jConstructor = neo4jObject.AddComponent<Neo4jObjConstructor>();
+        neo4jConstructor = neo4jObject.AddComponent<Neo4jOsgiConstructor>();
         jConstructor = new JsonObjConstructor();
         osgiConstructor = new OsgiProjectConstructor();
         stopwatch = new System.Diagnostics.Stopwatch();
@@ -59,8 +59,9 @@ public class IslandVizData : MonoBehaviour
         // Start the timer to measure construction time.
         stopwatch.Start();
 
-        // TODO
-        // yield return neo4jConstructor.Construct();
+        // Only for testing TODO
+        //yield return neo4jConstructor.Test();
+        //yield return neo4jConstructor.Construct();
 
         if (DataLoading == DataLoadingType.Json)
         {
@@ -71,32 +72,16 @@ public class IslandVizData : MonoBehaviour
                 yield return null;
 
             yield return osgiConstructor.Construct(jConstructor.getJsonModel()); // Construct a osgi Object from the Json Object.
+            OsgiProject = osgiConstructor.getProject();
         }
         else if (DataLoading == DataLoadingType.Neo4J)
         {
-            // Read & construct a Json Object.
-            yield return neo4jConstructor.Construct();
-            // Construct a osgi Object from the Json Object.
-            yield return osgiConstructor.Neo4jConstruct(neo4jConstructor.GetNeo4JModel()); // Construct a osgi Object from the neo4J Object.
+            yield return neo4jConstructor.Construct(); // Construct a osgi Object from the neo4J Object.
+            OsgiProject = neo4jConstructor.GetOsgiProject();
         }
 
-
-            
-
-        // Store the osgi data
-        OsgiProject = osgiConstructor.getProject();
         GlobalVar.islandNumber = OsgiProject.getBundles().Count;
-
-        // Debug
-        //List<OsgiViz.Relations.GraphVertex> allVertices = OsgiProject.getDependencyGraph().Vertices.ToList();
-        //foreach (var item in allVertices)
-        //{
-        //    Debug.Log(item.getName());
-        //}
-        //Debug.Log(allVertices.Count);
-        //Debug.Log(OsgiProject.getBundles().Count);
-        //Debug.Log(OsgiProject.getServices().Count);
-
+        
         stopwatch.Stop();
         Debug.Log("IslandVizData Construction finished after " + stopwatch.Elapsed.TotalSeconds.ToString("0.00") + " seconds!");
     }

@@ -252,6 +252,11 @@ namespace OsgiViz.SideThreadConstructors
         /// <returns></returns>
         private bool ExpandCountries(List<CompilationUnit> cuList, List<VFace> cellMap, Dictionary<int, VFace> endCandidates, VFace startingCell, float b)
         {
+            if (startingCell == null)
+            {
+                return false;
+            }
+
             Dictionary<int, VFace> candidates = new Dictionary<int, VFace>();
             candidates.Add(startingCell.ID, startingCell);
 
