@@ -175,8 +175,8 @@ namespace OsgiViz.Unity.MainThreadConstructors
             yield return null;
 
             VisualizationRoot.localScale *= maxDistance / furthestDistance; // Scales the islands to make all of them fit on the table.
-            GlobalVar.CurrentZoomLevel = VisualizationRoot.localScale.x; 
-            GlobalVar.MinZoomLevel = VisualizationRoot.localScale.x;
+            GlobalVar.CurrentZoom = VisualizationRoot.localScale.x; 
+            GlobalVar.MinZoom = VisualizationRoot.localScale.x;
         }
 
         /// <summary>

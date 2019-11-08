@@ -68,7 +68,11 @@ namespace OsgiViz.Core
         //Island Parent-Manipulation        
         public const float translationCutoff = 1f + 1.25f; // The maximal distance the visualization can be draged from the island-world center.
                                                            // 1.0 = the distance of the furthest island from the island-world center
-        public const float MaxZoomLevel = 0.2f; // The biggest possible scale of the island parent.
+        public const float MaxZoom = 0.2f; // The biggest possible scale of the island parent.
+
+        public const float NearZoomLevelPercent = 30f;
+        public const float MediumZoomLevelPercent = 60f;
+
 
         //Service-Nodes
         public const float serviceNodeSize = 0.25f * voronoiCellScalefactor;
@@ -80,9 +84,10 @@ namespace OsgiViz.Core
 
         //Dynamic Variables - written to by IslandViz - Modification is useless ;)
         public static int islandNumber = 100;
-        public static float CurrentZoomLevel; // The current scale of the island parent.
-        public static float MinZoomLevel; // The smallest possible scale of the island parent and also the start 
+        public static float CurrentZoom; // The current scale of the island parent.
+        public static float MinZoom; // The smallest possible scale of the island parent and also the start 
                                           // zoom level on island initiation.
+
         public static float worldRadius = 1f;
         public static Vector3 worldCenter = Vector3.zero;
         public static long maximumLOCinProject = 0;

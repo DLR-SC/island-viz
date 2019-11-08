@@ -65,11 +65,11 @@ namespace OsgiViz
 
                     GameObject connectionGO = Instantiate(connectionPrefab, Vector3.zero, Quaternion.identity);
                     connectionGO.name = "Downward Connection";
-                    length = Mathf.Abs(length) / GlobalVar.CurrentZoomLevel;
+                    length = Mathf.Abs(length) / GlobalVar.CurrentZoom;
                     connectionGO.transform.SetParent(DownwardConnectionContainer.transform, false);
                     Vector3 newScale = new Vector3(GlobalVar.serviceNodeSize * 0.03f, length, GlobalVar.serviceNodeSize * 0.03f);
                     Vector3 newPosition = serviceNodes[i].transform.position;
-                    newPosition.y = GlobalVar.hologramTableHeight + (length * 0.5f * GlobalVar.CurrentZoomLevel);
+                    newPosition.y = GlobalVar.hologramTableHeight + (length * 0.5f * GlobalVar.CurrentZoom);
                     connectionGO.transform.localScale = newScale;
                     connectionGO.transform.position = newPosition;
                     connectionGO.SetActive(false);

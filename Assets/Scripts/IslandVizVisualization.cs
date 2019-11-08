@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using OsgiViz.SideThreadConstructors;
 using OsgiViz.Core;
 using OsgiViz.Island;
@@ -38,6 +39,7 @@ public class IslandVizVisualization : MonoBehaviour
     public List<CartographicIsland> IslandStructures;
     public List<IslandGO> IslandGameObjects;
 
+    public Text ZoomLevelValue;
 
     // Mandatory coomonents for visualization.
     private IslandGOConstructor islandGOConstructor;
@@ -52,6 +54,12 @@ public class IslandVizVisualization : MonoBehaviour
 
     private System.Random RNG;
     private System.Diagnostics.Stopwatch stopwatch;
+
+    private List<IslandGO> currentIslands;
+
+    private ZoomLevel currentZoomLevel;
+    private bool zoomLevelDirty;
+    private bool islandsDirty;
 
 
     // ################
@@ -96,6 +104,8 @@ public class IslandVizVisualization : MonoBehaviour
 
         RNG = new System.Random(RandomSeed);
         stopwatch = new System.Diagnostics.Stopwatch();
+
+        currentIslands = new List<IslandGO>();
     }
 
     /// <summary>
@@ -136,10 +146,12 @@ public class IslandVizVisualization : MonoBehaviour
         // Construct the dock GameObjects.
         yield return dockGOConstructor.Construct(islandGOConstructor.getIslandGOs(), TransformContainer.IslandContainer.gameObject);
 
-        // Construct the island hierarchy. TODO enable in the future
+        // Construct the island hierarchy. TODO enable in the future?
         //yield return hierarchyConstructor.Construct(islandGOConstructor.getIslandGOs());
                 
         yield return AutoZoom();
+
+        StartCoroutine(ZoomLevelRoutine());
 
         // Set table height
         //GlobalVar.hologramTableHeight = IslandVizInteraction.Instance.GetPlayerEyeHeight() - 0.75f;
@@ -163,6 +175,176 @@ public class IslandVizVisualization : MonoBehaviour
     }
 
     #endregion
+
+
+
+    public void AddCurrentIsland(IslandGO islandGO)
+    {
+        if (!currentIslands.Contains(islandGO))
+        {
+            currentIslands.Add(islandGO);
+
+            if (islandGO.currentZoomLevel != currentZoomLevel)
+            {
+                islandsDirty = true;
+            }
+            //Debug.Log(currentIslands.Count);
+        }
+    }
+
+    public void RemoveCurrentIsland(IslandGO islandGO)
+    {
+        if (currentIslands.Contains(islandGO))
+        {
+            currentIslands.Remove(islandGO);
+
+            //Debug.Log(currentIslands.Count);
+        }
+    }
+
+
+
+    // ################
+    // Zoom Level
+    // ################
+
+    public void ZoomChanged ()
+    {
+        zoomLevelDirty = true;
+    }
+
+
+
+    /// <summary>
+    /// 
+    /// Level 1: 100%-60%
+    /// Level 2: 60%-30% 
+    /// Level 3: 30%-1%
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    IEnumerator ZoomLevelRoutine ()
+    {
+        float zoomLevelPercent = 0;
+
+        zoomLevelDirty = true;
+        islandsDirty = true;
+
+        while (true)
+        {
+            if (zoomLevelDirty)
+            {
+                zoomLevelDirty = false;                
+
+                // Calculate current zoom level in percent
+                zoomLevelPercent = Mathf.Sqrt(Mathf.Sqrt((GlobalVar.CurrentZoom - GlobalVar.MinZoom) / (GlobalVar.MaxZoom - GlobalVar.MinZoom))) * 100;
+
+                // Check for ZoomLevel changes
+                if (zoomLevelPercent <= GlobalVar.NearZoomLevelPercent && currentZoomLevel != ZoomLevel.Far)
+                {
+                    // Apply current zoom level to UI
+                    currentZoomLevel = ZoomLevel.Far;
+                    islandsDirty = true;
+                }
+                else if (zoomLevelPercent <= GlobalVar.MediumZoomLevelPercent && currentZoomLevel != ZoomLevel.Medium)
+                {
+                    // Apply current zoom level to UI
+                    currentZoomLevel = ZoomLevel.Medium;
+                    islandsDirty = true;
+                }
+                else if (zoomLevelPercent > GlobalVar.MediumZoomLevelPercent && currentZoomLevel != ZoomLevel.Near)
+                {                    
+                    currentZoomLevel = ZoomLevel.Near;
+                    islandsDirty = true;
+                }
+                // Apply current zoom level to UI
+                ZoomLevelValue.text = zoomLevelPercent.ToString("0") + "%";
+
+                // Debug
+                //Debug.Log(GlobalVar.MinZoomLevel + " - " + GlobalVar.CurrentZoomLevel + " - " + GlobalVar.MaxZoomLevel + " -> " + zoomPercent + "%");
+            }
+
+            if (islandsDirty)
+            {
+                islandsDirty = false;
+
+                // Give feedback
+                ZoomLevelValue.text = "...";
+                yield return ApplyZoomLevelToCurrentIslands();
+                // Apply current zoom level to UI
+                ZoomLevelValue.text = zoomLevelPercent.ToString("0") + "%";
+            }
+            
+
+            
+            
+            yield return new WaitForFixedUpdate();
+        }
+    }
+
+    IEnumerator ApplyZoomLevelToCurrentIslands ()
+    {
+
+        if (currentZoomLevel == ZoomLevel.Near)
+        {
+            // Enable all buildings.
+            for (int i = 0; i < currentIslands.Count; i++)
+            {
+                if (currentIslands.Count <= i || currentIslands[i].currentZoomLevel == currentZoomLevel)
+                {
+                    continue;
+                }
+                currentIslands[i].currentZoomLevel = currentZoomLevel;
+                currentIslands[i].getImportDock().SetActive(true);
+                currentIslands[i].getExportDock().SetActive(true);
+                foreach (var region in currentIslands[i].getRegions())
+                {
+                    foreach (var building in region.getBuildings())
+                    {
+                        if (!building.gameObject.activeSelf)
+                            building.gameObject.SetActive(true);
+                    }
+                    yield return null;
+                }
+            }
+        }
+        else if (currentZoomLevel == ZoomLevel.Medium)
+        {
+            // Disable all buildings.
+            for (int i = 0; i < currentIslands.Count; i++)
+            {
+                if (currentIslands.Count <= i || currentIslands[i].currentZoomLevel == currentZoomLevel)
+                {
+                    continue;
+                }
+                currentIslands[i].currentZoomLevel = currentZoomLevel;
+                currentIslands[i].getImportDock().SetActive(true);
+                currentIslands[i].getExportDock().SetActive(true);
+                foreach (var region in currentIslands[i].getRegions())
+                {
+                    foreach (var building in region.getBuildings())
+                    {
+                        if (building.gameObject.activeSelf)
+                            building.gameObject.SetActive(false);
+                    }
+                    yield return null;
+                }
+            }
+        }
+        else if (currentZoomLevel == ZoomLevel.Far)
+        {
+            for (int i = 0; i < currentIslands.Count; i++)
+            {
+                if (currentIslands.Count <= i || currentIslands[i].currentZoomLevel == currentZoomLevel)
+                {
+                    continue;
+                }
+                currentIslands[i].currentZoomLevel = currentZoomLevel;
+                currentIslands[i].getImportDock().SetActive(false);
+                currentIslands[i].getExportDock().SetActive(false);                
+            }
+        }
+    }
 
 
     // ################
@@ -198,8 +380,8 @@ public class IslandVizVisualization : MonoBehaviour
 
         VisualizationRoot.localScale *= maxDistance / furthestDistance;
         //TransformContainer.IslandContainer.localScale *= maxDistance / furthestDistance; // Scales the islands to make all of them fit on the table.
-        GlobalVar.CurrentZoomLevel = VisualizationRoot.localScale.x;
-        GlobalVar.MinZoomLevel = VisualizationRoot.localScale.x;
+        GlobalVar.CurrentZoom = VisualizationRoot.localScale.x;
+        GlobalVar.MinZoom = VisualizationRoot.localScale.x;
 
         // Debug
         //TransformContainer.DependencyContainer.localScale *= GlobalVar.CurrentZoomLevel;
@@ -222,6 +404,13 @@ public enum Graph_Layout
 {
     ForceDirected,
     Random
+}
+
+public enum ZoomLevel
+{
+    Near,
+    Medium,
+    Far
 }
 
 public class VisualizationTransformContainer

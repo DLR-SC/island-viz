@@ -40,7 +40,7 @@ public class IslandVizInteraction : MonoBehaviour {
         Instance = this;
         inputComponents = InteractionComponentsGameObject.GetComponents<AdditionalIslandVizComponent>();
 
-        OnControllerTriggerDown += DebugInput;
+        //OnControllerTriggerDown += DebugInput;
     }
 
     /// <summary>

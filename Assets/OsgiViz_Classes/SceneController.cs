@@ -55,7 +55,7 @@ namespace OsgiViz
             {
                 currentIDX = currentIDX % islandList.Count;
                 float absoluteDistanceSquared = (islandList[currentIDX].gameObject.transform.position - hologramCenter.transform.position).sqrMagnitude;
-                if (absoluteDistanceSquared > GlobalVar.CurrentZoomLevel * GlobalVar.CurrentZoomLevel)
+                if (absoluteDistanceSquared > GlobalVar.CurrentZoom * GlobalVar.CurrentZoom)
                     islandList[currentIDX].gameObject.gameObject.SetActive(false);
                 else
                     islandList[currentIDX].gameObject.gameObject.SetActive(true);

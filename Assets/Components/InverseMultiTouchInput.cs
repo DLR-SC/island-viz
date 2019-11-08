@@ -179,7 +179,7 @@ public class InverseMultiTouchInput : AdditionalIslandVizComponent {
 
         if (useDrag && currentTranslationVelocity != Vector3.zero)
         {
-            currentTranslationVelocity -= currentTranslationVelocity * (2f - GlobalVar.CurrentZoomLevel * 5f) * Time.deltaTime;
+            currentTranslationVelocity -= currentTranslationVelocity * (2f - GlobalVar.CurrentZoom * 5f) * Time.deltaTime;
         }
 
         currentTranslationVelocity = ClampTranslationVelocityVector(currentTranslationVelocity);
@@ -189,8 +189,8 @@ public class InverseMultiTouchInput : AdditionalIslandVizComponent {
     public void RotateAndScale(Vector3 origin, float amountRot, float amountScale)
     {
         // Scale Constraints
-        if (GlobalVar.CurrentZoomLevel * amountScale > GlobalVar.MaxZoomLevel
-            || GlobalVar.CurrentZoomLevel * amountScale < GlobalVar.MinZoomLevel)
+        if (GlobalVar.CurrentZoom * amountScale > GlobalVar.MaxZoom
+            || GlobalVar.CurrentZoom * amountScale < GlobalVar.MinZoom)
         {
             amountScale = 1.0f;
         }
@@ -200,7 +200,8 @@ public class InverseMultiTouchInput : AdditionalIslandVizComponent {
         IslandVizVisualization.Instance.VisualizationRoot.RotateAround(origin, Vector3.up, -amountRot);
 
         #region Update due to scale change
-        GlobalVar.CurrentZoomLevel = IslandVizVisualization.Instance.VisualizationRoot.localScale.x;
+        GlobalVar.CurrentZoom = IslandVizVisualization.Instance.VisualizationRoot.localScale.x;
+        IslandVizVisualization.Instance.ZoomChanged();
         #endregion
     }
 

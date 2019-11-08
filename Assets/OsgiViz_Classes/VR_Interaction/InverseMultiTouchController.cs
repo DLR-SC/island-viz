@@ -173,7 +173,7 @@ namespace OsgiViz
             {
                 //currentTranslationVelocity /= 2f * (1f - (GlobalVar.CurrentZoomLevel * Time.deltaTime));
 
-                currentTranslationVelocity -= currentTranslationVelocity * (2f - GlobalVar.CurrentZoomLevel * 5f) * Time.deltaTime;
+                currentTranslationVelocity -= currentTranslationVelocity * (2f - GlobalVar.CurrentZoom * 5f) * Time.deltaTime;
             }
 
             currentTranslationVelocity = ClampTranslationVelocityVector(currentTranslationVelocity);
@@ -183,8 +183,8 @@ namespace OsgiViz
         public void RotateAndScale(Vector3 origin, float amountRot, float amountScale)
         {
             // Scale Constraints
-            if (GlobalVar.CurrentZoomLevel * amountScale > GlobalVar.MaxZoomLevel 
-                || GlobalVar.CurrentZoomLevel * amountScale < GlobalVar.MinZoomLevel)
+            if (GlobalVar.CurrentZoom * amountScale > GlobalVar.MaxZoom 
+                || GlobalVar.CurrentZoom * amountScale < GlobalVar.MinZoom)
             {
                 amountScale = 1.0f;
             }
@@ -194,11 +194,12 @@ namespace OsgiViz
             transformCandidate.transform.RotateAround(origin, Vector3.up, -amountRot);
 
             #region Update due to scale change
-            GlobalVar.CurrentZoomLevel = transformCandidate.transform.localScale.x;
+            GlobalVar.CurrentZoom = transformCandidate.transform.localScale.x;
+            IslandVizVisualization.Instance.ZoomChanged();
             //mainLight.range = originalLightRange * GlobalVar.CurrentZoomLevel;
-            effectiveDrag = drag * 1.0f / GlobalVar.CurrentZoomLevel;
-            effectiveTranslationSpeedCutoff = translationSpeedCutoff * GlobalVar.CurrentZoomLevel;
-            effectivePivotTransferCutoff = pivotTransferCutoff * GlobalVar.CurrentZoomLevel;
+            effectiveDrag = drag * 1.0f / GlobalVar.CurrentZoom;
+            effectiveTranslationSpeedCutoff = translationSpeedCutoff * GlobalVar.CurrentZoom;
+            effectivePivotTransferCutoff = pivotTransferCutoff * GlobalVar.CurrentZoom;
             #endregion
 
             #region Correct Y Position of ServiceSlices
@@ -206,7 +207,7 @@ namespace OsgiViz
             {
                 Vector3 correctedPosition = slice.transform.position;
                 //correctedPosition.y = Mathf.Max(slice.height, slice.height * GlobalVar.inverseHologramScale);
-                correctedPosition.y = GlobalVar.hologramTableHeight + (slice.height - GlobalVar.hologramTableHeight) * GlobalVar.CurrentZoomLevel;
+                correctedPosition.y = GlobalVar.hologramTableHeight + (slice.height - GlobalVar.hologramTableHeight) * GlobalVar.CurrentZoom;
                 slice.transform.position = correctedPosition;
             }
             #endregion
@@ -214,8 +215,8 @@ namespace OsgiViz
             #region Correct Height of downward Connections
             Vector3 oldDClocalScale = downwardConnectionContainer.transform.localScale;
             Vector3 oldDCposition = downwardConnectionContainer.transform.position;
-            oldDClocalScale.y = GlobalVar.CurrentZoomLevel;
-            oldDCposition.y = -(GlobalVar.CurrentZoomLevel * GlobalVar.hologramTableHeight) + GlobalVar.hologramTableHeight;
+            oldDClocalScale.y = GlobalVar.CurrentZoom;
+            oldDCposition.y = -(GlobalVar.CurrentZoom * GlobalVar.hologramTableHeight) + GlobalVar.hologramTableHeight;
             downwardConnectionContainer.transform.localScale = oldDClocalScale;
             downwardConnectionContainer.transform.position = oldDCposition;
             #endregion

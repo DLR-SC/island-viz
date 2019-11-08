@@ -11,7 +11,7 @@ namespace OsgiViz.Unity.Island
 
     public class IslandGO : MonoBehaviour
     {
-
+        public ZoomLevel currentZoomLevel;
 
         private CartographicIsland island;
         private List<Region> regions;
@@ -60,6 +60,21 @@ namespace OsgiViz.Unity.Island
 
 
             gameObject.GetComponent<PdaInspectable>().sendContentToPda(contentText);
+        }
+
+        private void OnTriggerEnter(Collider other)
+        {
+            if (other.tag == "TableContent")
+            {
+                IslandVizVisualization.Instance.AddCurrentIsland(this);
+            }
+        }
+        private void OnTriggerExit(Collider other)
+        {
+            if (other.tag == "TableContent")
+            {
+                IslandVizVisualization.Instance.RemoveCurrentIsland(this);
+            }
         }
 
         //Returns true if island does not contain a single CU. Returns false otherwise.
