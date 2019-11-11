@@ -33,7 +33,7 @@ public class InverseMultiTouchInput : AdditionalIslandVizComponent {
     /// Initialize this input component. 
     /// This method is called by the IslandVizInteraction class.
     /// </summary>
-    public override void Init () {
+    public override IEnumerator Init () {
         // Init GameObject
         mapNavigationArea = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
         mapNavigationArea.name = "MapNavigationArea";
@@ -63,6 +63,8 @@ public class InverseMultiTouchInput : AdditionalIslandVizComponent {
         usingHandList = new List<Hand>();
         currentTranslationVelocity = new Vector3(0f, 0f, 0f);
         initiated = true;
+
+        yield return null;
     }
 
     #endregion

@@ -249,8 +249,6 @@ namespace OsgiViz.SideThreadConstructors
             #endregion
             //Debug.Log("Max Import-count: " + currentProject.getMaxImportCount());
 
-            Debug.Log(currentProject.getBundles().Count + " " + currentProject.getServices().Count);
-
             status = Status.Finished;
             Debug.Log("Finished OSGi-Project construction!");
         }

@@ -70,7 +70,7 @@ namespace OsgiViz.Core
                                                            // 1.0 = the distance of the furthest island from the island-world center
         public const float MaxZoom = 0.2f; // The biggest possible scale of the island parent.
 
-        public const float NearZoomLevelPercent = 30f;
+        public const float NearZoomLevelPercent = 35f;
         public const float MediumZoomLevelPercent = 60f;
 
 

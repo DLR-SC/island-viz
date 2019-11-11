@@ -11,7 +11,7 @@ namespace OsgiViz.Unity.Island
 
     public class IslandGO : MonoBehaviour
     {
-        public ZoomLevel currentZoomLevel;
+        public ZoomLevel ZoomLevel;
 
         private CartographicIsland island;
         private List<Region> regions;

@@ -13,7 +13,6 @@ using OsgiViz;
 /// </summary>
 public class ServiceVisualization : AdditionalIslandVizComponent
 {
-
     public Material DefaultMaterial; // (Material)Resources.Load("Materials/Diffuse_White")
 
     public GameObject InterfacePrefab; // (GameObject)Resources.Load("Prefabs/ServiceInterfaceNode")
@@ -30,7 +29,7 @@ public class ServiceVisualization : AdditionalIslandVizComponent
 
 
 
-    public override void Init()
+    public override IEnumerator Init()
     {
         ServiceSliceContainer = new GameObject("ServiceSliceContainer");
         ServiceSliceContainer.transform.SetParent(IslandVizVisualization.Instance.VisualizationRoot, false);
@@ -39,15 +38,8 @@ public class ServiceVisualization : AdditionalIslandVizComponent
         DownwardConnectionContainer.transform.SetParent(IslandVizVisualization.Instance.VisualizationRoot, false);
 
         serviceVolume = new ServiceVolume();
-
-        StartCoroutine(ConstructAll());
-    }
-
-
-    // Taken from ServiceGOConstructor.cs
-    IEnumerator ConstructAll()
-    {
-        Debug.Log("Started with Service-GameObject construction!");
+        
+        Debug.Log("Starting with Service-GameObject construction!");
 
         Dictionary<ServiceSlice, List<Service>> serviceSliceMap = DistributeServicesToSlices(IslandVizData.Instance.OsgiProject.getServices());
         foreach (KeyValuePair<ServiceSlice, List<Service>> kvp in serviceSliceMap)

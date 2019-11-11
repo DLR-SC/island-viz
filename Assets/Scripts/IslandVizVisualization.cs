@@ -58,8 +58,8 @@ public class IslandVizVisualization : MonoBehaviour
     private List<IslandGO> currentIslands;
 
     private ZoomLevel currentZoomLevel;
-    private bool zoomLevelDirty;
-    private bool islandsDirty;
+    private bool zoomDirty; // This is set to TRUE when the current Zoom was changed (called by a IslandVizInteraction Component).
+    private bool islandsDirty; // This is set to TRUE when ZoomLevel changed or when appearing island displays the wrong ZoomLevel.
 
 
     // ################
@@ -151,10 +151,11 @@ public class IslandVizVisualization : MonoBehaviour
                 
         yield return AutoZoom();
 
+        // Starts the ZoomLevelRoutine.
         StartCoroutine(ZoomLevelRoutine());
 
         // Set table height
-        //GlobalVar.hologramTableHeight = IslandVizInteraction.Instance.GetPlayerEyeHeight() - 0.75f;
+        //GlobalVar.hologramTableHeight = IslandVizInteraction.Instance.GetPlayerEyeHeight() - 0.75f; // TODO reenable
         UpdateTableHight(GlobalVar.hologramTableHeight);
 
         stopwatch.Stop();
@@ -169,8 +170,7 @@ public class IslandVizVisualization : MonoBehaviour
     {
         foreach (var item in visualizationComponents)
         {
-            item.Init();
-            yield return null;
+            yield return item.Init();
         }
     }
 
@@ -178,13 +178,22 @@ public class IslandVizVisualization : MonoBehaviour
 
 
 
+    // ################
+    // Current Visible Islands Handling
+    // ################
+
+    /// <summary>
+    /// Called when a island GameObject has entered the TableContent-Trigger, i.e. has become visible. Adds this island to the currentIslands List.
+    /// </summary>
+    /// <param name="islandGO">The island that entered the TableContent-Trigger.</param>
     public void AddCurrentIsland(IslandGO islandGO)
     {
         if (!currentIslands.Contains(islandGO))
         {
             currentIslands.Add(islandGO);
 
-            if (islandGO.currentZoomLevel != currentZoomLevel)
+            // When a new island with a wrong ZoomLevel appears, the current ZoomLevel needs to be applied to it.
+            if (islandGO.ZoomLevel != currentZoomLevel)
             {
                 islandsDirty = true;
             }
@@ -192,12 +201,15 @@ public class IslandVizVisualization : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Called when a island GameObject has exited the TableContent-Trigger, i.e. has become invisible. Removes this island from the currentIslands List.
+    /// </summary>
+    /// <param name="islandGO">The island that exited the TableContent-Trigger.</param>
     public void RemoveCurrentIsland(IslandGO islandGO)
     {
         if (currentIslands.Contains(islandGO))
         {
             currentIslands.Remove(islandGO);
-
             //Debug.Log(currentIslands.Count);
         }
     }
@@ -208,47 +220,44 @@ public class IslandVizVisualization : MonoBehaviour
     // Zoom Level
     // ################
 
+    /// <summary>
+    /// Called when the visualization was zoomed in or out.
+    /// </summary>
     public void ZoomChanged ()
     {
-        zoomLevelDirty = true;
+        zoomDirty = true;
     }
-
-
+    
 
     /// <summary>
-    /// 
-    /// Level 1: 100%-60%
-    /// Level 2: 60%-30% 
-    /// Level 3: 30%-1%
     /// 
     /// </summary>
     /// <returns></returns>
     IEnumerator ZoomLevelRoutine ()
     {
-        float zoomLevelPercent = 0;
+        float zoomLevelPercent = 0; // The current ZoomLevel in %. 
 
-        zoomLevelDirty = true;
+        zoomDirty = true;
         islandsDirty = true;
 
         while (true)
         {
-            if (zoomLevelDirty)
+            // Zoom was changed.
+            if (zoomDirty) 
             {
-                zoomLevelDirty = false;                
+                zoomDirty = false; // This has to be done first, because the zoom can be changed at any point.               
 
                 // Calculate current zoom level in percent
                 zoomLevelPercent = Mathf.Sqrt(Mathf.Sqrt((GlobalVar.CurrentZoom - GlobalVar.MinZoom) / (GlobalVar.MaxZoom - GlobalVar.MinZoom))) * 100;
 
-                // Check for ZoomLevel changes
+                // Check if the ZoomLevel changed.
                 if (zoomLevelPercent <= GlobalVar.NearZoomLevelPercent && currentZoomLevel != ZoomLevel.Far)
                 {
-                    // Apply current zoom level to UI
                     currentZoomLevel = ZoomLevel.Far;
                     islandsDirty = true;
                 }
-                else if (zoomLevelPercent <= GlobalVar.MediumZoomLevelPercent && currentZoomLevel != ZoomLevel.Medium)
+                else if (zoomLevelPercent > GlobalVar.NearZoomLevelPercent && zoomLevelPercent <= GlobalVar.MediumZoomLevelPercent && currentZoomLevel != ZoomLevel.Medium)
                 {
-                    // Apply current zoom level to UI
                     currentZoomLevel = ZoomLevel.Medium;
                     islandsDirty = true;
                 }
@@ -257,94 +266,86 @@ public class IslandVizVisualization : MonoBehaviour
                     currentZoomLevel = ZoomLevel.Near;
                     islandsDirty = true;
                 }
-                // Apply current zoom level to UI
-                ZoomLevelValue.text = zoomLevelPercent.ToString("0") + "%";
 
+                ZoomLevelValue.text = zoomLevelPercent.ToString("0") + "%"; // Apply current zoom level to UI
+                
                 // Debug
                 //Debug.Log(GlobalVar.MinZoomLevel + " - " + GlobalVar.CurrentZoomLevel + " - " + GlobalVar.MaxZoomLevel + " -> " + zoomPercent + "%");
             }
 
-            if (islandsDirty)
+            // Island with wrong ZoomLevel.
+            if (islandsDirty) 
             {
-                islandsDirty = false;
+                islandsDirty = false; // This has to be done first, because dirty islands can appear at any point.
 
-                // Give feedback
-                ZoomLevelValue.text = "...";
-                yield return ApplyZoomLevelToCurrentIslands();
-                // Apply current zoom level to UI
-                ZoomLevelValue.text = zoomLevelPercent.ToString("0") + "%";
+                Debug.Log(currentZoomLevel);
+
+                // Apply current ZoomLevel to all current islands.
+                for (int i = 0; i < currentIslands.Count; i++)
+                {
+                    if (i < currentIslands.Count && currentIslands[i].ZoomLevel != currentZoomLevel) // The first condition is important, because islands can 
+                                                                                                            // appear or disappear at any point.
+                    {
+                        ZoomLevelValue.text = "<color=yellow>" + (i / currentIslands.Count) * 100 + " %</color>"; // Give simple feedback on progress // TODO
+                        yield return ApplyZoomLevelToIsland(currentIslands[i], currentZoomLevel);
+                    }
+                }
+
+                ZoomLevelValue.text = zoomLevelPercent.ToString("0") + "%"; // Apply current zoom level to UI
             }
-            
-
-            
-            
             yield return new WaitForFixedUpdate();
         }
     }
 
-    IEnumerator ApplyZoomLevelToCurrentIslands ()
-    {
 
-        if (currentZoomLevel == ZoomLevel.Near)
-        {
-            // Enable all buildings.
-            for (int i = 0; i < currentIslands.Count; i++)
+    /// <summary>
+    /// This Method contains and applies the rules of all ZoomLevels to an island. 
+    /// Call this to change the Zoomlevel of an island.
+    /// </summary>
+    /// <param name="island">The island you want to change the ZoomLevel.</param>
+    /// <param name="zoomLevel">The ZoomLevel that you want to apply to the island.</param>
+    /// <returns></returns>
+    IEnumerator ApplyZoomLevelToIsland(IslandGO island, ZoomLevel zoomLevel)
+    {
+        if (zoomLevel == ZoomLevel.Near)
+        {            
+            island.ZoomLevel = currentZoomLevel;
+            island.getImportDock().SetActive(true);
+            island.getExportDock().SetActive(true);
+            foreach (var region in island.getRegions())
             {
-                if (currentIslands.Count <= i || currentIslands[i].currentZoomLevel == currentZoomLevel)
+                foreach (var building in region.getBuildings())
                 {
-                    continue;
+                    if (!building.gameObject.activeSelf)
+                        building.gameObject.SetActive(true);
                 }
-                currentIslands[i].currentZoomLevel = currentZoomLevel;
-                currentIslands[i].getImportDock().SetActive(true);
-                currentIslands[i].getExportDock().SetActive(true);
-                foreach (var region in currentIslands[i].getRegions())
+                yield return null;
+            }            
+        }
+        else if (zoomLevel == ZoomLevel.Medium)
+        {
+            island.ZoomLevel = currentZoomLevel;
+            island.getImportDock().SetActive(true);
+            island.getExportDock().SetActive(true);
+            foreach (var region in island.getRegions())
+            {
+                foreach (var building in region.getBuildings())
                 {
-                    foreach (var building in region.getBuildings())
-                    {
-                        if (!building.gameObject.activeSelf)
-                            building.gameObject.SetActive(true);
-                    }
-                    yield return null;
+                    if (building.gameObject.activeSelf)
+                        building.gameObject.SetActive(false);
                 }
+                yield return null;
             }
         }
-        else if (currentZoomLevel == ZoomLevel.Medium)
+        else if (zoomLevel == ZoomLevel.Far)
         {
-            // Disable all buildings.
-            for (int i = 0; i < currentIslands.Count; i++)
-            {
-                if (currentIslands.Count <= i || currentIslands[i].currentZoomLevel == currentZoomLevel)
-                {
-                    continue;
-                }
-                currentIslands[i].currentZoomLevel = currentZoomLevel;
-                currentIslands[i].getImportDock().SetActive(true);
-                currentIslands[i].getExportDock().SetActive(true);
-                foreach (var region in currentIslands[i].getRegions())
-                {
-                    foreach (var building in region.getBuildings())
-                    {
-                        if (building.gameObject.activeSelf)
-                            building.gameObject.SetActive(false);
-                    }
-                    yield return null;
-                }
-            }
+            island.ZoomLevel = currentZoomLevel;
+            island.getImportDock().SetActive(false);
+            island.getExportDock().SetActive(false);
         }
-        else if (currentZoomLevel == ZoomLevel.Far)
-        {
-            for (int i = 0; i < currentIslands.Count; i++)
-            {
-                if (currentIslands.Count <= i || currentIslands[i].currentZoomLevel == currentZoomLevel)
-                {
-                    continue;
-                }
-                currentIslands[i].currentZoomLevel = currentZoomLevel;
-                currentIslands[i].getImportDock().SetActive(false);
-                currentIslands[i].getExportDock().SetActive(false);                
-            }
-        }
-    }
+    } 
+
+    
 
 
     // ################

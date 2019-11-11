@@ -127,8 +127,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
             // Init Input Components
             foreach (var item in InputComponents)
             {
-                item.Init();
-                yield return null;
+                yield return item.Init();
             }
 
             stopwatch.Stop();
