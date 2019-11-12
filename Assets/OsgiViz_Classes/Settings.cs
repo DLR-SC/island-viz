@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 
 namespace OsgiViz.Core
@@ -70,8 +68,10 @@ namespace OsgiViz.Core
                                                            // 1.0 = the distance of the furthest island from the island-world center
         public const float MaxZoom = 0.2f; // The biggest possible scale of the island parent.
 
-        public const float NearZoomLevelPercent = 35f;
-        public const float MediumZoomLevelPercent = 60f;
+        // Zoom Levels
+        // 0% = all zoomed out; 100% = all zoomed in
+        public const float FarZoomLevelPercent = 35f; // Percentage when the "FAR" ZoomLevel is ending
+        public const float MediumZoomLevelPercent = 60f; // Percentage when the "MEDIUM" ZoomLevel is ending, i.e. "NEAR" is starting
 
 
         //Service-Nodes

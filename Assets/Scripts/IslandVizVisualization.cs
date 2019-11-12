@@ -197,6 +197,11 @@ public class IslandVizVisualization : MonoBehaviour
             {
                 islandsDirty = true;
             }
+
+            for (int i = 0; i < islandGO.transform.childCount; i++)
+            {
+                islandGO.transform.GetChild(i).gameObject.SetActive(true);
+            }
             //Debug.Log(currentIslands.Count);
         }
     }
@@ -211,6 +216,11 @@ public class IslandVizVisualization : MonoBehaviour
         {
             currentIslands.Remove(islandGO);
             //Debug.Log(currentIslands.Count);
+
+            for (int i = 0; i < islandGO.transform.childCount; i++)
+            {
+                islandGO.transform.GetChild(i).gameObject.SetActive(false);
+            }
         }
     }
 
@@ -251,12 +261,12 @@ public class IslandVizVisualization : MonoBehaviour
                 zoomLevelPercent = Mathf.Sqrt(Mathf.Sqrt((GlobalVar.CurrentZoom - GlobalVar.MinZoom) / (GlobalVar.MaxZoom - GlobalVar.MinZoom))) * 100;
 
                 // Check if the ZoomLevel changed.
-                if (zoomLevelPercent <= GlobalVar.NearZoomLevelPercent && currentZoomLevel != ZoomLevel.Far)
+                if (zoomLevelPercent <= GlobalVar.FarZoomLevelPercent && currentZoomLevel != ZoomLevel.Far)
                 {
                     currentZoomLevel = ZoomLevel.Far;
                     islandsDirty = true;
                 }
-                else if (zoomLevelPercent > GlobalVar.NearZoomLevelPercent && zoomLevelPercent <= GlobalVar.MediumZoomLevelPercent && currentZoomLevel != ZoomLevel.Medium)
+                else if (zoomLevelPercent > GlobalVar.FarZoomLevelPercent && zoomLevelPercent <= GlobalVar.MediumZoomLevelPercent && currentZoomLevel != ZoomLevel.Medium)
                 {
                     currentZoomLevel = ZoomLevel.Medium;
                     islandsDirty = true;
@@ -268,6 +278,8 @@ public class IslandVizVisualization : MonoBehaviour
                 }
 
                 ZoomLevelValue.text = zoomLevelPercent.ToString("0") + "%"; // Apply current zoom level to UI
+
+                IslandVizUI.Instance.UpdateZoomLevelUI(zoomLevelPercent);
                 
                 // Debug
                 //Debug.Log(GlobalVar.MinZoomLevel + " - " + GlobalVar.CurrentZoomLevel + " - " + GlobalVar.MaxZoomLevel + " -> " + zoomPercent + "%");
@@ -308,10 +320,7 @@ public class IslandVizVisualization : MonoBehaviour
     IEnumerator ApplyZoomLevelToIsland(IslandGO island, ZoomLevel zoomLevel)
     {
         if (zoomLevel == ZoomLevel.Near)
-        {            
-            island.ZoomLevel = currentZoomLevel;
-            island.getImportDock().SetActive(true);
-            island.getExportDock().SetActive(true);
+        {
             foreach (var region in island.getRegions())
             {
                 foreach (var building in region.getBuildings())
@@ -320,28 +329,69 @@ public class IslandVizVisualization : MonoBehaviour
                         building.gameObject.SetActive(true);
                 }
                 yield return null;
-            }            
+            }
+            island.ZoomLevel = currentZoomLevel;
         }
         else if (zoomLevel == ZoomLevel.Medium)
         {
-            island.ZoomLevel = currentZoomLevel;
-            island.getImportDock().SetActive(true);
-            island.getExportDock().SetActive(true);
-            foreach (var region in island.getRegions())
-            {
-                foreach (var building in region.getBuildings())
+            // MEDIUM
+            //  ^
+            // NEAR  
+            if (island.ZoomLevel == ZoomLevel.Near)
+            {                
+                foreach (var region in island.getRegions())
                 {
-                    if (building.gameObject.activeSelf)
-                        building.gameObject.SetActive(false);
+                    foreach (var building in region.getBuildings())
+                    {
+                        if (building.gameObject.activeSelf)
+                            building.gameObject.SetActive(false);
+                    }
+                    yield return null;
                 }
-                yield return null;
             }
+            // FAR
+            //  v
+            // MEDIUM
+            else
+            {
+                island.getImportDock().SetActive(true);
+                island.getExportDock().SetActive(true);
+
+                foreach (var region in island.getRegions())
+                {
+                    region.GetComponent<MeshCollider>().enabled = true;
+                }
+            }
+
+            island.ZoomLevel = currentZoomLevel;
         }
         else if (zoomLevel == ZoomLevel.Far)
-        {
+        {            
+            // MEDIUM -> FAR
+            if (island.ZoomLevel == ZoomLevel.Medium)
+            {
+                island.getImportDock().SetActive(false);
+                island.getExportDock().SetActive(false);
+            }
+            // NEAR -> FAR
+            else
+            {
+                island.getImportDock().SetActive(false);
+                island.getExportDock().SetActive(false);
+
+                foreach (var region in island.getRegions())
+                {
+                    region.GetComponent<MeshCollider>().enabled = false;
+
+                    foreach (var building in region.getBuildings())
+                    {
+                        if (building.gameObject.activeSelf)
+                            building.gameObject.SetActive(false);
+                    }
+                    yield return null;
+                }
+            }
             island.ZoomLevel = currentZoomLevel;
-            island.getImportDock().SetActive(false);
-            island.getExportDock().SetActive(false);
         }
     } 
 
