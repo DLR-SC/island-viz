@@ -18,19 +18,19 @@ namespace OsgiViz.Unity.Island
         {
             buildings = new List<Building>();
 
-            #region clickable
-            InteractableViaClickTouch ict = gameObject.GetComponent<InteractableViaClickTouch>();
-            if (ict == null)
-                ict = gameObject.AddComponent<InteractableViaClickTouch>();
+            //#region clickable
+            //InteractableViaClickTouch ict = gameObject.GetComponent<InteractableViaClickTouch>();
+            //if (ict == null)
+            //    ict = gameObject.AddComponent<InteractableViaClickTouch>();
 
-            ict.handleActivationDeactivation.Add(handleActivationDeactivation);
-            #endregion
+            //ict.handleActivationDeactivation.Add(handleActivationDeactivation);
+            //#endregion
 
-            #region PdaInspectable
-            PdaInspectable pi = gameObject.GetComponent<PdaInspectable>();
-            if (pi == null)
-                pi = gameObject.AddComponent<PdaInspectable>();
-            #endregion
+            //#region PdaInspectable
+            //PdaInspectable pi = gameObject.GetComponent<PdaInspectable>();
+            //if (pi == null)
+            //    pi = gameObject.AddComponent<PdaInspectable>();
+            //#endregion
         }
 
         private void handleActivationDeactivation(Hand hand)

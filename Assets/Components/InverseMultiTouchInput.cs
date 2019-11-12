@@ -118,7 +118,51 @@ public class InverseMultiTouchInput : AdditionalIslandVizComponent {
 
     #region Interaction - Movement
 
-    // From InverseMultiTouchController.cs
+
+    //void Update()
+    //{
+    //    if (!initiated)
+    //    {
+    //        return;
+    //    }
+
+    //    if (usingHandList.Count == 1)
+    //    {
+    //        Vector3 delta = usingHandList[0].GetTrackedObjectVelocity() * Time.deltaTime * TranslationMult;
+    //        delta.y = 0;
+    //        IslandVizVisualization.Instance.VisualizationRoot.position += delta;
+    //    }
+    //    else if (usingHandList.Count == 2)
+    //    {
+    //        float currentDistance = Vector3.Distance(usingHandList[0].transform.position, usingHandList[1].transform.position);
+
+    //        Vector3 nextPosition1 = usingHandList[0].GetTrackedObjectVelocity() * Time.deltaTime + usingHandList[0].transform.position;
+    //        Vector3 nextPosition2 = usingHandList[1].GetTrackedObjectVelocity() * Time.deltaTime + usingHandList[1].transform.position;
+    //        float nextDistance = Vector3.Distance(nextPosition1, nextPosition2);
+
+    //        float amountScale = 1f - (nextDistance - currentDistance) * ScaleMult;
+    //        amountScale *= -1f;
+
+    //        Debug.Log(amountScale);
+
+    //        Vector3 pivot = (usingHandList[0].transform.position + usingHandList[1].transform.position) / 2f;
+
+    //        Vector3 diff = IslandVizVisualization.Instance.VisualizationRoot.position - pivot;
+    //        Vector3 newPos = Vector3.Scale(diff, new Vector3(amountScale, 1, amountScale));
+    //        newPos += pivot;
+
+    //        IslandVizVisualization.Instance.VisualizationRoot.localScale = Vector3.Scale(new Vector3(amountScale, amountScale, amountScale), IslandVizVisualization.Instance.VisualizationRoot.localScale);
+    //        IslandVizVisualization.Instance.VisualizationRoot.position = newPos;
+
+    //        GlobalVar.CurrentZoom = IslandVizVisualization.Instance.VisualizationRoot.localScale.x;
+    //        IslandVizVisualization.Instance.ZoomChanged();
+    //    }
+    //}
+
+
+
+    //From InverseMultiTouchController.cs
+
     void Update()
     {
         if (!initiated)
@@ -169,14 +213,14 @@ public class InverseMultiTouchInput : AdditionalIslandVizComponent {
         }
 
         //Shader.SetGlobalVector(clippingCenterShaderID, IslandVizVisualization.Instance.Table.transform.position); // TODO: nötig?
-        //Shader.SetGlobalFloat(hologramScaleShaderID, GlobalVar.CurrentZoomLevel * 0.8f);
+        //Shader.SetGlobalFloat(hologramScaleShaderID, GlobalVar.CurrentZoomLevel * 0.8f);        
     }
 
     private void UpdateTranslation(bool useDrag)
     {
         #region translation constraint
         // TODO
-        
+
         #endregion
 
         if (useDrag && currentTranslationVelocity != Vector3.zero)
