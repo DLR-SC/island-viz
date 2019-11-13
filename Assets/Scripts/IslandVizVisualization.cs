@@ -1,7 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using OsgiViz.SideThreadConstructors;
 using OsgiViz.Core;
 using OsgiViz.Island;
@@ -36,10 +35,11 @@ public class IslandVizVisualization : MonoBehaviour
     [HideInInspector]
     public Transform VisualizationRoot;
 
+    [HideInInspector]
     public List<CartographicIsland> IslandStructures;
-    public List<IslandGO> IslandGameObjects;
 
-    public Text ZoomLevelValue;
+    [HideInInspector]
+    public List<IslandGO> IslandGameObjects;
 
     // Mandatory coomonents for visualization.
     private IslandGOConstructor islandGOConstructor;
@@ -60,6 +60,10 @@ public class IslandVizVisualization : MonoBehaviour
     private ZoomLevel currentZoomLevel;
     private bool zoomDirty; // This is set to TRUE when the current Zoom was changed (called by a IslandVizInteraction Component).
     private bool islandsDirty; // This is set to TRUE when ZoomLevel changed or when appearing island displays the wrong ZoomLevel.
+
+
+    
+
 
 
     // ################
@@ -203,6 +207,7 @@ public class IslandVizVisualization : MonoBehaviour
                 islandGO.transform.GetChild(i).gameObject.SetActive(true);
             }
             //Debug.Log(currentIslands.Count);
+            IslandVizUI.Instance.UpdateCurrentVisibleIslandsUI(((float)currentIslands.Count/(float)GlobalVar.islandNumber) * 100f);
         }
     }
 
@@ -221,6 +226,8 @@ public class IslandVizVisualization : MonoBehaviour
             {
                 islandGO.transform.GetChild(i).gameObject.SetActive(false);
             }
+
+            IslandVizUI.Instance.UpdateCurrentVisibleIslandsUI(((float)currentIslands.Count / (float)GlobalVar.islandNumber) * 100f);
         }
     }
 
@@ -277,8 +284,6 @@ public class IslandVizVisualization : MonoBehaviour
                     islandsDirty = true;
                 }
 
-                ZoomLevelValue.text = zoomLevelPercent.ToString("0") + "%"; // Apply current zoom level to UI
-
                 IslandVizUI.Instance.UpdateZoomLevelUI(zoomLevelPercent);
                 
                 // Debug
@@ -298,12 +303,12 @@ public class IslandVizVisualization : MonoBehaviour
                     if (i < currentIslands.Count && currentIslands[i].ZoomLevel != currentZoomLevel) // The first condition is important, because islands can 
                                                                                                             // appear or disappear at any point.
                     {
-                        ZoomLevelValue.text = "<color=yellow>" + (i / currentIslands.Count) * 100 + " %</color>"; // Give simple feedback on progress // TODO
+                        IslandVizUI.Instance.ZoomLevelValue.text = "<color=yellow>" + (i / currentIslands.Count) * 100 + " %</color>"; // Give simple feedback on progress // TODO
                         yield return ApplyZoomLevelToIsland(currentIslands[i], currentZoomLevel);
                     }
                 }
 
-                ZoomLevelValue.text = zoomLevelPercent.ToString("0") + "%"; // Apply current zoom level to UI
+                IslandVizUI.Instance.UpdateZoomLevelUI(zoomLevelPercent);
             }
             yield return new WaitForFixedUpdate();
         }
@@ -441,11 +446,13 @@ public class IslandVizVisualization : MonoBehaviour
     /// <summary>
     /// Moves the table to a new hight.
     /// </summary>
-    /// <param name="height">The new height (in meters) of the table.</param>
-    public void UpdateTableHight (float height)
+    /// <param name="newHeight">The new height (in meters) of the table.</param>
+    public void UpdateTableHight (float newHeight)
     {
-        Table.transform.position = new Vector3(Table.transform.position.x, height, Table.transform.position.z);
-        VisualizationRoot.transform.position = new Vector3(VisualizationRoot.transform.position.x, height, VisualizationRoot.transform.position.z);
+        Table.transform.position = new Vector3(Table.transform.position.x, newHeight, Table.transform.position.z);
+        VisualizationRoot.transform.position = new Vector3(VisualizationRoot.transform.position.x, newHeight, VisualizationRoot.transform.position.z);
+        GlobalVar.hologramTableHeight = newHeight;
+        IslandVizUI.Instance.OnTableHeightChanged();
     }
 
     #endregion

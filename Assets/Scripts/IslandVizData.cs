@@ -65,6 +65,8 @@ public class IslandVizData : MonoBehaviour
 
         if (DataLoading == DataLoadingType.Json)
         {
+            IslandVizUI.Instance.UpdateLoadingScreenUI("OSGi-Project from Json", "");
+
             jConstructor.Construct(GlobalVar.projectmodelPath, Done); // Read & construct a Json Object.
 
             // Wait for jConstructor.Construct. TODO remove in future
@@ -76,6 +78,8 @@ public class IslandVizData : MonoBehaviour
         }
         else if (DataLoading == DataLoadingType.Neo4J)
         {
+            IslandVizUI.Instance.UpdateLoadingScreenUI("OSGi-Project from Neo4J", "");
+
             yield return neo4jConstructor.Construct(); // Construct a osgi Object from the neo4J Object.
             OsgiProject = neo4jConstructor.GetOsgiProject();
         }

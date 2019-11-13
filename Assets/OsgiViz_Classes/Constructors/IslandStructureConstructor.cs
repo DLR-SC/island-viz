@@ -60,6 +60,7 @@ namespace OsgiViz.SideThreadConstructors
 
             status = Status.Working;
             Debug.Log("Starting with the construction of the IslandStructures");
+            IslandVizUI.Instance.UpdateLoadingScreenUI("Island Structures Construction", "");
 
             foreach (Bundle bundle in osgiProject.getBundles())
             {

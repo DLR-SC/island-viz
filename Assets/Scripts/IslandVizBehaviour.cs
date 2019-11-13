@@ -41,6 +41,7 @@ public class IslandVizBehaviour : MonoBehaviour
         StartCoroutine(IslandVizConstructionRoutine());
 	}
 
+
     /// <summary>
     /// The main construction routine of the islandviz application.
     /// </summary>
@@ -55,7 +56,27 @@ public class IslandVizBehaviour : MonoBehaviour
         // Load additional components
         yield return IslandVizVisualization.Instance.InitVisualizationComponents();
         yield return IslandVizInteraction.Instance.InitInputComponents();
+
+        if (OnConstructionDone != null)
+            OnConstructionDone();
     }
 
     #endregion
+
+
+
+    // ################
+    // Delegates
+    // ################
+
+    /// <summary>
+    /// Called when the IslandVizConstructionRoutine has finished.
+    /// </summary>
+    public delegate void ConstructionDone();
+
+    /// <summary>
+    /// Called when the IslandVizConstructionRoutine has finished.
+    /// </summary>
+    public ConstructionDone OnConstructionDone;
+
 }

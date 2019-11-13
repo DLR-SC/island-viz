@@ -44,6 +44,7 @@ namespace OsgiViz.SideThreadConstructors
             dependencyGraph = project.getDependencyGraph();
             
             Debug.Log("Starting forcedirected graph layout construction.");
+            IslandVizUI.Instance.UpdateLoadingScreenUI("Forcedirected Graph Layout Construction", "");
 
             //Attract Strength multi
             float c1 = 10.0f;

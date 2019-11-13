@@ -33,15 +33,17 @@ namespace OsgiViz.Unity.MainThreadConstructors
             status = Status.Working;
             VisualizationContainer = visualizationContainer;
             Debug.Log("Started with Dock-GameObject construction!");
-            yield return StartCoroutine(constructAll(islands));
-        }
+            IslandVizUI.Instance.UpdateLoadingScreenUI("Dock-GameObject Construction", "");
 
-        IEnumerator constructAll(List<IslandGO> islands)
-        {
             for (int i = 0; i < islands.Count; i++)
             {
                 constructDockGO(islands[i]);
-                yield return null;
+
+                if (i % 5 == 0) // Only wait every 5th Dock construction
+                {
+                    IslandVizUI.Instance.UpdateLoadingScreenUI("Dock-GameObject Construction", (((float)i / (float)islands.Count) * 50f).ToString("0.0") + "%");
+                    yield return null;
+                }                
             }
 
             for (int i = 0; i < islands.Count; i++)
@@ -59,7 +61,12 @@ namespace OsgiViz.Unity.MainThreadConstructors
                     dockList.Add(iDock);
                     iDock.GetComponent<DependencyDock>().constructConnectionArrows();
                 }
-                yield return null;
+
+                if (i % 5 == 0) // Only wait every 5th Dock construction
+                {
+                    IslandVizUI.Instance.UpdateLoadingScreenUI("Dock-GameObject Construction", (50f + ((float)i / (float)islands.Count) * 50f).ToString("0.0") + "%");
+                    yield return null;
+                }   
             }
 
             Debug.Log("Finished with Dock-GameObject construction!");

@@ -64,6 +64,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
         public IEnumerator Construct(List<CartographicIsland> islandStructures, GameObject visualizationContainer)
         {
             Debug.Log("Started with Island-GameObject construction!");
+            IslandVizUI.Instance.UpdateLoadingScreenUI("Island-GameObject Construction", "");
 
             VisualizationContainer = visualizationContainer;
 
@@ -75,6 +76,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
                     Vector3 placementPosition = vertex.getPosition();
                     placementPosition.y = VisualizationContainer.transform.position.y - GlobalVar.islandHeightProfile[GlobalVar.islandHeightProfile.Length-1];
                     islandGOs.Add(ConstructIslandGO(islandStructures[i], placementPosition));
+                    IslandVizUI.Instance.UpdateLoadingScreenUI("Island-GameObject Construction", (((float)i/(float)islandStructures.Count) * 100f).ToString("0.0") + "%");
                     yield return null;
                 }
             }
