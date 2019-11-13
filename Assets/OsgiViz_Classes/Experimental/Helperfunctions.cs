@@ -313,7 +313,7 @@ namespace OsgiViz
         public static float mapDependencycountToSize(long count)
         {
             if (count == 0)
-                return GlobalVar.minDockSize;
+                return 0f; // GlobalVar.minDockSize; // TODO HACK...
             else
                 return GlobalVar.minDockSize + (Mathf.Sqrt((float)count) * GlobalVar.dockScaleMult);
         }

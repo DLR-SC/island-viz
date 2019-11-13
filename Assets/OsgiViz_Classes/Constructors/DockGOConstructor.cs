@@ -33,7 +33,6 @@ namespace OsgiViz.Unity.MainThreadConstructors
             status = Status.Working;
             VisualizationContainer = visualizationContainer;
             Debug.Log("Started with Dock-GameObject construction!");
-            IslandVizUI.Instance.UpdateLoadingScreenUI("Dock-GameObject Construction", "");
 
             for (int i = 0; i < islands.Count; i++)
             {
@@ -41,7 +40,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
 
                 if (i % 5 == 0) // Only wait every 5th Dock construction
                 {
-                    IslandVizUI.Instance.UpdateLoadingScreenUI("Dock-GameObject Construction", (((float)i / (float)islands.Count) * 50f).ToString("0.0") + "%");
+                    IslandVizUI.Instance.UpdateLoadingScreenUI("Dock-GameObject Construction", (((float)i / (float)islands.Count) * 100f).ToString("0.0") + "%");
                     yield return null;
                 }                
             }
@@ -64,7 +63,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
 
                 if (i % 5 == 0) // Only wait every 5th Dock construction
                 {
-                    IslandVizUI.Instance.UpdateLoadingScreenUI("Dock-GameObject Construction", (50f + ((float)i / (float)islands.Count) * 50f).ToString("0.0") + "%");
+                    IslandVizUI.Instance.UpdateLoadingScreenUI("Dock-ConnectionArrows Construction", (((float)i / (float)islands.Count) * 100f).ToString("0.0") + "%");
                     yield return null;
                 }   
             }
@@ -126,6 +125,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
 
         private void constructDockGO(IslandGO island)
         {
+
             CartographicIsland islandStructure = island.getIslandStructure();
 
             //Get graph vertex associated with the island
@@ -134,9 +134,8 @@ namespace OsgiViz.Unity.MainThreadConstructors
             GraphVertex vert = islandStructure.getDependencyVertex();
             if (vert != null)
             {
-
-                float importSize = GlobalVar.minDockSize;
-                float exportSize = GlobalVar.minDockSize;
+                float importSize; 
+                float exportSize; 
 
                 //Outgoing edges -Bundle depends on...
                 IEnumerable<GraphEdge> outEdges;
@@ -145,6 +144,10 @@ namespace OsgiViz.Unity.MainThreadConstructors
                 importSize = Helperfunctions.mapDependencycountToSize(edgeList.Count);
                 //Import Dock
                 GameObject importD = island.getImportDock();
+
+                //if (importSize == 0f)
+                //    Debug.LogError("Island " + island.gameObject.name + " has no size");
+
                 importD.transform.localScale = new Vector3(importSize, importSize, importSize);
                 //Link dependencies
                 DependencyDock dockComponent = importD.GetComponent<DependencyDock>();
@@ -173,7 +176,11 @@ namespace OsgiViz.Unity.MainThreadConstructors
                 GameObject exportD = island.getExportDock();
                 float eDockWidth = exportD.GetComponent<MeshFilter>().sharedMesh.bounds.size.x * exportSize;
                 float iDockWidth = importD.GetComponent<MeshFilter>().sharedMesh.bounds.size.x * importSize;
-                //exportD.transform.position = importD.transform.position + Vector3.left * (iDockWidth + eDockWidth) * 0.5f;                
+                //exportD.transform.position = importD.transform.position + Vector3.left * (iDockWidth + eDockWidth) * 0.5f;     
+
+                //if (exportSize == 0f)
+                //    Debug.LogError("Island " + island.gameObject.name + " has no size");
+
                 exportD.transform.localScale = new Vector3(exportSize, exportSize, exportSize);
                 //Link dependencies
                 dockComponent = exportD.GetComponent<DependencyDock>();

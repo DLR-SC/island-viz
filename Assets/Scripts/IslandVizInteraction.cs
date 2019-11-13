@@ -192,10 +192,10 @@ public class IslandVizInteraction : MonoBehaviour {
     /// <summary>
     /// Called by Unity every fixed time stamp.
     /// </summary>
-    void FixedUpdate()
-    {
+    //void FixedUpdate()
+    //{
         
-    }
+    //}
 
 
     // ################
@@ -203,7 +203,7 @@ public class IslandVizInteraction : MonoBehaviour {
     // ################
 
     #region HelperFunctions
-
+    
     public float GetPlayerEyeHeight ()
     {
         return Player.eyeHeight;

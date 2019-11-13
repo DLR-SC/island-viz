@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Attach this class to a GameObject to make it always look at a target Transform. The GameObject will only rotate on the y axis.
+/// </summary>
 public class AlwaysLookAtTarget : MonoBehaviour
 {
-    public Transform Target;
-
+    public Transform Target; 
     public bool Invert;
 
     private Quaternion rotation;

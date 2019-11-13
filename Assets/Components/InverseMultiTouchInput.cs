@@ -5,6 +5,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using Valve.VR.InteractionSystem;
 
+/// <summary>
+/// This class is a interaction component creating a interaction area on top of the table whitch can change transform of the visualization. 
+/// Most of this comes from the InverseMultiTouchController.cs in Assets/OsgiViz/VR_Interaction/.
+/// </summary>
 public class InverseMultiTouchInput : AdditionalIslandVizComponent {
 
     [Header("Settings")]

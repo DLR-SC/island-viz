@@ -10,6 +10,24 @@ public class IslandVizBehaviour : MonoBehaviour
 {
     public static IslandVizBehaviour Instance; // The instance of this class.
 
+
+    // ################
+    // Delegates
+    // ################
+
+    /// <summary>
+    /// Called when the IslandVizConstructionRoutine has finished.
+    /// </summary>
+    public delegate void ConstructionDone();
+
+    /// <summary>
+    /// Called when the IslandVizConstructionRoutine has finished.
+    /// </summary>
+    public ConstructionDone OnConstructionDone;
+
+
+
+
     // ################
     // Initiation
     // ################
@@ -35,11 +53,10 @@ public class IslandVizBehaviour : MonoBehaviour
         Shader.SetGlobalFloat("hologramOutlineWidth", GlobalVar.hologramOutlineWidth);
         Shader.SetGlobalVector("hologramOutlineColor", GlobalVar.hologramOutlineColor);        
         Shader.SetGlobalVector("hologramCenter", new Vector3(0, 0, 0));
-        Shader.SetGlobalFloat("hologramScale", 0.8f);
+        Shader.SetGlobalFloat("hologramScale", 0.8f);        
         
-        // Start the islandviz construction coroutine.
-        StartCoroutine(IslandVizConstructionRoutine());
-	}
+        StartCoroutine(IslandVizConstructionRoutine()); // Start the islandviz construction coroutine.
+    }
 
 
     /// <summary>
@@ -47,6 +64,8 @@ public class IslandVizBehaviour : MonoBehaviour
     /// </summary>
     IEnumerator IslandVizConstructionRoutine ()
     {
+        yield return null;
+
         // Load the data we want to visualize.
         yield return IslandVizData.Instance.ConstructOsgiProject();
 
@@ -65,18 +84,6 @@ public class IslandVizBehaviour : MonoBehaviour
 
 
 
-    // ################
-    // Delegates
-    // ################
-
-    /// <summary>
-    /// Called when the IslandVizConstructionRoutine has finished.
-    /// </summary>
-    public delegate void ConstructionDone();
-
-    /// <summary>
-    /// Called when the IslandVizConstructionRoutine has finished.
-    /// </summary>
-    public ConstructionDone OnConstructionDone;
+   
 
 }

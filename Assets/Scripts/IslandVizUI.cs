@@ -3,54 +3,60 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// This class manages all user interface (UI) elements in the IslandViz application.
+/// All UI elements are accessable through this class. 
+/// Additionally this class provides some helper functions for UI actions.
+/// </summary>
 public class IslandVizUI : MonoBehaviour
 {
-    public static IslandVizUI Instance;
+    public static IslandVizUI Instance; // The instance of this class.
 
     [Header("General UI Components")]
-    public Transform TableUI_Parent;
-    public Transform StaticUI_Parent;
-    public GameObject LoadingScreen;
-    public GameObject ZoomLevel;
+    public Transform TableUI_Parent; // Parent Transform of all UI elements, that are "attached" to the table.
+    public Transform StaticUI_Parent; // Parent Transform of all static UI elements.
+    public GameObject LoadingScreen; // Parent GameObject of all loading screen UI elements.
+    public GameObject ZoomLevel; // Parent GameObject of all zoom level UI elements.
 
     [Header("Loading Screen Components")]
-    public Text LoadingScreenProgressValue;
-    public Text LoadingScreenNameValue;
-
+    public Text LoadingScreenProgressValue; // Text element containing the loading progress (in %) of the current loading process.
+    public Text LoadingScreenNameValue; // Text element containing the name of the current loading process. 
 
     [Header("Zoom Level Components")]
-    public Slider ZoomLevelSlider;
-    public Text ZoomLevelValue;
+    public Slider ZoomLevelSlider; // Slider element showing the current zoom level like a progress bar.
+    public Text ZoomLevelValue; // Text element containing the current zoom level (in %).
 
     [Header("Current Visible Islands Components")]
-    public Text CurrentVisivleIslandsValue;
+    public Text CurrentVisivleIslandsValue; // Text element containing the current number of visible islands (in %). 
 
 
 
     void Awake()
     {
         Instance = this;
-
-        IslandVizBehaviour.Instance.OnConstructionDone += ConstructionDone;
-
+        IslandVizBehaviour.Instance.OnConstructionDone += OnConstructionDone; // Subscribe to the OnConstructionDone event of the IslandVizBehaviour.
         StaticUI_Parent.gameObject.SetActive(true); // This is probably disabled because it is annoying in the editor, so we enable it here ;)
     }
+
 
     // ################
     // General
     // ################
 
     /// <summary>
-    /// Call this when the table height was changed to also change the height of all UI elements.
+    /// Call this when the table height was changed to also change the height of all UI elements that are attached to the table.
     /// </summary>
-    public void OnTableHeightChanged ()
+    public void TableHeightChanged ()
     {
         TableUI_Parent.position = Vector3.up * OsgiViz.Core.GlobalVar.hologramTableHeight;
     }
 
-    public void ConstructionDone ()
+    /// <summary>
+    /// This method is called when the IslandViz construction is done.
+    /// </summary>
+    public void OnConstructionDone ()
     {
-        StaticUI_Parent.gameObject.SetActive(false);
+        StaticUI_Parent.gameObject.SetActive(false); // Disable the loading screen.
     }
 
 
@@ -58,31 +64,43 @@ public class IslandVizUI : MonoBehaviour
     // Loading Screen
     // ################
 
-    public void UpdateLoadingScreenUI (string currentName, string progress)
+    /// <summary>
+    /// Change the process name and progress of the loading screen.
+    /// </summary>
+    /// <param name="processName">The name of the process that is current loading.</param>
+    /// <param name="processProgress">The loading progress of the current process (e.g. "88.76%"). Leave empty when you do not want to show progress.</param>
+    public void UpdateLoadingScreenUI (string processName, string processProgress)
     {
-        LoadingScreenNameValue.text = currentName;
-        LoadingScreenProgressValue.text = progress;
+        LoadingScreenNameValue.text = processName;
+        LoadingScreenProgressValue.text = processProgress;
     }
-
-
-
+       
 
     // ################
     // Zoom Level
     // ################
 
-    public void UpdateZoomLevelUI (float zoomLevelInPercent)
+    /// <summary>
+    /// Change the position of the zoom level slider and the text containing the current zoom level in %.
+    /// </summary>
+    /// <param name="zoomLevelInPercentage">The zoom level in % (e.g. 88.76).</param>
+    public void UpdateZoomLevelUI (float zoomLevelInPercentage)
     {
-        ZoomLevelSlider.value = 100 - zoomLevelInPercent;
-        ZoomLevelValue.text = zoomLevelInPercent.ToString("0") + "%";
+        ZoomLevelSlider.value = 100 - zoomLevelInPercentage; // Invert the percentage value to be represented correctly by the slider.
+        ZoomLevelValue.text = zoomLevelInPercentage.ToString("0") + "%";
     }
 
 
     // ################
     // Current Visible Islands
     // ################
-    public void UpdateCurrentVisibleIslandsUI (float percent)
+
+    /// <summary>
+    /// Change the text containting the current percentage of visible islands.
+    /// </summary>
+    /// <param name="percentage">The number of visible islands in % (e.g. 88.76).</param>
+    public void UpdateCurrentVisibleIslandsUI (float percentage)
     {
-        CurrentVisivleIslandsValue.text = "Currently visible:\n<b>" + percent.ToString("0") + "%</b> of all islands";
+        CurrentVisivleIslandsValue.text = "Currently visible:\n<b>" + percentage.ToString("0") + "%</b> of all islands";
     }
 }
