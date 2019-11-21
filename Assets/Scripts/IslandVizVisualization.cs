@@ -39,12 +39,10 @@ public class IslandVizVisualization : MonoBehaviour
     [HideInInspector]
     public List<CartographicIsland> IslandStructures;
 
-    [HideInInspector]
     public List<IslandGO> IslandGameObjects;
 
     // Mandatory coomonents for visualization.
     private IslandGOConstructor islandGOConstructor;
-    //private ServiceGOConstructor serviceGOConstructor;
     private DockGOConstructor dockGOConstructor;
     private HierarchyConstructor hierarchyConstructor;
     private IslandStructureConstructor isConstructor;
@@ -63,7 +61,22 @@ public class IslandVizVisualization : MonoBehaviour
     private bool islandsDirty; // This is set to TRUE when ZoomLevel changed or when appearing island displays the wrong ZoomLevel.
 
 
-    
+
+
+
+
+    /// <summary>
+    /// Called when the table hight was changed.
+    /// </summary>
+    /// <param name="newHeight">The new height of the table.</param>
+    public delegate void TableHeightChanged(float newHeight);
+    /// <summary>
+    /// Called when the table hight was changed.
+    /// </summary>
+    public TableHeightChanged OnTableHeightChanged;
+
+
+
 
 
 
@@ -83,10 +96,8 @@ public class IslandVizVisualization : MonoBehaviour
         // Get all optimal additional visualization components
         visualizationComponents = VisualizationComponentsGameObject.GetComponents<AdditionalIslandVizComponent>();
 
-        // Since we saved all additional visualization components in "visualizationComponents", we can add the remaining
-        // mandatory visualization components.
+        // Since we saved all additional visualization components in "visualizationComponents", we can add the remaining mandatory visualization components.
         islandGOConstructor = VisualizationComponentsGameObject.AddComponent<IslandGOConstructor>();
-        //serviceGOConstructor = VisualizationComponentsGameObject.AddComponent<ServiceGOConstructor>();
         dockGOConstructor = VisualizationComponentsGameObject.AddComponent<DockGOConstructor>();
         hierarchyConstructor = VisualizationComponentsGameObject.AddComponent<HierarchyConstructor>();
 
@@ -109,6 +120,8 @@ public class IslandVizVisualization : MonoBehaviour
 
         RNG = new System.Random(RandomSeed);
         stopwatch = new System.Diagnostics.Stopwatch();
+
+        OnTableHeightChanged += ApplyTableHeight;
 
         currentIslands = new List<IslandGO>();
     }
@@ -153,7 +166,7 @@ public class IslandVizVisualization : MonoBehaviour
         StartCoroutine(ZoomLevelRoutine()); // Starts the ZoomLevelRoutine.
         
         //GlobalVar.hologramTableHeight = IslandVizInteraction.Instance.GetPlayerEyeHeight() - 0.75f; // TODO reenable
-        UpdateTableHight(GlobalVar.hologramTableHeight); // Set table height
+        OnTableHeightChanged(GlobalVar.hologramTableHeight); // Set table height
 
         stopwatch.Stop();
         Debug.Log("IslandVizVisualization Construction finished after " + stopwatch.Elapsed.TotalSeconds.ToString("0.00") + " seconds!");
@@ -402,6 +415,66 @@ public class IslandVizVisualization : MonoBehaviour
 
 
 
+    // ################
+    // Selection
+    // ################
+
+    public void SelectAndFlyTo (GameObject Target)
+    {
+
+    }
+
+    public void SelectAndFlyTo(GameObject[] Targets)
+    {
+
+    }
+
+    IEnumerator FlyToPosition(Vector3 endPosition, Vector3 endScale, float speed = 0.5f)
+    {
+        Vector3 startScale = Vector3.one * GlobalVar.CurrentZoom;
+        Vector3 startPosition = VisualizationRoot.localPosition;
+        startPosition.y = GlobalVar.hologramTableHeight;
+
+        float value = 0;
+        while (value <= 1)
+        {
+            VisualizationRoot.localScale = Vector3.Lerp(startScale, endScale, value);
+            VisualizationRoot.localPosition = Vector3.Lerp(startPosition, endPosition, value);
+            GlobalVar.CurrentZoom = VisualizationRoot.localScale.x;
+
+            value += 0.01f * speed;
+            yield return new WaitForFixedUpdate();
+        }
+    }
+
+    IEnumerator FlyToMultiple(Transform[] targetTransforms)
+    {
+        float distance;
+        Vector3 centerPosition = FindCentroid(targetTransforms, out distance);
+        float zoomMultiplier = 1.5f / (GlobalVar.CurrentZoom * distance);
+
+        Vector3 startScale = Vector3.one * GlobalVar.CurrentZoom;
+        Vector3 endScale = startScale * zoomMultiplier;
+
+        Vector3 startPosition = VisualizationRoot.localPosition;
+        Vector3 endPosition = (startPosition - (centerPosition - startPosition)) * endScale.x;
+        endPosition.y = startPosition.y;
+
+        Debug.Log("startScale: " + startScale + " --- endScale: " + endScale);
+        Debug.Log("worldCenterPosition: " + centerPosition + " --- endPosition: " + endPosition);
+
+        yield return FlyToPosition(endPosition, endScale);
+    }
+
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.KeypadEnter))
+        {
+            StartCoroutine(FlyToMultiple(new Transform[] { IslandGameObjects[0].transform, IslandGameObjects[1].transform, IslandGameObjects[2].transform}));
+        }
+    }
+
 
     // ################
     // Helper Functions
@@ -442,12 +515,41 @@ public class IslandVizVisualization : MonoBehaviour
     /// Moves the table to a new hight.
     /// </summary>
     /// <param name="newHeight">The new height (in meters) of the table.</param>
-    public void UpdateTableHight (float newHeight)
+    public void ApplyTableHeight (float newHeight)
     {
         Table.transform.position = new Vector3(Table.transform.position.x, newHeight, Table.transform.position.z);
         VisualizationRoot.transform.position = new Vector3(VisualizationRoot.transform.position.x, newHeight, VisualizationRoot.transform.position.z);
         GlobalVar.hologramTableHeight = newHeight;
-        IslandVizUI.Instance.TableHeightChanged();
+    }
+
+    private Vector3 FindCentroid(Transform[] targets, out float distance)
+    {
+        Vector3 centroid;
+        Vector3 minPoint = targets[0].localPosition;
+        Vector3 maxPoint = targets[0].localPosition;
+
+        for (int i = 1; i < targets.Length; i++)
+        {
+            Vector3 pos = targets[i].localPosition;
+            if (pos.x < minPoint.x)
+                minPoint.x = pos.x;
+            if (pos.x > maxPoint.x)
+                maxPoint.x = pos.x;
+            if (pos.y < minPoint.y)
+                minPoint.y = pos.y;
+            if (pos.y > maxPoint.y)
+                maxPoint.y = pos.y;
+            if (pos.z < minPoint.z)
+                minPoint.z = pos.z;
+            if (pos.z > maxPoint.z)
+                maxPoint.z = pos.z;
+        }
+
+        centroid = minPoint + 0.5f * (maxPoint - minPoint);
+
+        distance = Vector3.Distance(maxPoint, minPoint);
+
+        return centroid;
     }
 
     #endregion

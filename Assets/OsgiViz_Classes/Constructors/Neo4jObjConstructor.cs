@@ -12,13 +12,56 @@ using OsgiViz.SoftwareArtifact;
 using OsgiViz.Relations;
 
 /// <summary>
-/// THIS ONLY WORKS IN UNITY 2019!
+/// This class TODO
 /// </summary>
 public class Neo4jOsgiConstructor : MonoBehaviour {
 
-    private Neo4JDriver.Neo4J neo4j;
-    private IStatementResult neo4jModel;
+    private Neo4JDriver.Neo4J neo4j; // Neo4J Server Connection instance
     private OsgiProject osgiProject;
+
+    Dictionary<CypherCode, string> cypherStrings = new Dictionary<CypherCode, string>() // TODO
+        {
+            { CypherCode.Bundle, "Bundle" },
+            { CypherCode.BundleID, "bundleSymbolicName" },
+            { CypherCode.BundleName, "name"},
+            { CypherCode.Package, "Package"},
+            { CypherCode.PackageID, "fileName"},
+            { CypherCode.Class, "Class"},
+            { CypherCode.ClassName, "name"},
+            { CypherCode.ClassLOC, "linesOfCode"},
+            { CypherCode.Service, "Service"},
+            { CypherCode.ServiceName, "name"},
+            { CypherCode.ServiceID, "fileName"},
+            { CypherCode.ServiceComponent, "ServiceComponent"},
+            { CypherCode.Package_Contains_Class, "CONTAINS"},
+            { CypherCode.Bundle_Export_Package, "EXPORTS"},
+            { CypherCode.Bundle_Import_Package, "IMPORTS"},
+            { CypherCode.Bundle_Contains_ServiceComponent, "CONTAINS"},
+            { CypherCode.Bundle_Contains_Package, "HAS"},
+            { CypherCode.ServiceComponent_Publisches_CompilationUnit, "PUBLISHES"}
+        };
+
+    enum CypherCode
+    {
+        Bundle,
+        BundleID,
+        BundleName,
+        Package,
+        PackageID,
+        Class,
+        ClassName,
+        ClassLOC,
+        Service,
+        ServiceName,
+        ServiceID,
+        ServiceComponent,
+        Package_Contains_Class,
+        Bundle_Export_Package,
+        Bundle_Import_Package,
+        Bundle_Contains_ServiceComponent,
+        Bundle_Contains_Package,
+        ServiceComponent_Publisches_CompilationUnit
+    }
 
     private void Start()
     {
@@ -26,37 +69,9 @@ public class Neo4jOsgiConstructor : MonoBehaviour {
     }
 
     /// <summary>
-    /// Extracts the data from the Neo4J server and stores it intro a O.
+    /// Extracts the OsgiProject from the Neo4J server and stores it into a local variable.
     /// </summary>
     /// <returns></returns>
-    public IEnumerator Test() // TODO
-    {
-        yield return null;
-
-        try
-        {
-            //IStatementResult result = neo4j.Transaction("MATCH (cloudAtlas {title: \"Cloud Atlas\"}) " +
-            //                "RETURN cloudAtlas.released");
-            //string release = result.Single()[0].As<string>();
-            //Debug.Log("Output: " + release);
-
-            IStatementResult result = neo4j.Transaction("MATCH (b:Bundle) RETURN b.name as name");
-            List<string> bundleNames = result.Select(record => record["name"].As<string>()).ToList();
-            string output = "Neo4J databse contains the following " + bundleNames.Count + " bundles:";
-            foreach (var bundleName in bundleNames)
-            {
-                output += "\n" + bundleName;
-            }
-            Debug.Log(output);
-        }
-        catch (Exception e)
-        {
-            Debug.LogError(e.Data);
-            Debug.LogError("Neo4jObjConstructor Failed!");
-        }
-    }
-
-
     public IEnumerator Construct()
     {
         Debug.Log("Starting OSGi-Project construction!");
@@ -64,7 +79,7 @@ public class Neo4jOsgiConstructor : MonoBehaviour {
         osgiProject = new OsgiProject("Default"); // TODO
 
         // Find all bundles
-        IStatementResult result = neo4j.Transaction("MATCH (b:Bundle) RETURN b.bundleSymbolicName as symbolicName");
+        IStatementResult result = neo4j.Transaction("MATCH (b:"+ cypherStrings[CypherCode.Bundle] + ") RETURN b.bundleSymbolicName as symbolicName");
         List<string> bundlesymbolicNameList = result.Select(record => record["symbolicName"].As<string>()).ToList();
 
         result = neo4j.Transaction("MATCH (b:Bundle) RETURN b.name as name");
@@ -288,17 +303,15 @@ public class Neo4jOsgiConstructor : MonoBehaviour {
             }
         }
 
-        yield return null;
-
         Debug.Log("Finished OSGi-Project construction!");
-
     }
 
 
 
-
-
-
+    // ################
+    // Public Getter Methods
+    // ################
+    
     /// <summary>
     /// Returns the extracted data from the Neo4J server.
     /// </summary>
@@ -309,13 +322,22 @@ public class Neo4jOsgiConstructor : MonoBehaviour {
     }
 
 
-    private modifier StringToModifier (string input)
+
+    // ################
+    // Helper Functions
+    // ################
+
+    private modifier StringToModifier (string input) // TODO
     {
         //return (modifier)Enum.Parse(typeof(modifier), input);
         return modifier.Default;
     }
 
-
+    /// <summary>
+    /// Search for a CompilationUnit in the local OsgiProject.
+    /// </summary>
+    /// <param name="fileName">The fileName of the CompilationUnit.</param>
+    /// <returns></returns>
     private CompilationUnit FindCompilationUnit (string fileName)
     {
         foreach (var b in osgiProject.getBundles())
@@ -332,6 +354,11 @@ public class Neo4jOsgiConstructor : MonoBehaviour {
         return null;
     }
 
+    /// <summary>
+    /// Search for a Package in the local OsgiProject.
+    /// </summary>
+    /// <param name="fileName">The fileName of the Package.</param>
+    /// <returns></returns>
     private Package FindPackage (string fileName)
     {
         foreach (var b in osgiProject.getBundles())
@@ -345,6 +372,11 @@ public class Neo4jOsgiConstructor : MonoBehaviour {
         return null;
     }
 
+    /// <summary>
+    /// Search for a Service in the local OsgiProject.
+    /// </summary>
+    /// <param name="fileName">The fileName of the Service.</param>
+    /// <returns></returns>
     private Service FindService(string fileName)
     {
         foreach (var s in osgiProject.getServices())

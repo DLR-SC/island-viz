@@ -18,7 +18,6 @@ namespace OsgiViz.SideThreadConstructors
     {
 
         private OsgiProject currentProject;
-        private Status status;
         private readonly string redundantString_A = "http://www.example.org/OSGiApplicationModel#//";
         private JSONObject jsonObj;
 
@@ -28,7 +27,6 @@ namespace OsgiViz.SideThreadConstructors
         public OsgiProjectConstructor()
         {
             currentProject = null;
-            status = Status.Idle;
             jsonObj = null;
         }
 
@@ -48,7 +46,6 @@ namespace OsgiViz.SideThreadConstructors
         {
             jsonObj = jObj;
 
-            status = Status.Working;
             Debug.Log("Starting OSGi-Project construction!");
 
             #region OsgiProject            
@@ -249,7 +246,6 @@ namespace OsgiViz.SideThreadConstructors
             #endregion
             //Debug.Log("Max Import-count: " + currentProject.getMaxImportCount());
 
-            status = Status.Finished;
             Debug.Log("Finished OSGi-Project construction!");
         }
 
@@ -380,14 +376,6 @@ namespace OsgiViz.SideThreadConstructors
         public OsgiProject getProject()
         {
             return currentProject;
-        }
-        public Status getStatus()
-        {
-            return status;
-        }
-        public void setStatus(Status newStatus)
-        {
-            status = newStatus;
         }
     }
 

@@ -36,6 +36,8 @@ public class IslandVizUI : MonoBehaviour
         Instance = this;
         IslandVizBehaviour.Instance.OnConstructionDone += OnConstructionDone; // Subscribe to the OnConstructionDone event of the IslandVizBehaviour.
         StaticUI_Parent.gameObject.SetActive(true); // This is probably disabled because it is annoying in the editor, so we enable it here ;)
+
+        IslandVizVisualization.Instance.OnTableHeightChanged += TableHeightChanged;
     }
 
 
@@ -46,9 +48,9 @@ public class IslandVizUI : MonoBehaviour
     /// <summary>
     /// Call this when the table height was changed to also change the height of all UI elements that are attached to the table.
     /// </summary>
-    public void TableHeightChanged ()
+    public void TableHeightChanged (float newHeight)
     {
-        TableUI_Parent.position = Vector3.up * OsgiViz.Core.GlobalVar.hologramTableHeight;
+        TableUI_Parent.position = Vector3.up * newHeight;
     }
 
     /// <summary>

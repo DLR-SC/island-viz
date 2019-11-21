@@ -116,7 +116,7 @@ public class TableHeightAdjuster : AdditionalIslandVizComponent
         {
             newHeight = GlobalVar.hologramTableHeight + (hand.GetTrackedObjectVelocity().y * Time.fixedDeltaTime);
 
-            IslandVizVisualization.Instance.UpdateTableHight(newHeight);
+            IslandVizVisualization.Instance.OnTableHeightChanged(newHeight);
             handle.transform.position = new Vector3(handle.transform.position.x, newHeight, handle.transform.position.z);
 
             yield return new WaitForFixedUpdate();
