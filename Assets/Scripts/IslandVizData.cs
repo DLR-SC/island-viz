@@ -80,6 +80,8 @@ public class IslandVizData : MonoBehaviour
         {
             IslandVizUI.Instance.UpdateLoadingScreenUI("OSGi-Project from Neo4J", "");
 
+            yield return null;
+
             yield return neo4jConstructor.Construct(); // Construct a osgi Object from the neo4J Object.
             OsgiProject = neo4jConstructor.GetOsgiProject();
         }

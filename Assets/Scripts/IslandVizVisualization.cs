@@ -39,6 +39,7 @@ public class IslandVizVisualization : MonoBehaviour
     [HideInInspector]
     public List<CartographicIsland> IslandStructures;
 
+    [HideInInspector]
     public List<IslandGO> IslandGameObjects;
 
     // Mandatory coomonents for visualization.
