@@ -20,8 +20,6 @@ namespace OsgiViz.Unity.Island
         private GameObject importDock;
         private GameObject exportDock;
 
-        private List<Hand> touchingHandList; // List of hands, that are currently touching the handle.
-        private Hand currentHand; // The hand that is currently using the handle.
 
         void Awake()
         {
@@ -102,57 +100,28 @@ namespace OsgiViz.Unity.Island
 
 
 
-        // ################
-        // Interaction - Event Handling
-        // ################
-
-        #region Interaction - Event Handling
-
-        private void OnControllerEnterEvent(Collider collider, Hand hand)
-        {
-            if (collider.gameObject == gameObject && !touchingHandList.Contains(hand))
-            {
-                touchingHandList.Add(hand);
-            }
-        }
-
-        private void OnControllerExitEvent(Collider collider, Hand hand)
-        {
-            if (collider.gameObject == gameObject && touchingHandList.Contains(hand))
-            {
-                touchingHandList.Remove(hand);
-            }
-        }
-
-        private void OnControllerTriggerPressed(Hand hand)
-        {
-            if (currentHand == null && touchingHandList.Contains(hand))
-            {
-                Select();
-            }
-        }
-
-        private void OnControllerTriggerReleased(Hand hand)
-        {
-            if (currentHand == hand)
-            {
-                Deselect();
-            }
-        }
-
-        #endregion
+        
 
 
 
 
         public void Select ()
         {
-            Selected = true;
+            if (!Selected)
+            {
+                Selected = true;
+                IslandVizInteraction.Instance.OnIslandSelected(this);
+            }
+            else
+            {
+                Deselect();
+            }
         }
 
         public void Deselect ()
         {
             Selected = false;
+            IslandVizInteraction.Instance.OnIslandDeselected(this);
         }
 
 

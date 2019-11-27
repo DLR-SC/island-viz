@@ -57,6 +57,8 @@ public class StaticIslandNames : AdditionalIslandVizComponent
 
     IEnumerator IslandName (IslandGO island)
     {
+        Debug.Log("Spawning Text");
+
         GameObject islandName = (GameObject)Instantiate(IslandNamePrefab);
         islandName.transform.parent = IslandNameParent;
         islandName.transform.localScale = Vector3.one * 0.001f;

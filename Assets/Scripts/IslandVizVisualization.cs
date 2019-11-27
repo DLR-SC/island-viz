@@ -344,7 +344,7 @@ public class IslandVizVisualization : MonoBehaviour
             {
                 islandsDirty = false; // This has to be done first, because dirty islands can appear at any point.
 
-                Debug.Log(CurrentZoomLevel);
+                //Debug.Log(CurrentZoomLevel);
 
                 // Apply current ZoomLevel to all current islands.
                 for (int i = 0; i < currentIslands.Count; i++)

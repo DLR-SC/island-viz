@@ -23,6 +23,7 @@ public class IslandVizInteraction : MonoBehaviour {
 
     private AdditionalIslandVizComponent[] inputComponents; // Array of all additional input componets.
 
+    private IslandSelectionComponent islandSelectionComponent;
     
 
 
@@ -41,6 +42,7 @@ public class IslandVizInteraction : MonoBehaviour {
         Instance = this;
         inputComponents = InteractionComponentsGameObject.GetComponents<AdditionalIslandVizComponent>();
 
+        islandSelectionComponent = InteractionComponentsGameObject.AddComponent<IslandSelectionComponent>();
         //OnControllerTriggerDown += DebugInput;
     }
 
