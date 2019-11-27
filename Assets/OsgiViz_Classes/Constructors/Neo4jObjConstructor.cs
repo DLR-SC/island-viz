@@ -65,7 +65,7 @@ public class Neo4jOsgiConstructor : MonoBehaviour {
 
     private void Start()
     {
-        neo4j = new Neo4JDriver.Neo4J("bolt://localhost:7687", "neo4j", "123456");
+        neo4j = new Neo4JDriver.Neo4J("bolt://localhost:7687", "neo4j", "123");
     }
 
     /// <summary>

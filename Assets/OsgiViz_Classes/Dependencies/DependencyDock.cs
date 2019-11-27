@@ -7,6 +7,7 @@ using QuickGraph;
 using System.Linq;
 using OsgiViz.Relations;
 using OsgiViz.Core;
+using OsgiViz.Unity.Island;
 
 namespace OsgiViz
 {
@@ -19,7 +20,6 @@ namespace OsgiViz
     [RequireComponent(typeof(Valve.VR.InteractionSystem.Interactable))]
     public class DependencyDock : MonoBehaviour
     {
-
         private GameObject dependencyContainer;
         private ConnectionPool connectionPool;
         private GameObject rotPivot;
@@ -158,7 +158,6 @@ namespace OsgiViz
                 connectionArrows.Add(conArrow);
                 cc++;
             }
-
         }
 
         public void hideAllDependencies()
@@ -173,6 +172,14 @@ namespace OsgiViz
             expanded = true;
             foreach (GameObject arrow in connectionArrows)
                 arrow.SetActive(true);
+
+            List<Transform> connectedDockTransforms = new List<Transform>();
+            foreach (var item in connectedDocks)
+            {
+                connectedDockTransforms.Add(item.transform.parent);
+            }
+            connectedDockTransforms.Add(this.transform.parent);
+            IslandVizVisualization.Instance.SelectAndFlyTo(connectedDockTransforms.ToArray());
         }
 
     }

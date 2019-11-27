@@ -38,7 +38,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
             {
                 constructDockGO(islands[i]);
 
-                if (i % 5 == 0) // Only wait every 5th Dock construction
+                if (i % 5 == 0) // Only wait every 5th Dock construction for better performance.
                 {
                     IslandVizUI.Instance.UpdateLoadingScreenUI("Dock-GameObject Construction", (((float)i / (float)islands.Count) * 100f).ToString("0.0") + "%");
                     yield return null;
@@ -61,7 +61,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
                     iDock.GetComponent<DependencyDock>().constructConnectionArrows();
                 }
 
-                if (i % 5 == 0) // Only wait every 5th Dock construction
+                if (i % 5 == 0) // Only wait every 5th Dock construction for better performance.
                 {
                     IslandVizUI.Instance.UpdateLoadingScreenUI("Dock-ConnectionArrows Construction", (((float)i / (float)islands.Count) * 100f).ToString("0.0") + "%");
                     yield return null;

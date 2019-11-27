@@ -14,6 +14,7 @@ using OsgiViz.SoftwareArtifact;
 using VFace = TriangleNet.Topology.DCEL.Face;
 using TnetMesh = TriangleNet.Mesh;
 using VHEdge = TriangleNet.Topology.DCEL.HalfEdge;
+using Valve.VR.InteractionSystem;
 
 namespace OsgiViz.Unity.MainThreadConstructors
 {
@@ -301,6 +302,8 @@ namespace OsgiViz.Unity.MainThreadConstructors
             cColliderIsland.center = newCenter;
             cColliderIsland.isTrigger = true;
             #endregion
+
+            islandGO.AddComponent<Interactable>();
 
             #endregion
 

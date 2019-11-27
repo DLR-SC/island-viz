@@ -11,13 +11,17 @@ namespace OsgiViz.Unity.Island
 
     public class IslandGO : MonoBehaviour
     {
-        public ZoomLevel ZoomLevel;
+        public ZoomLevel CurrentZoomLevel;
+        public bool Selected = false;
 
         private CartographicIsland island;
         private List<Region> regions;
         private GameObject coast;
         private GameObject importDock;
         private GameObject exportDock;
+
+        private List<Hand> touchingHandList; // List of hands, that are currently touching the handle.
+        private Hand currentHand; // The hand that is currently using the handle.
 
         void Awake()
         {
@@ -39,13 +43,238 @@ namespace OsgiViz.Unity.Island
             //if (pi == null)
             //    pi = gameObject.AddComponent<PdaInspectable>();
             //#endregion
-
         }
 
-        void Start()
+
+        // ################
+        // Events
+        // ################
+
+        
+        /// <summary>
+        /// Called when the island GameObject is enabled.
+        /// </summary>
+        public IslandEnabled OnIslandEnabled;
+        /// <summary>
+        /// Called when the island GameObject is disabled.
+        /// </summary>
+        public IslandDisabled OnIslandDisabled;
+
+
+        // ################
+        // Delegates
+        // ################
+
+        /// <summary>
+        /// Called when the island GameObject is enabled.
+        /// </summary>
+        public delegate void IslandEnabled();
+        /// <summary>
+        /// Called when the island GameObject is disabled.
+        /// </summary>
+        public delegate void IslandDisabled();
+        
+
+
+
+
+        // ################
+        // Physics
+        // ################
+        #region Physics
+
+        private void OnTriggerEnter(Collider other)
         {
-            
+            if (other.tag == "TableContent")
+            {
+                IslandVizVisualization.Instance.AddCurrentIsland(this);
+            }
         }
+        private void OnTriggerExit(Collider other)
+        {
+            if (other.tag == "TableContent")
+            {
+                IslandVizVisualization.Instance.RemoveCurrentIsland(this);
+            }
+        }
+
+        #endregion
+
+
+
+        // ################
+        // Interaction - Event Handling
+        // ################
+
+        #region Interaction - Event Handling
+
+        private void OnControllerEnterEvent(Collider collider, Hand hand)
+        {
+            if (collider.gameObject == gameObject && !touchingHandList.Contains(hand))
+            {
+                touchingHandList.Add(hand);
+            }
+        }
+
+        private void OnControllerExitEvent(Collider collider, Hand hand)
+        {
+            if (collider.gameObject == gameObject && touchingHandList.Contains(hand))
+            {
+                touchingHandList.Remove(hand);
+            }
+        }
+
+        private void OnControllerTriggerPressed(Hand hand)
+        {
+            if (currentHand == null && touchingHandList.Contains(hand))
+            {
+                Select();
+            }
+        }
+
+        private void OnControllerTriggerReleased(Hand hand)
+        {
+            if (currentHand == hand)
+            {
+                Deselect();
+            }
+        }
+
+        #endregion
+
+
+
+
+        public void Select ()
+        {
+            Selected = true;
+        }
+
+        public void Deselect ()
+        {
+            Selected = false;
+        }
+
+
+        /// <summary>
+        /// This Method contains and applies the rules of all ZoomLevels to an island. 
+        /// Call this to change the Zoomlevel of an island.
+        /// </summary>
+        /// <param name="newZoomLevel">The ZoomLevel that you want to apply to the island.</param>
+        /// <returns></returns>
+        public IEnumerator ApplyZoomLevel(ZoomLevel newZoomLevel)
+        {
+            if (CurrentZoomLevel == newZoomLevel)
+            {
+                // Do nothing.
+            }
+            else if (newZoomLevel == ZoomLevel.Near)
+            {
+                yield return NearZoomLevel();
+            }
+            else if (newZoomLevel == ZoomLevel.Medium)
+            {
+                yield return MediumZoomLevel();
+            }
+            else if (newZoomLevel == ZoomLevel.Far)
+            {
+                yield return FarZoomLevel();
+            }
+            CurrentZoomLevel = newZoomLevel;
+        }
+
+
+        public IEnumerator NearZoomLevel()
+        {
+            // Disable region colliders & enable buildings.
+            foreach (var region in regions)
+            {
+                if (region.GetComponent<MeshCollider>().enabled)
+                    region.GetComponent<MeshCollider>().enabled = false;
+
+                foreach (var building in region.getBuildings())
+                {
+                    if (!building.gameObject.activeSelf)
+                        building.gameObject.SetActive(true);
+                }
+                yield return null;
+            }
+
+            // Disable island collider.
+            if (GetComponent<CapsuleCollider>().enabled)
+                GetComponent<CapsuleCollider>().enabled = false;
+        }
+
+
+        public IEnumerator MediumZoomLevel()
+        {
+            // NEAR -> MEDIUM 
+            if (CurrentZoomLevel == ZoomLevel.Near)
+            {
+                foreach (var region in regions)
+                {
+                    foreach (var building in region.getBuildings())
+                    {
+                        if (building.gameObject.activeSelf)
+                            building.gameObject.SetActive(false);
+                    }
+                    yield return null;
+                }
+            }
+            // FAR -> MEDIUM
+            else
+            {
+                // Enable Docks.
+                if (!importDock.activeSelf)
+                {
+                    importDock.SetActive(true);
+                    exportDock.SetActive(true);
+                }                
+
+                // Enable region colliders.
+                foreach (var region in regions)
+                {
+                    if (!region.GetComponent<MeshCollider>().enabled)
+                        region.GetComponent<MeshCollider>().enabled = true;
+                }
+
+                // Disable island collider.
+                if (GetComponent<CapsuleCollider>().enabled)
+                    GetComponent<CapsuleCollider>().enabled = false;
+            }
+        }
+
+
+        public IEnumerator FarZoomLevel ()
+        {
+            // Hide Docks.
+            if (importDock.activeSelf)
+            {
+                importDock.SetActive(false);
+                exportDock.SetActive(false);
+            }   
+
+            // Disable region colliders & hide buildings.
+            foreach (var region in regions)
+            {
+                if (region.GetComponent<MeshCollider>().enabled)
+                    region.GetComponent<MeshCollider>().enabled = false;
+
+                foreach (var building in region.getBuildings())
+                {
+                    if (building.gameObject.activeSelf)
+                        building.gameObject.SetActive(false);
+                }
+                yield return null;
+            }
+
+            // Enable island collider.
+            GetComponent<CapsuleCollider>().enabled = true;
+        }
+
+
+
+
 
         private void handleActivationDeactivation(Hand hand)
         {
@@ -62,20 +291,10 @@ namespace OsgiViz.Unity.Island
             gameObject.GetComponent<PdaInspectable>().sendContentToPda(contentText);
         }
 
-        private void OnTriggerEnter(Collider other)
-        {
-            if (other.tag == "TableContent")
-            {
-                IslandVizVisualization.Instance.AddCurrentIsland(this);
-            }
-        }
-        private void OnTriggerExit(Collider other)
-        {
-            if (other.tag == "TableContent")
-            {
-                IslandVizVisualization.Instance.RemoveCurrentIsland(this);
-            }
-        }
+
+
+
+
 
         //Returns true if island does not contain a single CU. Returns false otherwise.
         public bool isIslandEmpty()

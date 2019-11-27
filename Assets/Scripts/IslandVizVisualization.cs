@@ -57,14 +57,34 @@ public class IslandVizVisualization : MonoBehaviour
 
     private List<IslandGO> currentIslands;
 
-    private ZoomLevel currentZoomLevel;
+    public ZoomLevel CurrentZoomLevel;
     private bool zoomDirty; // This is set to TRUE when the current Zoom was changed (called by a IslandVizInteraction Component).
     private bool islandsDirty; // This is set to TRUE when ZoomLevel changed or when appearing island displays the wrong ZoomLevel.
 
 
 
 
+    // ################
+    // Events
+    // ################
 
+    /// <summary>
+    /// Called when the table hight was changed.
+    /// </summary>
+    public TableHeightChanged OnTableHeightChanged;
+    /// <summary>
+    /// Called when the zoom level of the visualization has changed.
+    /// </summary>
+    public ZoomLevelChanged OnZoomLevelChanged;
+    /// <summary>
+    /// Called when the position of the visualization root was changed.
+    /// </summary>
+    public PositionChanged OnPositionChanged;
+
+
+    // ################
+    // Delegates
+    // ################
 
     /// <summary>
     /// Called when the table hight was changed.
@@ -72,9 +92,15 @@ public class IslandVizVisualization : MonoBehaviour
     /// <param name="newHeight">The new height of the table.</param>
     public delegate void TableHeightChanged(float newHeight);
     /// <summary>
-    /// Called when the table hight was changed.
+    /// Called when the zoom level has changed.
     /// </summary>
-    public TableHeightChanged OnTableHeightChanged;
+    /// <param name="newZoomLevel">.</param>
+    public delegate void ZoomLevelChanged(ZoomLevel newZoomLevel);
+    /// <summary>
+    /// Called when the position of the visualization root was changed.
+    /// </summary>
+    public delegate void PositionChanged();
+
 
 
 
@@ -156,7 +182,7 @@ public class IslandVizVisualization : MonoBehaviour
         // Construct and store the island GameObjects.
         yield return islandGOConstructor.Construct(IslandVizVisualization.Instance.IslandStructures, TransformContainer.IslandContainer.gameObject);
         IslandGameObjects = islandGOConstructor.getIslandGOs();
-
+        
         yield return dockGOConstructor.Construct(islandGOConstructor.getIslandGOs(), TransformContainer.IslandContainer.gameObject); // Construct the dock GameObjects.
 
         // Construct the island hierarchy. TODO enable in the future?
@@ -206,7 +232,7 @@ public class IslandVizVisualization : MonoBehaviour
             currentIslands.Add(islandGO);
 
             // When a new island with a wrong ZoomLevel appears, the current ZoomLevel needs to be applied to it.
-            if (islandGO.ZoomLevel != currentZoomLevel)
+            if (islandGO.CurrentZoomLevel != CurrentZoomLevel)
             {
                 islandsDirty = true;
             }
@@ -215,6 +241,12 @@ public class IslandVizVisualization : MonoBehaviour
             {
                 islandGO.transform.GetChild(i).gameObject.SetActive(true);
             }
+
+            if (islandGO.OnIslandEnabled != null)
+            {
+                islandGO.OnIslandEnabled();
+            }
+
             //Debug.Log(currentIslands.Count);
             IslandVizUI.Instance.UpdateCurrentVisibleIslandsUI(((float)currentIslands.Count/(float)GlobalVar.islandNumber) * 100f);
         }
@@ -234,6 +266,11 @@ public class IslandVizVisualization : MonoBehaviour
             for (int i = 0; i < islandGO.transform.childCount; i++)
             {
                 islandGO.transform.GetChild(i).gameObject.SetActive(false);
+            }
+
+            if (islandGO.OnIslandDisabled != null)
+            {
+                islandGO.OnIslandDisabled();
             }
 
             IslandVizUI.Instance.UpdateCurrentVisibleIslandsUI(((float)currentIslands.Count / (float)GlobalVar.islandNumber) * 100f);
@@ -280,19 +317,19 @@ public class IslandVizVisualization : MonoBehaviour
                 zoomLevelPercent = Mathf.Sqrt(Mathf.Sqrt((GlobalVar.CurrentZoom - GlobalVar.MinZoom) / (GlobalVar.MaxZoom - GlobalVar.MinZoom))) * 100;
 
                 // Check if the ZoomLevel changed.
-                if (zoomLevelPercent <= GlobalVar.FarZoomLevelPercent && currentZoomLevel != ZoomLevel.Far)
+                if (zoomLevelPercent <= GlobalVar.FarZoomLevelPercent && CurrentZoomLevel != ZoomLevel.Far)
                 {
-                    currentZoomLevel = ZoomLevel.Far;
+                    CurrentZoomLevel = ZoomLevel.Far;
                     islandsDirty = true;
                 }
-                else if (zoomLevelPercent > GlobalVar.FarZoomLevelPercent && zoomLevelPercent <= GlobalVar.MediumZoomLevelPercent && currentZoomLevel != ZoomLevel.Medium)
+                else if (zoomLevelPercent > GlobalVar.FarZoomLevelPercent && zoomLevelPercent <= GlobalVar.MediumZoomLevelPercent && CurrentZoomLevel != ZoomLevel.Medium)
                 {
-                    currentZoomLevel = ZoomLevel.Medium;
+                    CurrentZoomLevel = ZoomLevel.Medium;
                     islandsDirty = true;
                 }
-                else if (zoomLevelPercent > GlobalVar.MediumZoomLevelPercent && currentZoomLevel != ZoomLevel.Near)
+                else if (zoomLevelPercent > GlobalVar.MediumZoomLevelPercent && CurrentZoomLevel != ZoomLevel.Near)
                 {                    
-                    currentZoomLevel = ZoomLevel.Near;
+                    CurrentZoomLevel = ZoomLevel.Near;
                     islandsDirty = true;
                 }
 
@@ -307,16 +344,16 @@ public class IslandVizVisualization : MonoBehaviour
             {
                 islandsDirty = false; // This has to be done first, because dirty islands can appear at any point.
 
-                Debug.Log(currentZoomLevel);
+                Debug.Log(CurrentZoomLevel);
 
                 // Apply current ZoomLevel to all current islands.
                 for (int i = 0; i < currentIslands.Count; i++)
                 {
-                    if (i < currentIslands.Count && currentIslands[i].ZoomLevel != currentZoomLevel) // The first condition is important, because islands can 
+                    if (i < currentIslands.Count && currentIslands[i].CurrentZoomLevel != CurrentZoomLevel) // The first condition is important, because islands can 
                                                                                                             // appear or disappear at any point.
                     {
                         IslandVizUI.Instance.ZoomLevelValue.text = "<color=yellow>" + (i / currentIslands.Count) * 100 + " %</color>"; // Give simple feedback on progress // TODO
-                        yield return ApplyZoomLevelToIsland(currentIslands[i], currentZoomLevel);
+                        yield return currentIslands[i].ApplyZoomLevel(CurrentZoomLevel);
                     }
                 }
 
@@ -325,93 +362,7 @@ public class IslandVizVisualization : MonoBehaviour
             yield return new WaitForFixedUpdate();
         }
     }
-
-
-    /// <summary>
-    /// This Method contains and applies the rules of all ZoomLevels to an island. 
-    /// Call this to change the Zoomlevel of an island.
-    /// </summary>
-    /// <param name="island">The island you want to change the ZoomLevel.</param>
-    /// <param name="zoomLevel">The ZoomLevel that you want to apply to the island.</param>
-    /// <returns></returns>
-    IEnumerator ApplyZoomLevelToIsland(IslandGO island, ZoomLevel zoomLevel)
-    {
-        if (zoomLevel == ZoomLevel.Near)
-        {
-            foreach (var region in island.getRegions())
-            {
-                foreach (var building in region.getBuildings())
-                {
-                    if (!building.gameObject.activeSelf)
-                        building.gameObject.SetActive(true);
-                }
-                yield return null;
-            }
-            island.ZoomLevel = currentZoomLevel;
-        }
-        else if (zoomLevel == ZoomLevel.Medium)
-        {
-            // MEDIUM
-            //  ^
-            // NEAR  
-            if (island.ZoomLevel == ZoomLevel.Near)
-            {                
-                foreach (var region in island.getRegions())
-                {
-                    foreach (var building in region.getBuildings())
-                    {
-                        if (building.gameObject.activeSelf)
-                            building.gameObject.SetActive(false);
-                    }
-                    yield return null;
-                }
-            }
-            // FAR
-            //  v
-            // MEDIUM
-            else
-            {
-                island.getImportDock().SetActive(true);
-                island.getExportDock().SetActive(true);
-
-                foreach (var region in island.getRegions())
-                {
-                    region.GetComponent<MeshCollider>().enabled = true;
-                }
-            }
-
-            island.ZoomLevel = currentZoomLevel;
-        }
-        else if (zoomLevel == ZoomLevel.Far)
-        {            
-            // MEDIUM -> FAR
-            if (island.ZoomLevel == ZoomLevel.Medium)
-            {
-                island.getImportDock().SetActive(false);
-                island.getExportDock().SetActive(false);
-            }
-            // NEAR -> FAR
-            else
-            {
-                island.getImportDock().SetActive(false);
-                island.getExportDock().SetActive(false);
-
-                foreach (var region in island.getRegions())
-                {
-                    region.GetComponent<MeshCollider>().enabled = false;
-
-                    foreach (var building in region.getBuildings())
-                    {
-                        if (building.gameObject.activeSelf)
-                            building.gameObject.SetActive(false);
-                    }
-                    yield return null;
-                }
-            }
-            island.ZoomLevel = currentZoomLevel;
-        }
-    }
-
+    
     #endregion
 
 
@@ -420,14 +371,22 @@ public class IslandVizVisualization : MonoBehaviour
     // Selection
     // ################
 
-    public void SelectAndFlyTo (GameObject Target)
+    public void SelectAndFlyTo (Transform target)
     {
-
+        Debug.Log(target.position);
     }
 
-    public void SelectAndFlyTo(GameObject[] Targets)
+    public void SelectAndFlyTo(Transform[] targets)
     {
+        foreach (var item in targets)
+        {
+            if (item.GetComponent<IslandGO>() != null)
+            {
+                item.GetComponent<IslandGO>().Select();
+            }
+        }
 
+        StartCoroutine(FlyToMultiple(targets));
     }
 
     IEnumerator FlyToPosition(Vector3 endPosition, Vector3 endScale, float speed = 0.5f)
@@ -440,7 +399,7 @@ public class IslandVizVisualization : MonoBehaviour
         while (value <= 1)
         {
             VisualizationRoot.localScale = Vector3.Lerp(startScale, endScale, value);
-            VisualizationRoot.localPosition = Vector3.Lerp(startPosition, endPosition, value);
+            VisualizationRoot.position = Vector3.Lerp(startPosition, endPosition, value);
             GlobalVar.CurrentZoom = VisualizationRoot.localScale.x;
 
             value += 0.01f * speed;
@@ -451,18 +410,26 @@ public class IslandVizVisualization : MonoBehaviour
     IEnumerator FlyToMultiple(Transform[] targetTransforms)
     {
         float distance;
-        Vector3 centerPosition = FindCentroid(targetTransforms, out distance);
-        float zoomMultiplier = 1.5f / (GlobalVar.CurrentZoom * distance);
+        Vector3 centerLocalPosition = FindCentroid(targetTransforms, out distance);
+        Vector3 centerWorldPosition = centerLocalPosition * GlobalVar.CurrentZoom + VisualizationRoot.transform.position;
 
+        float zoomMultiplier = 0.75f / (GlobalVar.CurrentZoom * distance);        
         Vector3 startScale = Vector3.one * GlobalVar.CurrentZoom;
         Vector3 endScale = startScale * zoomMultiplier;
 
-        Vector3 startPosition = VisualizationRoot.localPosition;
-        Vector3 endPosition = (startPosition - (centerPosition - startPosition)) * endScale.x;
+        // Debug
+        GameObject DebugCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        DebugCube.transform.localScale = new Vector3(0.01f, 100, 0.01f);
+        DebugCube.transform.parent = VisualizationRoot;
+        DebugCube.transform.localPosition = centerLocalPosition;
+        Debug.Log("DebugCube Position: " + DebugCube.transform.position + " --- WorldPosition: " + centerWorldPosition);
+        
+        Vector3 startPosition = VisualizationRoot.position;
+        Vector3 endPosition = (startPosition / GlobalVar.CurrentZoom - DebugCube.transform.position / GlobalVar.CurrentZoom) * endScale.x;
         endPosition.y = startPosition.y;
 
         Debug.Log("startScale: " + startScale + " --- endScale: " + endScale);
-        Debug.Log("worldCenterPosition: " + centerPosition + " --- endPosition: " + endPosition);
+        Debug.Log("startPosition: " + startPosition + " --- worldCenterPosition: " + DebugCube.transform.position + " --- endPosition: " + endPosition);
 
         yield return FlyToPosition(endPosition, endScale);
     }
@@ -472,7 +439,7 @@ public class IslandVizVisualization : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.KeypadEnter))
         {
-            StartCoroutine(FlyToMultiple(new Transform[] { IslandGameObjects[0].transform, IslandGameObjects[1].transform, IslandGameObjects[2].transform}));
+            StartCoroutine(FlyToMultiple(new Transform[] { IslandGameObjects[0].transform, IslandGameObjects[1].transform}));
         }
     }
 

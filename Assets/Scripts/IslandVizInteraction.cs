@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using OsgiViz.Unity.Island;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Valve.VR.InteractionSystem;
@@ -89,6 +90,14 @@ public class IslandVizInteraction : MonoBehaviour {
     /// Called when a controller exited a trigger.
     /// </summary>
     public ControllerExit OnControllerExit;
+    /// <summary>
+    /// Called when an island was selected.
+    /// </summary>
+    public IslandSelected OnIslandSelected;
+    /// <summary>
+    /// Called when an island was deselected.
+    /// </summary>
+    public IslandDeselected OnIslandDeselected;
 
     #endregion
 
@@ -145,6 +154,26 @@ public class IslandVizInteraction : MonoBehaviour {
     /// <param name="col">Collider component of the trigger GameObject.</param>
     /// <param name="hand">The hand that exited the trigger.</param>
     public delegate void ControllerExit(Collider col, Hand hand);
+
+    #endregion
+
+
+    // ################
+    // Interaction - Visualization
+    // ################
+
+    #region Interaction - Visualization
+
+    /// <summary>
+    /// Called when an island GameObject was selected.
+    /// </summary>
+    /// <param name="island">The island that was selected</param>
+    public delegate void IslandSelected(IslandGO island);
+    /// <summary>
+    /// Called when an island GameObject was deselected.
+    /// </summary>
+    /// <param name="island">The island that was deselected</param>
+    public delegate void IslandDeselected(IslandGO island);
 
     #endregion
 
