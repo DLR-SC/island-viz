@@ -1,11 +1,7 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using OsgiViz.SideThreadConstructors;
 using OsgiViz.Core;
-using OsgiViz.Island;
-using OsgiViz.Unity.MainThreadConstructors;
-using System.Linq;
 
 /// <summary>
 /// This class handles all abstract data the IslandViz visualizes.
@@ -78,7 +74,7 @@ public class IslandVizData : MonoBehaviour
         }
         else if (DataLoading == DataLoadingType.Neo4J)
         {
-            IslandVizUI.Instance.UpdateLoadingScreenUI("OSGi-Project from Neo4J", "");
+            IslandVizUI.Instance.UpdateLoadingScreenUI("Connecting to Neo4J", "");
 
             yield return null;
 

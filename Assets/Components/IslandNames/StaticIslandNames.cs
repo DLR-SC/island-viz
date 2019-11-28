@@ -119,7 +119,7 @@ public class StaticIslandNames : AdditionalIslandVizComponent
 
                 if (IslandVizVisualization.Instance.CurrentZoomLevel != ZoomLevel.Near)
                 {
-                    islandName.transform.position = new Vector3(target.position.x, GlobalVar.hologramTableHeight + 0.075f, target.position.z);
+                    islandName.transform.position = new Vector3(target.position.x, GlobalVar.hologramTableHeight + 0.075f + currentTargets.IndexOf(target) * 0.1f, target.position.z);
                 }
                 else
                 {
@@ -141,7 +141,6 @@ public class StaticIslandNames : AdditionalIslandVizComponent
             yield return new WaitForFixedUpdate();
         }
 
-        currentTargets.Remove(target);
         Destroy(islandName);
     }
 

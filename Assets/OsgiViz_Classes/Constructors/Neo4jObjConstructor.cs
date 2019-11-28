@@ -78,9 +78,22 @@ public class Neo4jOsgiConstructor : MonoBehaviour {
 
         osgiProject = new OsgiProject("Default"); // TODO
 
-        // Find all bundles
-        IStatementResult result = neo4j.Transaction("MATCH (b:"+ cypherStrings[CypherCode.Bundle] + ") RETURN b.bundleSymbolicName as symbolicName");
+
+        IStatementResult result = null;
+        try
+        {
+            // Find all bundles
+            result = neo4j.Transaction("MATCH (b:" + cypherStrings[CypherCode.Bundle] + ") RETURN b.bundleSymbolicName as symbolicName");
+        }
+        catch(Exception e)
+        {
+            IslandVizUI.Instance.UpdateLoadingScreenUI("Connecting to Neo4J", "<color=red>Connection failed!</color>");
+            throw e;
+        }        
         List<string> bundlesymbolicNameList = result.Select(record => record["symbolicName"].As<string>()).ToList();
+
+        IslandVizUI.Instance.UpdateLoadingScreenUI("OSGi-Project from Neo4J", "");
+        yield return null;
 
         result = neo4j.Transaction("MATCH (b:Bundle) RETURN b.name as name");
         List<string> bundleNameList = result.Select(record => record["name"].As<string>()).ToList();
