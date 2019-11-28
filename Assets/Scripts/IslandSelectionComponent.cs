@@ -6,16 +6,27 @@ using Valve.VR.InteractionSystem;
 
 public class IslandSelectionComponent : MonoBehaviour
 {
+    public static IslandSelectionComponent Instance;
 
     private List<Hand> touchingHandList; // List of hands, that are currently touching the handle.
     private Hand currentHand; // The hand that is currently using the handle.
 
     private List<Touch> currentTouches;
 
+    private List<IslandGO> currentSelectedIslands;
+    private List<Region> currentSelectedRegion;
+    private List<Building> currentSelectedBuildings;
+
 
     private void Start()
     {
+        Instance = this;
+
         currentTouches = new List<Touch>();
+
+        currentSelectedIslands = new List<IslandGO>();
+        currentSelectedRegion = new List<Region>();
+        currentSelectedBuildings = new List<Building>();
 
         // Subscribe input methods
         IslandVizInteraction.Instance.OnControllerEnter += OnControllerEnterEvent;
@@ -67,17 +78,56 @@ public class IslandSelectionComponent : MonoBehaviour
     #endregion
 
 
+    // ################
+    // Island Selection
+    // ################
+
+    #region Island Selection
+
     private void SelectIsland (Collider collider)
     {
         if (IslandVizVisualization.Instance.CurrentZoomLevel == ZoomLevel.Far && collider.GetComponent<IslandGO>())
         {
-            collider.GetComponent<IslandGO>().Select();
+            SelectIsland(collider.GetComponent<IslandGO>());
         }
-        else if (IslandVizVisualization.Instance.CurrentZoomLevel == ZoomLevel.Medium && collider.GetComponent<Region>())
+        else if (IslandVizVisualization.Instance.CurrentZoomLevel == ZoomLevel.Near && collider.GetComponent<Region>())
         {
-            collider.GetComponent<Region>().getParentIsland().Select();
+            IslandVizInteraction.Instance.OnRegionSelect(collider.GetComponent<Region>(), true);
+        }
+        else if (IslandVizVisualization.Instance.CurrentZoomLevel == ZoomLevel.Near && collider.GetComponent<Building>())
+        {
+            IslandVizInteraction.Instance.OnBuildingSelect(collider.GetComponent<Building>(), true);
         }
     }
+
+    public void SelectIsland (IslandGO island)
+    {
+        DeselectAllCurrentIslands(island);
+
+        if (!currentSelectedIslands.Contains(island))
+        {
+            IslandVizInteraction.Instance.OnIslandSelect(island, true);
+            currentSelectedIslands.Add(island);
+        }
+    }
+
+    public void SelectIslands(List<IslandGO> islands)
+    {
+        DeselectAllCurrentIslands(islands);
+
+        foreach (var island in islands)
+        {
+            if (!currentSelectedIslands.Contains(island))
+            {
+                IslandVizInteraction.Instance.OnIslandSelect(island, true);
+                currentSelectedIslands.Add(island);
+            }
+        }
+    }
+
+    #endregion
+
+
 
 
     // ################
@@ -117,6 +167,51 @@ public class IslandSelectionComponent : MonoBehaviour
     {
         return collider.GetComponent<IslandGO>() || collider.GetComponent<Region>() || collider.GetComponent<Building>();
     }
+
+
+    private void DeselectAllCurrentIslands()
+    {
+        if (currentSelectedIslands.Count > 0)
+        {
+            for (int i = currentSelectedIslands.Count - 1; i >= 0; i--)
+            {
+                IslandVizInteraction.Instance.OnIslandSelect(currentSelectedIslands[i], false);
+                currentSelectedIslands.Remove(currentSelectedIslands[i]);
+            }
+        }
+    }
+
+    private void DeselectAllCurrentIslands (IslandGO exception)
+    {
+        if (currentSelectedIslands.Count > 0)
+        {
+            for (int i = currentSelectedIslands.Count - 1; i >= 0; i--)
+            {             
+                if (currentSelectedIslands[i] != exception)
+                {
+                    IslandVizInteraction.Instance.OnIslandSelect(currentSelectedIslands[i], false);
+                    currentSelectedIslands.Remove(currentSelectedIslands[i]);
+                }                
+            }
+        }
+    }
+
+    private void DeselectAllCurrentIslands(List<IslandGO> exceptions)
+    {
+        if (currentSelectedIslands.Count > 0)
+        {
+            for (int i = currentSelectedIslands.Count - 1; i >= 0; i--)
+            {
+                if (!exceptions.Contains(currentSelectedIslands[i]))
+                {
+                    IslandVizInteraction.Instance.OnIslandSelect(currentSelectedIslands[i], false);
+                    currentSelectedIslands.Remove(currentSelectedIslands[i]);
+                }
+            }
+        }
+    }
+
+
 
 
     public class Touch

@@ -18,6 +18,9 @@ public class AlwaysLookAtTarget : MonoBehaviour
         rotation.x = 0f;
         rotation.z = 0f;
 
-        transform.rotation = rotation;
+        if ( Mathf.Abs(Mathf.Abs(rotation.y) - Mathf.Abs(transform.rotation.y)) > 0.2f)
+        {
+            transform.rotation = rotation;
+        }
     }
 }

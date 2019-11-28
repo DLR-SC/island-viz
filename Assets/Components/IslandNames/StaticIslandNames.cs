@@ -5,15 +5,17 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// This component adds a name tag to an island, when a island is selected.
+/// </summary>
 public class StaticIslandNames : AdditionalIslandVizComponent
 {
 
     public GameObject IslandNameParentPrefab;
     public GameObject IslandNamePrefab;
 
-    private Transform IslandNameParent;
-    private List<IslandGO> currentIslands;
-    private List<GameObject> IslandNames;
+    private Transform StaticIslandNameParent;
+    private List<Transform> currentTargets;
 
     private bool initiated = false;
 
@@ -30,15 +32,14 @@ public class StaticIslandNames : AdditionalIslandVizComponent
     public override IEnumerator Init()
     {
         // Create parent GameObject of the island names
-        IslandNameParent = ((GameObject) Instantiate(IslandNameParentPrefab)).transform;
-        IslandNameParent.parent = IslandVizVisualization.Instance.VisualizationRoot;
-        IslandNameParent.localPosition = Vector3.zero;
+        StaticIslandNameParent = ((GameObject) Instantiate(IslandNameParentPrefab, Vector3.zero, Quaternion.identity)).transform;
+        //IslandNameParent.parent = IslandVizVisualization.Instance.VisualizationRoot;
 
-        IslandNames = new List<GameObject>();
-        currentIslands = new List<IslandGO>();
+        currentTargets = new List<Transform>();
 
-        IslandVizInteraction.Instance.OnIslandSelected += CrateIslandName;
-        IslandVizInteraction.Instance.OnIslandDeselected += RemoveIslandName;
+        IslandVizInteraction.Instance.OnIslandSelect += UpdateIslandName;
+        IslandVizInteraction.Instance.OnRegionSelect += UpdateRegionName;
+        IslandVizInteraction.Instance.OnBuildingSelect += UpdateBuildingName;
 
         yield return null;
 
@@ -46,34 +47,91 @@ public class StaticIslandNames : AdditionalIslandVizComponent
     }
     #endregion
 
-    private void CrateIslandName (IslandGO island)
+
+    private void UpdateIslandName (IslandGO island, bool selected)
     {
-        if (!currentIslands.Contains(island))
+        if (selected)
         {
-            currentIslands.Add(island);
-            StartCoroutine(IslandName(island));
+            CreateName(island.transform);
+        }
+        else
+        {
+            RemoveIslandName(island.transform);
         }
     }
 
-    IEnumerator IslandName (IslandGO island)
+    private void UpdateRegionName(Region region, bool selected)
     {
-        Debug.Log("Spawning Text");
+        if (selected)
+        {
+            CreateName(region.transform);
+        }
+        else
+        {
+            RemoveIslandName(region.transform);
+        }
+    }
+
+    private void UpdateBuildingName(Building building, bool selected)
+    {
+        if (selected)
+        {
+            CreateName(building.transform);
+        }
+        else
+        {
+            RemoveIslandName(building.transform);
+        }
+    }
+
+
+
+
+
+    private void CreateName (Transform target)
+    {
+        if (!currentTargets.Contains(target))
+        {
+            StartCoroutine(ShowTargetName(target));
+        }
+    }
+
+    IEnumerator ShowTargetName (Transform target)
+    {
+        //Debug.Log("Spawning Text");
+        currentTargets.Add(target);
+        bool isIsland = target.GetComponent<IslandGO>() != null;
 
         GameObject islandName = (GameObject)Instantiate(IslandNamePrefab);
-        islandName.transform.parent = IslandNameParent;
-        islandName.transform.localScale = Vector3.one * 0.001f;
-        islandName.transform.position = new Vector3(island.transform.position.x, GlobalVar.hologramTableHeight + 0.075f, island.transform.position.z);
-        islandName.GetComponent<StaticIslandName>().ChangeName(island.name);
+        islandName.transform.parent = StaticIslandNameParent;
+        islandName.transform.position = new Vector3(target.position.x, GlobalVar.hologramTableHeight + 0.075f, target.position.z);
+        islandName.GetComponent<StaticIslandName>().ChangeName(target.name);
         islandName.GetComponent<AlwaysLookAtTarget>().Target = Camera.main.transform;
-        //IslandNames.Add(islandName);
 
         yield return new WaitForFixedUpdate();
 
-        while (currentIslands.Contains(island))
+        while (currentTargets.Contains(target))
         {
-            if (island.gameObject.activeSelf)
+            if (target.gameObject.activeSelf)
             {
+                if (!islandName.activeSelf)
+                    islandName.SetActive(true);
 
+                if (IslandVizVisualization.Instance.CurrentZoomLevel != ZoomLevel.Near)
+                {
+                    islandName.transform.position = new Vector3(target.position.x, GlobalVar.hologramTableHeight + 0.075f, target.position.z);
+                }
+                else
+                {
+                    if (isIsland)
+                    {
+                        islandName.transform.position = new Vector3(target.position.x, GlobalVar.hologramTableHeight + 0.2f + GlobalVar.CurrentZoom * 2f, target.position.z);
+                    }
+                    else
+                    {
+                        islandName.transform.position = new Vector3(target.position.x, GlobalVar.hologramTableHeight + 0.2f + GlobalVar.CurrentZoom, target.position.z);
+                    }
+                }
             }
             else
             {
@@ -83,17 +141,18 @@ public class StaticIslandNames : AdditionalIslandVizComponent
             yield return new WaitForFixedUpdate();
         }
 
+        currentTargets.Remove(target);
         Destroy(islandName);
     }
 
     /// <summary>
     /// By removing the island from the currentIslands list, we stop the IslandName Coroutine and the island name disappears.
     /// </summary>
-    /// <param name="island">The island that was deselected.</param>
-    private void RemoveIslandName (IslandGO island)
+    /// <param name="target">The target that was deselected.</param>
+    private void RemoveIslandName (Transform target)
     {
-        if (currentIslands.Contains(island))
-            currentIslands.Remove(island);
+        if (currentTargets.Contains(target))
+            currentTargets.Remove(target);
     }
 
 }

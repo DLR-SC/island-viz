@@ -77,9 +77,9 @@ public class IslandVizVisualization : MonoBehaviour
     /// </summary>
     public ZoomLevelChanged OnZoomLevelChanged;
     /// <summary>
-    /// Called when the position of the visualization root was changed.
+    /// Called when the position or rotation of the visualization root was changed.
     /// </summary>
-    public PositionChanged OnPositionChanged;
+    public TransformChanged OnTransformChanged;
 
 
     // ################
@@ -97,9 +97,9 @@ public class IslandVizVisualization : MonoBehaviour
     /// <param name="newZoomLevel">.</param>
     public delegate void ZoomLevelChanged(ZoomLevel newZoomLevel);
     /// <summary>
-    /// Called when the position of the visualization root was changed.
+    /// Called when the position or rotation of the visualization root was changed.
     /// </summary>
-    public delegate void PositionChanged();
+    public delegate void TransformChanged();
 
 
 
@@ -378,13 +378,17 @@ public class IslandVizVisualization : MonoBehaviour
 
     public void SelectAndFlyTo(Transform[] targets)
     {
+        List<IslandGO> islands = new List<IslandGO>();
+
         foreach (var item in targets)
         {
             if (item.GetComponent<IslandGO>() != null)
             {
-                item.GetComponent<IslandGO>().Select();
+                islands.Add(item.GetComponent<IslandGO>());
             }
         }
+
+        IslandSelectionComponent.Instance.SelectIslands(islands);
 
         StartCoroutine(FlyToMultiple(targets));
     }

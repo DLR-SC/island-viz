@@ -14,6 +14,7 @@ namespace OsgiViz.Unity.Island
         private List<Building> buildings;
         private MeshFilter regionArea;
 
+
         private void Awake()
         {
             buildings = new List<Building>();
@@ -32,6 +33,8 @@ namespace OsgiViz.Unity.Island
             //    pi = gameObject.AddComponent<PdaInspectable>();
             //#endregion
         }
+        
+
 
         private void handleActivationDeactivation(Hand hand)
         {

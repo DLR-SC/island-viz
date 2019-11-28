@@ -73,11 +73,11 @@ namespace OsgiViz
         {
             if (expanded)
             {
-                hideAllDependencies();
+                HideAllDependencies();
             }
             else
             {
-                showAllDependencies();
+                ShowAllDependencies();
             }
         }
 
@@ -86,6 +86,12 @@ namespace OsgiViz
             connectedDocks.Add(dock);
             dockWeights.Add(w);
         }
+
+
+
+        // ################
+        // Connection Arrow Construction
+        // ################
 
         public void constructConnectionArrows()
         {
@@ -160,14 +166,16 @@ namespace OsgiViz
             }
         }
 
-        public void hideAllDependencies()
+
+
+        public void HideAllDependencies()
         {
             expanded = false;
             foreach (GameObject arrow in connectionArrows)
                 arrow.SetActive(false);
         }
 
-        public void showAllDependencies()
+        public void ShowAllDependencies()
         {
             expanded = true;
             foreach (GameObject arrow in connectionArrows)

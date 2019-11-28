@@ -12,7 +12,6 @@ namespace OsgiViz.Unity.Island
     public class IslandGO : MonoBehaviour
     {
         public ZoomLevel CurrentZoomLevel;
-        public bool Selected = false;
 
         private CartographicIsland island;
         private List<Region> regions;
@@ -103,28 +102,6 @@ namespace OsgiViz.Unity.Island
         
 
 
-
-
-        public void Select ()
-        {
-            if (!Selected)
-            {
-                Selected = true;
-                IslandVizInteraction.Instance.OnIslandSelected(this);
-            }
-            else
-            {
-                Deselect();
-            }
-        }
-
-        public void Deselect ()
-        {
-            Selected = false;
-            IslandVizInteraction.Instance.OnIslandDeselected(this);
-        }
-
-
         /// <summary>
         /// This Method contains and applies the rules of all ZoomLevels to an island. 
         /// Call this to change the Zoomlevel of an island.
@@ -159,7 +136,7 @@ namespace OsgiViz.Unity.Island
             foreach (var region in regions)
             {
                 if (region.GetComponent<MeshCollider>().enabled)
-                    region.GetComponent<MeshCollider>().enabled = false;
+                    region.GetComponent<MeshCollider>().enabled = true; // TODO?
 
                 foreach (var building in region.getBuildings())
                 {

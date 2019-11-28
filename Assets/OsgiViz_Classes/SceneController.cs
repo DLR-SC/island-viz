@@ -130,7 +130,7 @@ namespace OsgiViz
                 foreach (GameObject dockGO in dockConstructor.getDocks())
                 {
                     DependencyDock dockComponent = dockGO.GetComponent<DependencyDock>();
-                    dockComponent.showAllDependencies();
+                    dockComponent.ShowAllDependencies();
                 }
             }
         }
@@ -147,7 +147,7 @@ namespace OsgiViz
                 foreach (GameObject dockGO in dockConstructor.getDocks())
                 {
                     DependencyDock dockComponent = dockGO.GetComponent<DependencyDock>();
-                    dockComponent.hideAllDependencies();
+                    dockComponent.HideAllDependencies();
                 }
             }
         }

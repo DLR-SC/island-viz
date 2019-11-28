@@ -93,14 +93,17 @@ public class IslandVizInteraction : MonoBehaviour {
     /// </summary>
     public ControllerExit OnControllerExit;
     /// <summary>
-    /// Called when an island was selected.
+    /// Called when an island was selected or deselected.
     /// </summary>
-    public IslandSelected OnIslandSelected;
+    public IslandSelected OnIslandSelect;
     /// <summary>
-    /// Called when an island was deselected.
+    /// Called when an island was selected or deselected.
     /// </summary>
-    public IslandDeselected OnIslandDeselected;
-
+    public RegionSelected OnRegionSelect;
+    /// <summary>
+    /// Called when an island was selected or deselected.
+    /// </summary>
+    public BuildingSelected OnBuildingSelect;
     #endregion
 
 
@@ -167,15 +170,20 @@ public class IslandVizInteraction : MonoBehaviour {
     #region Interaction - Visualization
 
     /// <summary>
-    /// Called when an island GameObject was selected.
+    /// Called when an island GameObject was selected or deselected.
     /// </summary>
-    /// <param name="island">The island that was selected</param>
-    public delegate void IslandSelected(IslandGO island);
+    /// <param name="island">The island that was selected.</param>
+    public delegate void IslandSelected(IslandGO island, bool selected);
     /// <summary>
-    /// Called when an island GameObject was deselected.
+    /// Called when an island GameObject was selected or deselected.
     /// </summary>
-    /// <param name="island">The island that was deselected</param>
-    public delegate void IslandDeselected(IslandGO island);
+    /// <param name="region">The region that was selected.</param>
+    public delegate void RegionSelected(Region region, bool selected);
+    /// <summary>
+    /// Called when an island GameObject was selected or deselected.
+    /// </summary>
+    /// <param name="building">The building that was selected.</param>
+    public delegate void BuildingSelected(Building building, bool selected);
 
     #endregion
 
