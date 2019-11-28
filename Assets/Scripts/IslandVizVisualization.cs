@@ -207,7 +207,8 @@ public class IslandVizVisualization : MonoBehaviour
     {
         foreach (var item in visualizationComponents)
         {
-            yield return item.Init();
+            if (item.enabled)
+                yield return item.Init();
         }
     }
 

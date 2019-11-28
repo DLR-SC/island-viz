@@ -54,7 +54,8 @@ public class IslandVizInteraction : MonoBehaviour {
     {        
         foreach (var item in inputComponents)
         {
-            yield return item.Init();
+            if (item.enabled)
+                yield return item.Init();
         }
     }
 
