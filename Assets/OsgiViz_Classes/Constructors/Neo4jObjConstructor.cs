@@ -159,10 +159,13 @@ public class Neo4jOsgiConstructor : MonoBehaviour {
                 }
             }
             osgiProject.addBundle(bundle);
+            IslandVizUI.Instance.UpdateLoadingScreenUI("OSGi-Project from Neo4J", "Downloaded Bundles: " + osgiProject.getBundles().Count);
+            yield return null;
         }
 
         GlobalVar.maximumLOCinProject = maxLOC;
 
+        IslandVizUI.Instance.UpdateLoadingScreenUI("OSGi-Project from Neo4J", "Loading Services...");
 
         // Find all services
         result = neo4j.Transaction("MATCH (s:Service) RETURN s.fileName as fileName");
@@ -185,9 +188,10 @@ public class Neo4jOsgiConstructor : MonoBehaviour {
         }
 
         // Resolve import/export + construct ServiceComponents + build dependency graph
-
         BidirectionalGraph<GraphVertex, GraphEdge> dependencyGraph = osgiProject.getDependencyGraph();
-        
+
+        IslandVizUI.Instance.UpdateLoadingScreenUI("OSGi-Project from Neo4J", "...");
+
         //Construct and resolve ServiceComponents
         foreach (var bundle in osgiProject.getBundles())
         {
@@ -312,7 +316,6 @@ public class Neo4jOsgiConstructor : MonoBehaviour {
                     }
                 }
                 bundle.addServiceComponent(sc);
-                yield return null;
             }
         }
 

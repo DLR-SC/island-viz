@@ -45,6 +45,7 @@ namespace OsgiViz.SideThreadConstructors
             
             Debug.Log("Starting forcedirected graph layout construction.");
             IslandVizUI.Instance.UpdateLoadingScreenUI("Forcedirected Graph Layout Construction", "");
+            yield return null;
 
             //Attract Strength multi
             float c1 = 10.0f;
@@ -73,7 +74,6 @@ namespace OsgiViz.SideThreadConstructors
 
             while (stepCounter < simulationSteps)
             {
-
                 foreach (GraphVertex thisVert in dependencyGraph.Vertices)
                 {
                     // total force affecting "thisVert"
@@ -109,8 +109,7 @@ namespace OsgiViz.SideThreadConstructors
                     */
                     netForce += springForce;
                     #endregion
-
-                    
+                                        
                     #region Repulsion
                     foreach (GraphVertex otherVert in dependencyGraph.Vertices)
                     {
@@ -129,9 +128,7 @@ namespace OsgiViz.SideThreadConstructors
                         netForce += (direction.normalized * c4) / (Mathf.Pow(distanceToBounds + 0.1f, 2f));
                     }
                     #endregion
-
-
-
+                                       
                     #region Attract-to-Center
                     netForce -= simulationData[thisVert].position * c5;
                     #endregion
@@ -147,11 +144,12 @@ namespace OsgiViz.SideThreadConstructors
                     simulationData[thisVert] = vpd;
                     #endregion
 
-                    stepCounter++;
+                    stepCounter++;                    
                 }
+                
+                IslandVizUI.Instance.UpdateLoadingScreenUI("Forcedirected Graph Layout Construction", (((float)stepCounter / (float)simulationSteps) * 100f).ToString("0.0") + "%");
+                yield return null;
             }
-
-            yield return null;
 
             #region assign computed positions to graph vertices
             foreach (GraphVertex vert in dependencyGraph.Vertices)

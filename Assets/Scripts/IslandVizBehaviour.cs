@@ -76,8 +76,7 @@ public class IslandVizBehaviour : MonoBehaviour
         yield return IslandVizVisualization.Instance.InitVisualizationComponents();
         yield return IslandVizInteraction.Instance.InitInputComponents();
 
-        if (OnConstructionDone != null)
-            OnConstructionDone();
+        OnConstructionDone?.Invoke();
     }
 
     #endregion

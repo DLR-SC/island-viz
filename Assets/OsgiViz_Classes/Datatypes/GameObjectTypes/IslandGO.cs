@@ -51,11 +51,11 @@ namespace OsgiViz.Unity.Island
         /// <summary>
         /// Called when the island GameObject is enabled.
         /// </summary>
-        public IslandEnabled OnIslandEnabled;
+        public IslandEnabled OnIslandVisible;
         /// <summary>
         /// Called when the island GameObject is disabled.
         /// </summary>
-        public IslandDisabled OnIslandDisabled;
+        public IslandDisabled OnIslandInvisible;
 
 
         // ################
@@ -84,14 +84,14 @@ namespace OsgiViz.Unity.Island
         {
             if (other.tag == "TableContent")
             {
-                IslandVizVisualization.Instance.AddCurrentIsland(this);
+                IslandVizVisualization.Instance.MakeIslandVisible(this);
             }
         }
         private void OnTriggerExit(Collider other)
         {
             if (other.tag == "TableContent")
             {
-                IslandVizVisualization.Instance.RemoveCurrentIsland(this);
+                IslandVizVisualization.Instance.MakeIslandInvisible(this);
             }
         }
 

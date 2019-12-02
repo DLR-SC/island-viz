@@ -195,10 +195,10 @@ public class IslandVizInteraction : MonoBehaviour {
 
     /// <summary>
     /// Called by Unity every frame.
+    /// This goes through both hands, checks if buttons are pressed down and calls the delegates.
     /// </summary>
     void Update()
-    {
-        // Go through both hands, check buttons and call delegates when they are not empty.
+    {        
         for (int i = 0; i < 2; i++)
         {
             if (Player == null || Player.hands[i] == null || Player.hands[i].controller == null)
@@ -226,28 +226,15 @@ public class IslandVizInteraction : MonoBehaviour {
 
 
     // ################
-    // Interaction - FixedUpdate
-    // ################
-
-    /// <summary>
-    /// Called by Unity every fixed time stamp.
-    /// </summary>
-    //void FixedUpdate()
-    //{
-        
-    //}
-
-
-    // ################
     // Helper Functions
     // ################
 
     #region HelperFunctions
     
-    public float GetPlayerEyeHeight ()
-    {
-        return Player.eyeHeight;
-    }    
+    //public float GetPlayerEyeHeight ()
+    //{
+    //    return Player.eyeHeight;
+    //}    
 
     void DebugInput (Hand hand)
     {

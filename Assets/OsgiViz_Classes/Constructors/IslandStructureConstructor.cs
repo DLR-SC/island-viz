@@ -26,7 +26,6 @@ namespace OsgiViz.SideThreadConstructors
     {
         private OsgiProject osgiProject;
         private List<CartographicIsland> islands;
-        private Status status;
         private System.Random RNG;
         private int expansionFactor;
         private float minCohesion;
@@ -42,7 +41,6 @@ namespace OsgiViz.SideThreadConstructors
         {
             osgiProject = null;
             islands = new List<CartographicIsland>();
-            status = Status.Idle;
             RNG = new System.Random(0);
             expansionFactor = expansionF;
             minCohesion = minCoh;
@@ -51,27 +49,28 @@ namespace OsgiViz.SideThreadConstructors
 
         /// <summary>
         /// This Coroutine creates a list of CartographicIslands from a OsgiProject.
-        /// This method is called by the MainThreadConstructor.
         /// </summary>
         /// <param name="proj">The OsgiProject from which the CartographicIslands are created.</param>
         public IEnumerator Construct (OsgiProject proj)
         {
             osgiProject = proj;
 
-            status = Status.Working;
             Debug.Log("Starting with the construction of the IslandStructures");
             IslandVizUI.Instance.UpdateLoadingScreenUI("Island Structures Construction", "");
+            yield return null;
 
-            foreach (Bundle bundle in osgiProject.getBundles())
+            for (int i = 0; i < osgiProject.getBundles().Count; i++)
             {
-                islands.Add(constructIslandFromBundle(bundle));
-                //yield return null;
-            }
-            
-            status = Status.Finished;
-            Debug.Log("Finished with the construction of the IslandStructures");
+                islands.Add(constructIslandFromBundle(osgiProject.getBundles()[i]));
 
-            yield return null; // TODO remove
+                if (i % 2 == 0) // Only wait every 2nd Dock construction for better performance.
+                {
+                    IslandVizUI.Instance.UpdateLoadingScreenUI("Island Structures Construction", (((float)i / (float)proj.getBundles().Count) * 100f).ToString("0.0") + "%");
+                    yield return null;
+                }
+            }
+
+            Debug.Log("Finished with the construction of the IslandStructures");
         }
 
         
@@ -425,14 +424,7 @@ namespace OsgiViz.SideThreadConstructors
         {
             return islands;
         }
-        public Status getStatus()
-        {
-            return status;
-        }
-        public void setStatus(Status newStatus)
-        {
-            status = newStatus;
-        }
+      
 
 
 
