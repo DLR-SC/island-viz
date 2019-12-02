@@ -4,7 +4,7 @@
 
 [![Licence](https://img.shields.io/hexpm/l/plug.svg)](https://github.com/DLR-SC/island-viz/blob/master/LICENSE)
 
-> Unity 2018.4.12f1
+> Unity 2019.3.0f1
 
 > Please note that the __revised branch__ is an experimental branch. As such, there is no support offered and features may be incomplete, broken or removed in the future!
 
