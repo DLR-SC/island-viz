@@ -5,98 +5,126 @@ using UnityEngine.UI;
 using OsgiViz.Core;
 using OsgiViz.Unity.Island;
 
-public class StaticIslandName : MonoBehaviour
+namespace StaticIslandNamesComponent
 {
-    public GameObject NameParent;
-    public Text Name;
-    public Text Line;
-
-    public AlwaysLookAtTarget AlwaysLookAtTarget;
-
-
-    private Transform target;
-    private float heightIndex = 1f;    
-
-    private bool isIsland;
-    private float yPosition;
-
-    private bool initiated = false;
-
-
-
-    public void Init (Transform target, string name)
+    /// <summary>
+    /// This class is attached to all IslandNamePrefabs of the StaticIslandNames component and handles the movement of the island name ui elements.
+    /// </summary>
+    public class StaticIslandName : MonoBehaviour
     {
-        Debug.Log("StaticIslandName Init");
+        // ################
+        // Public
+        // ################
 
-        AlwaysLookAtTarget.Target = Camera.main.transform;
-        Name.text = name;
-        this.target = target;
+        // These values are defined in the Prefab.
+        public GameObject NameParent;
+        public Text Name;
+        public Text Line;
+        public AlwaysLookAtTarget AlwaysLookAtTarget;
 
-        heightIndex = StaticIslandNames.Instance.GetHeightIndex(this);
+        // ################
+        // Private
+        // ################
 
-        isIsland = target.GetComponent<IslandGO>() != null;
+        private Transform target; // The island target this island name is following.
+        private float heightIndex = 1f; // The current height index of this island name.
 
-        initiated = true;
-    }
+        private float yPosition; // The current y-position of this island name.
+
+        private bool isIsland; // TODO remove or extend?
+        private bool initiated = false;
 
 
-    private void FixedUpdate()
-    {
-        if (!initiated)
-            return;
 
-        if (target.gameObject.activeSelf) // && target.GetComponent<Collider>().enabled
+        // ################
+        // Initiation
+        // ################
+
+        public void Init(Transform target, string name)
         {
-            if (IslandVizVisualization.Instance.CurrentZoomLevel != ZoomLevel.Near)
+            Debug.Log("StaticIslandName Init");
+
+            AlwaysLookAtTarget.Target = Camera.main.transform;
+            Name.text = name;
+            this.target = target;
+
+            heightIndex = StaticIslandNames.Instance.GetHeightIndex(this);
+
+            isIsland = target.GetComponent<IslandGO>() != null;
+
+            initiated = true;
+        }
+
+
+        // ################
+        // Fixed Update
+        // ################
+
+        private void FixedUpdate()
+        {
+            if (!initiated)
+                return;
+
+            if (target.gameObject.activeSelf) // && target.GetComponent<Collider>().enabled
             {
-                yPosition = GlobalVar.hologramTableHeight + 0.075f + heightIndex * 0.12f;
-                transform.position = new Vector3(target.position.x, yPosition, target.position.z);
-            }
-            else
-            {
-                if (isIsland)
+                if (IslandVizVisualization.Instance.CurrentZoomLevel != ZoomLevel.Near)
                 {
-                    transform.position = new Vector3(target.position.x, GlobalVar.hologramTableHeight + 0.2f + GlobalVar.CurrentZoom * 2f, target.position.z);
+                    yPosition = GlobalVar.hologramTableHeight + 0.075f + heightIndex * StaticIslandNames.Instance.VerticalTextOffset;
+                    transform.position = new Vector3(target.position.x, yPosition, target.position.z);
                 }
                 else
                 {
-                    yPosition = GlobalVar.hologramTableHeight + 0.2f + GlobalVar.CurrentZoom + heightIndex * 0.12f;
-                    transform.position = new Vector3(target.position.x, yPosition, target.position.z);
+                    if (isIsland)
+                    {
+                        yPosition = GlobalVar.hologramTableHeight + 0.2f + GlobalVar.CurrentZoom * 2f;
+                        transform.position = new Vector3(target.position.x, yPosition, target.position.z);
+                    }
+                    else
+                    {
+                        yPosition = GlobalVar.hologramTableHeight + 0.2f + GlobalVar.CurrentZoom + heightIndex * StaticIslandNames.Instance.VerticalTextOffset;
+                        transform.position = new Vector3(target.position.x, yPosition, target.position.z);
+                    }
                 }
             }
+            else
+            {
+                Destroy(gameObject);
+            }
         }
-        else
+
+
+        // ################
+        // Disable & Enable Text
+        // ################
+
+        public void DisableText()
         {
-            Destroy(gameObject);
+            NameParent.SetActive(false);
+            Line.gameObject.SetActive(false);
         }
-    }
+
+        public void EnableText()
+        {
+            NameParent.SetActive(true);
+            Line.gameObject.SetActive(true);
+        }
 
 
+        // ################
+        // Getter & Setter
+        // ################
 
-    public void DisableText ()
-    {
-        NameParent.SetActive(false);
-        Line.gameObject.SetActive(false);
-    }
-
-    public void EnableText ()
-    {
-        NameParent.SetActive(true);
-        Line.gameObject.SetActive(true);
-    }
-
-
-
-    public Transform GetTarget ()
-    {
-        return target;
-    }
-    public float GetHeightIndex ()
-    {
-        return heightIndex;
-    }
-    public void SetHeightIndex (int index)
-    {
-        heightIndex = index;
+        public Transform GetTarget()
+        {
+            return target;
+        }
+        public float GetHeightIndex()
+        {
+            return heightIndex;
+        }
+        public void SetHeightIndex(int index)
+        {
+            heightIndex = index;
+        }
     }
 }
