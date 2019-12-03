@@ -470,6 +470,17 @@ public class IslandVizVisualization : MonoBehaviour
         {
             StartCoroutine(FlyToMultiple(new Transform[] { IslandGameObjects[0].transform, IslandGameObjects[1].transform}));
         }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            //List<Transform> islands = new List<Transform>();
+            //foreach (var item in IslandGameObjects)
+            //{
+            //    islands.Add(item.transform);
+            //}
+            //SelectAndFlyTo(islands.ToArray());
+            IslandSelectionComponent.Instance.SelectIslands(IslandGameObjects);
+        }
     }
 
 
