@@ -52,7 +52,7 @@ public class StaticIslandNames : AdditionalIslandVizComponent
         IslandVizInteraction.Instance.OnRegionSelect += OnRegionSelectionUpdate;
         IslandVizInteraction.Instance.OnBuildingSelect += OnBuildingSelectionUpdate;
 
-        IslandVizVisualization.Instance.OnTransformChanged += UpdateHeightIndexes;
+        IslandVizVisualization.Instance.OnVisualizationScaleChanged += UpdateHeightIndexes;
 
         yield return null;
     }

@@ -79,7 +79,7 @@ public class IslandVizVisualization : MonoBehaviour
     /// <summary>
     /// Called when the position or rotation of the visualization root was changed.
     /// </summary>
-    public TransformChanged OnTransformChanged;
+    public ScaleChanged OnVisualizationScaleChanged;
 
 
     // ################
@@ -99,7 +99,7 @@ public class IslandVizVisualization : MonoBehaviour
     /// <summary>
     /// Called when the position or rotation of the visualization root was changed.
     /// </summary>
-    public delegate void TransformChanged();
+    public delegate void ScaleChanged();
 
 
 
@@ -150,6 +150,7 @@ public class IslandVizVisualization : MonoBehaviour
         visibleIslandGOs = new List<IslandGO>();
 
         OnTableHeightChanged += ApplyTableHeight;
+        OnVisualizationScaleChanged += OnScaleChanged;
     }
 
     /// <summary>
@@ -289,7 +290,7 @@ public class IslandVizVisualization : MonoBehaviour
     /// <summary>
     /// Called by (additional) input components when the visualization was zoomed in or out.
     /// </summary>
-    public void OnVisualizationScaleChanged ()
+    public void OnScaleChanged ()
     {
         zoomDirty = true;
     }

@@ -49,7 +49,7 @@ public class StaticIslandName : MonoBehaviour
         {
             if (IslandVizVisualization.Instance.CurrentZoomLevel != ZoomLevel.Near)
             {
-                yPosition = GlobalVar.hologramTableHeight + 0.075f + heightIndex * 0.15f;
+                yPosition = GlobalVar.hologramTableHeight + 0.075f + heightIndex * 0.12f;
                 transform.position = new Vector3(target.position.x, yPosition, target.position.z);
             }
             else
@@ -60,7 +60,7 @@ public class StaticIslandName : MonoBehaviour
                 }
                 else
                 {
-                    yPosition = GlobalVar.hologramTableHeight + 0.2f + GlobalVar.CurrentZoom + heightIndex * 0.15f;
+                    yPosition = GlobalVar.hologramTableHeight + 0.2f + GlobalVar.CurrentZoom + heightIndex * 0.12f;
                     transform.position = new Vector3(target.position.x, yPosition, target.position.z);
                 }
             }

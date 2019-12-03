@@ -166,6 +166,8 @@ namespace OsgiViz.Unity.Island
                     }
                     yield return null;
                 }
+                if (GetComponent<CapsuleCollider>().enabled)
+                    GetComponent<CapsuleCollider>().enabled = true;
             }
             // FAR -> MEDIUM
             else
@@ -186,7 +188,7 @@ namespace OsgiViz.Unity.Island
 
                 // Disable island collider.
                 if (GetComponent<CapsuleCollider>().enabled)
-                    GetComponent<CapsuleCollider>().enabled = false;
+                    GetComponent<CapsuleCollider>().enabled = true;
             }
         }
 
