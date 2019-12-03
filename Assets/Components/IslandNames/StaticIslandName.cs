@@ -7,6 +7,7 @@ using OsgiViz.Core;
 
 public class StaticIslandName : MonoBehaviour
 {
+    public GameObject NameParent;
     public Text Name;
     public Text Line;
 
@@ -17,13 +18,13 @@ public class StaticIslandName : MonoBehaviour
 
     public void DisableText ()
     {
-        Name.gameObject.SetActive(false);
+        NameParent.SetActive(false);
         Line.gameObject.SetActive(false);
     }
 
     public void EnableText ()
     {
-        Name.gameObject.SetActive(true);
+        NameParent.SetActive(true);
         Line.gameObject.SetActive(true);
     }
 }

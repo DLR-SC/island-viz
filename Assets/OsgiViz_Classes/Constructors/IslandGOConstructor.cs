@@ -196,7 +196,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
                     #region BuildingCollider
                     building.layer = LayerMask.NameToLayer("InteractionSystemLayer");
                     CapsuleCollider capsuleCol = building.AddComponent<CapsuleCollider>();
-                    capsuleCol.isTrigger = true;
+                    //capsuleCol.isTrigger = true;
                     #endregion
                     float currentBuildingExtent = capsuleCol.bounds.size.magnitude;
                     if (currentBuildingExtent > maximumBuildingBoundSize)
@@ -300,7 +300,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
             Vector3 newCenter = islandStructure.getWeightedCenter();
             newCenter.y = -islandGOComponent.getCoast().GetComponent<MeshFilter>().sharedMesh.bounds.size.y + (cColliderIsland.height * 0.5f);
             cColliderIsland.center = newCenter;
-            cColliderIsland.isTrigger = true;
+            //cColliderIsland.isTrigger = true;
             #endregion
 
             islandGO.AddComponent<Interactable>();

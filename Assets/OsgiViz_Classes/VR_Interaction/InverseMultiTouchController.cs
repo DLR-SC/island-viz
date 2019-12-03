@@ -195,7 +195,7 @@ namespace OsgiViz
 
             #region Update due to scale change
             GlobalVar.CurrentZoom = transformCandidate.transform.localScale.x;
-            IslandVizVisualization.Instance.OnZoomChanged();
+            IslandVizVisualization.Instance.OnVisualizationScaleChanged();
             //mainLight.range = originalLightRange * GlobalVar.CurrentZoomLevel;
             effectiveDrag = drag * 1.0f / GlobalVar.CurrentZoom;
             effectiveTranslationSpeedCutoff = translationSpeedCutoff * GlobalVar.CurrentZoom;

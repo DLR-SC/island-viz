@@ -289,7 +289,7 @@ public class IslandVizVisualization : MonoBehaviour
     /// <summary>
     /// Called by (additional) input components when the visualization was zoomed in or out.
     /// </summary>
-    public void OnZoomChanged ()
+    public void OnVisualizationScaleChanged ()
     {
         zoomDirty = true;
     }
@@ -371,8 +371,30 @@ public class IslandVizVisualization : MonoBehaviour
     // ################
 
     public void SelectAndFlyTo (Transform target)
-    {
-        Debug.Log(target.position);
+    {        
+        Vector3 endScale = Vector3.one;
+        if (target.GetComponent<IslandGO>() != null)
+        {
+            endScale *= GlobalVar.MinZoom * 5;
+        }
+        else if (target.GetComponent<Region>() != null)
+        {
+            endScale *= GlobalVar.MaxZoom / 4;
+        }
+        else if (target.GetComponent<Building>() != null)
+        {
+            endScale *= GlobalVar.MaxZoom / 2;
+        }
+        else
+        {
+            endScale *= GlobalVar.MinZoom * 4;
+        }
+
+        Vector3 startPosition = VisualizationRoot.position;
+        Vector3 endPosition = (startPosition / GlobalVar.CurrentZoom - target.position / GlobalVar.CurrentZoom) * endScale.x;
+        endPosition.y = GlobalVar.hologramTableHeight;
+
+        StartCoroutine(FlyToPosition(endPosition, endScale));
     }
 
     public void SelectAndFlyTo(Transform[] targets)
@@ -433,6 +455,8 @@ public class IslandVizVisualization : MonoBehaviour
             VisualizationRoot.localScale = Vector3.Lerp(startScale, endScale, value);
             VisualizationRoot.position = Vector3.Lerp(startPosition, endPosition, value);
             GlobalVar.CurrentZoom = VisualizationRoot.localScale.x;
+
+            IslandVizVisualization.Instance.OnVisualizationScaleChanged();
 
             value += 0.01f * speed;
             yield return new WaitForFixedUpdate();

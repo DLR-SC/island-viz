@@ -254,7 +254,7 @@ public class InverseMultiTouchInput : AdditionalIslandVizComponent {
 
         #region Update due to scale change
         GlobalVar.CurrentZoom = IslandVizVisualization.Instance.VisualizationRoot.localScale.x;
-        IslandVizVisualization.Instance.OnZoomChanged();
+        IslandVizVisualization.Instance.OnVisualizationScaleChanged();
         #endregion
     }
 

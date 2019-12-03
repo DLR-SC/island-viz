@@ -65,7 +65,7 @@ public class IslandSelectionComponent : MonoBehaviour
     {
         if (FindFirstTouchWithHand(hand) != null)
         {
-            SelectIsland(FindFirstTouchWithHand(hand).Collider);
+            Select(FindFirstTouchWithHand(hand).Collider);
             Debug.Log("Island Selected");
         }
     }
@@ -84,19 +84,36 @@ public class IslandSelectionComponent : MonoBehaviour
 
     #region Island Selection
 
-    private void SelectIsland (Collider collider)
+    public void Select (Collider collider)
     {
-        if (IslandVizVisualization.Instance.CurrentZoomLevel == ZoomLevel.Far && collider.GetComponent<IslandGO>())
+        if (collider.GetComponent<IslandGO>()) // IslandVizVisualization.Instance.CurrentZoomLevel == ZoomLevel.Far && 
         {
-            SelectIsland(collider.GetComponent<IslandGO>());
+            //SelectIsland(collider.GetComponent<IslandGO>());
+            IslandVizInteraction.Instance.OnIslandSelect(collider.GetComponent<IslandGO>(), true);
         }
-        else if (IslandVizVisualization.Instance.CurrentZoomLevel == ZoomLevel.Near && collider.GetComponent<Region>())
+        else if (collider.GetComponent<Region>()) // IslandVizVisualization.Instance.CurrentZoomLevel == ZoomLevel.Medium &&
         {
             IslandVizInteraction.Instance.OnRegionSelect(collider.GetComponent<Region>(), true);
         }
-        else if (IslandVizVisualization.Instance.CurrentZoomLevel == ZoomLevel.Near && collider.GetComponent<Building>())
+        else if (collider.GetComponent<Building>()) // IslandVizVisualization.Instance.CurrentZoomLevel == ZoomLevel.Near && 
         {
             IslandVizInteraction.Instance.OnBuildingSelect(collider.GetComponent<Building>(), true);
+        }
+    }
+
+    public void Deselect(Collider collider)
+    {
+        if (collider.GetComponent<IslandGO>())
+        {
+            IslandVizInteraction.Instance.OnIslandSelect(collider.GetComponent<IslandGO>(), false);
+        }
+        else if (collider.GetComponent<Region>())
+        {
+            IslandVizInteraction.Instance.OnRegionSelect(collider.GetComponent<Region>(), false);
+        }
+        else if (collider.GetComponent<Building>())
+        {
+            IslandVizInteraction.Instance.OnBuildingSelect(collider.GetComponent<Building>(), false);
         }
     }
 

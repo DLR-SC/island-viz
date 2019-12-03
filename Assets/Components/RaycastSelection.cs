@@ -7,12 +7,19 @@ using Valve.VR.InteractionSystem;
 public class RaycastSelection : AdditionalIslandVizComponent
 {
     public Hand Hand;
+    //public float MaxDistance = 100f;    
+    public Material laserMaterial;
+
+    private float laserLength = 3f;
+    private float laserThickness = 0.01f;
 
     private RaycastHit hit;
 
-    private GameObject DebugObject;
+    private GameObject beamObj;
 
     private bool initiated = false;
+    private bool currentlyHitting = false;
+    private Collider currendHittingCollider;
 
     // ################
     // Initiation
@@ -26,9 +33,17 @@ public class RaycastSelection : AdditionalIslandVizComponent
     /// </summary>
     public override IEnumerator Init()
     {
-        DebugObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        DebugObject.transform.localScale = Vector3.one * 0.2f;
-        Destroy(DebugObject.GetComponent<SphereCollider>());
+        // Laser beam visuals
+        beamObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        beamObj.GetComponent<MeshRenderer>().sharedMaterial = laserMaterial;
+        beamObj.name = "LaserBeam";
+        Destroy(beamObj.GetComponent<BoxCollider>());
+        beamObj.transform.SetParent(Hand.transform);
+        beamObj.transform.localRotation = Quaternion.identity;
+        beamObj.transform.localPosition = Vector3.forward * laserLength/2f;
+        beamObj.transform.localScale = new Vector3(laserThickness, laserThickness, laserLength);
+
+        IslandVizInteraction.Instance.OnControllerTriggerDown += OnTriggerDown;
 
         yield return null;
 
@@ -43,13 +58,86 @@ public class RaycastSelection : AdditionalIslandVizComponent
         if (!initiated)
             return;
 
-        if (Physics.Raycast(Hand.transform.position + Hand.transform.forward * 0.1f, Hand.transform.forward * 1.5f, out hit))
+        //if (Physics.Raycast(Hand.transform.position + Hand.transform.forward * 0.1f, Hand.transform.forward * 1.5f, out hit, 5f))
+        if (Physics.SphereCast(Hand.transform.position + Hand.transform.forward * 0.1f, laserThickness/2, Hand.transform.forward, out hit))
         {
-            //DebugObject.transform.position = hit.point;
-            if (hit.collider.GetComponent<IslandGO>() != null)
+            if (hit.collider != currendHittingCollider)
             {
-                IslandSelectionComponent.Instance.SelectIsland(hit.collider.GetComponent<IslandGO>());
+                if (currendHittingCollider != null)
+                {
+                    Deselect(currendHittingCollider);
+                }
+                Select(hit.collider);
+                currendHittingCollider = hit.collider;
             }
+
+            // Make laser visuals look like it stops at hit.
+            float newLaserLength = Vector3.Distance(Hand.transform.position, hit.point);
+            beamObj.transform.localPosition = Vector3.forward * newLaserLength / 2f;
+            beamObj.transform.localScale = new Vector3(laserThickness, laserThickness, newLaserLength);
+
+            if (!currentlyHitting)
+            {
+                currentlyHitting = true;
+            }
+        }
+        else if (currentlyHitting || currendHittingCollider != null) // We hit something last update, but we do not now.
+        {
+            Deselect(currendHittingCollider);
+
+            currentlyHitting = false;
+            currendHittingCollider = null;
+
+            // Reset laser visuals
+            beamObj.transform.localPosition = Vector3.forward * laserLength / 2f;
+            beamObj.transform.localScale = new Vector3(laserThickness, laserThickness, laserLength);
+        }
+    }
+
+
+    public void Select(Collider collider)
+    {
+        if (collider.GetComponent<IslandGO>())
+        {
+            IslandVizInteraction.Instance.OnIslandSelect(collider.GetComponent<IslandGO>(), true);
+        }
+        else if (collider.GetComponent<Region>())
+        {
+            IslandVizInteraction.Instance.OnRegionSelect(collider.GetComponent<Region>(), true);
+        }
+        else if (collider.GetComponent<Building>()) 
+        {
+            IslandVizInteraction.Instance.OnBuildingSelect(collider.GetComponent<Building>(), true);
+        }
+    }
+
+    public void Deselect(Collider collider)
+    {
+        if (collider.GetComponent<IslandGO>())
+        {
+            IslandVizInteraction.Instance.OnIslandSelect(collider.GetComponent<IslandGO>(), false);
+        }
+        else if (collider.GetComponent<Region>())
+        {
+            IslandVizInteraction.Instance.OnRegionSelect(collider.GetComponent<Region>(), false);
+        }
+        else if (collider.GetComponent<Building>())
+        {
+            IslandVizInteraction.Instance.OnBuildingSelect(collider.GetComponent<Building>(), false);
+        }
+    }
+
+
+
+
+
+
+
+    private void OnTriggerDown (Hand hand)
+    {
+        if (currentlyHitting && hand == Hand)
+        {
+            IslandVizVisualization.Instance.SelectAndFlyTo(hit.collider.transform);
         }
     }
 }

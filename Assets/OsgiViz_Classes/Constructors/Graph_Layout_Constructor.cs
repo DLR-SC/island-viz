@@ -144,11 +144,14 @@ namespace OsgiViz.SideThreadConstructors
                     simulationData[thisVert] = vpd;
                     #endregion
 
-                    stepCounter++;                    
+                    stepCounter++;
+
+                    if (stepCounter % 1000 == 0)
+                    {
+                        IslandVizUI.Instance.UpdateLoadingScreenUI("Forcedirected Graph Layout Construction", (((float)stepCounter / (float)simulationSteps) * 100f).ToString("0.0") + "%");
+                        yield return null;
+                    }
                 }
-                
-                IslandVizUI.Instance.UpdateLoadingScreenUI("Forcedirected Graph Layout Construction", (((float)stepCounter / (float)simulationSteps) * 100f).ToString("0.0") + "%");
-                yield return null;
             }
 
             #region assign computed positions to graph vertices
