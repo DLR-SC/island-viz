@@ -7,6 +7,7 @@ using Valve.VR.InteractionSystem;
 public class RaycastSelection : AdditionalIslandVizComponent
 {
     public Hand Hand;
+    public RayMode Mode;
     //public float MaxDistance = 100f;    
     public Material laserMaterial;
 
@@ -16,10 +17,17 @@ public class RaycastSelection : AdditionalIslandVizComponent
     private RaycastHit hit;
 
     private GameObject beamObj;
+    private LineRenderer lineRenderer;
 
     private bool initiated = false;
     private bool currentlyHitting = false;
     private Collider currendHittingCollider;
+
+    private Vector3 forward;
+
+
+
+
 
     // ################
     // Initiation
@@ -33,17 +41,16 @@ public class RaycastSelection : AdditionalIslandVizComponent
     /// </summary>
     public override IEnumerator Init()
     {
-        // Laser beam visuals
-        beamObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        beamObj.GetComponent<MeshRenderer>().sharedMaterial = laserMaterial;
-        beamObj.name = "LaserBeam";
-        Destroy(beamObj.GetComponent<BoxCollider>());
-        beamObj.transform.SetParent(Hand.transform);
-        beamObj.transform.localRotation = Quaternion.identity;
-        beamObj.transform.localPosition = Vector3.forward * laserLength/2f;
-        beamObj.transform.localScale = new Vector3(laserThickness, laserThickness, laserLength);
-
         IslandVizInteraction.Instance.OnControllerTriggerDown += OnTriggerDown;
+
+        // Laser beam visuals
+        beamObj = new GameObject();
+        beamObj.name = "LaserBeam";
+        beamObj.transform.SetParent(Hand.transform);
+        lineRenderer = beamObj.AddComponent<LineRenderer>();
+        lineRenderer.material = laserMaterial;
+        lineRenderer.startWidth = laserThickness;
+        lineRenderer.endWidth = laserThickness;
 
         yield return null;
 
@@ -58,23 +65,24 @@ public class RaycastSelection : AdditionalIslandVizComponent
         if (!initiated)
             return;
 
+        forward = Mode == RayMode.Laserpointer ? Hand.transform.forward : (Hand.transform.forward - Hand.transform.up) / 2f;
+
         //if (Physics.Raycast(Hand.transform.position + Hand.transform.forward * 0.1f, Hand.transform.forward * 1.5f, out hit, 5f))
-        if (Physics.SphereCast(Hand.transform.position + Hand.transform.forward * 0.1f, laserThickness/2, Hand.transform.forward, out hit))
+        if (Physics.SphereCast(Hand.transform.position + forward * 0.1f, laserThickness/2, forward, out hit))
         {
             if (hit.collider != currendHittingCollider)
             {
-                if (currendHittingCollider != null)
+                if (currendHittingCollider != null) // We jumped from one collider to the next, hence, we need to deselect the prior collider.
                 {
-                    Deselect(currendHittingCollider);
+                    ToggleSelection(currendHittingCollider, false);
                 }
-                Select(hit.collider);
+                ToggleSelection(hit.collider, true);
                 currendHittingCollider = hit.collider;
             }
 
             // Make laser visuals look like it stops at hit.
-            float newLaserLength = Vector3.Distance(Hand.transform.position, hit.point);
-            beamObj.transform.localPosition = Vector3.forward * newLaserLength / 2f;
-            beamObj.transform.localScale = new Vector3(laserThickness, laserThickness, newLaserLength);
+            lineRenderer.SetPosition(0, Hand.transform.position);
+            lineRenderer.SetPosition(1, hit.point);
 
             if (!currentlyHitting)
             {
@@ -83,49 +91,40 @@ public class RaycastSelection : AdditionalIslandVizComponent
         }
         else if (currentlyHitting || currendHittingCollider != null) // We hit something last update, but we do not now.
         {
-            Deselect(currendHittingCollider);
+            ToggleSelection(currendHittingCollider, false);
 
             currentlyHitting = false;
             currendHittingCollider = null;
 
             // Reset laser visuals
-            beamObj.transform.localPosition = Vector3.forward * laserLength / 2f;
-            beamObj.transform.localScale = new Vector3(laserThickness, laserThickness, laserLength);
+            lineRenderer.SetPosition(0, Hand.transform.position);
+            lineRenderer.SetPosition(1, Hand.transform.position + forward * 5f);
+        }
+
+        if (currendHittingCollider == null)
+        {
+            lineRenderer.SetPosition(0, Hand.transform.position);
+            lineRenderer.SetPosition(1, Hand.transform.position + forward * 5f);
         }
     }
 
 
-    public void Select(Collider collider)
+    public void ToggleSelection(Collider collider, bool select)
     {
         if (collider.GetComponent<IslandGO>())
         {
-            IslandVizInteraction.Instance.OnIslandSelect(collider.GetComponent<IslandGO>(), true);
+            IslandVizInteraction.Instance.OnIslandSelect(collider.GetComponent<IslandGO>(), select);
         }
         else if (collider.GetComponent<Region>())
         {
-            IslandVizInteraction.Instance.OnRegionSelect(collider.GetComponent<Region>(), true);
+            IslandVizInteraction.Instance.OnRegionSelect(collider.GetComponent<Region>(), select);
         }
         else if (collider.GetComponent<Building>()) 
         {
-            IslandVizInteraction.Instance.OnBuildingSelect(collider.GetComponent<Building>(), true);
+            IslandVizInteraction.Instance.OnBuildingSelect(collider.GetComponent<Building>(), select);
         }
     }
 
-    public void Deselect(Collider collider)
-    {
-        if (collider.GetComponent<IslandGO>())
-        {
-            IslandVizInteraction.Instance.OnIslandSelect(collider.GetComponent<IslandGO>(), false);
-        }
-        else if (collider.GetComponent<Region>())
-        {
-            IslandVizInteraction.Instance.OnRegionSelect(collider.GetComponent<Region>(), false);
-        }
-        else if (collider.GetComponent<Building>())
-        {
-            IslandVizInteraction.Instance.OnBuildingSelect(collider.GetComponent<Building>(), false);
-        }
-    }
 
 
 
@@ -139,5 +138,13 @@ public class RaycastSelection : AdditionalIslandVizComponent
         {
             IslandVizVisualization.Instance.SelectAndFlyTo(hit.collider.transform);
         }
+    }
+
+
+
+    public enum RayMode
+    {
+        Laserpointer,
+        Pistol
     }
 }
