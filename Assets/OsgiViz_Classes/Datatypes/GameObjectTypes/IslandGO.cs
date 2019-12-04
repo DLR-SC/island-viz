@@ -75,6 +75,10 @@ namespace OsgiViz.Unity.Island
 
 
 
+        // ################
+        // Visible & Invisible
+        // ################
+
         private void MakeIslandVisible ()
         {
             // Enable all children, i.e. make island visible.

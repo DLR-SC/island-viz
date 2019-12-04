@@ -134,44 +134,37 @@ public class IslandVizInteraction : MonoBehaviour {
     /// Called when the trigger button of a controller is pressed.
     /// </summary>
     /// <param name="hand">The hand where the button was pressed.</param>
-    public delegate void ControllerTriggerDown(Hand hand);
-    
+    public delegate void ControllerTriggerDown(Hand hand);    
     /// <summary>
     /// Called when the trigger button of a controller is released.
     /// </summary>
     /// <param name="hand">The hand where the button was released.</param>
     public delegate void ControllerTriggerUp(Hand hand);
-
     /// <summary>
     /// Called when the touchpad of a controller is pressed down.
     /// </summary>
     /// <param name="hand">The hand where the button was pressed.</param>
     public delegate void ControllerTouchpadDown(Hand hand);
-
     /// <summary>
     /// Called when the touchpad of a controller is released.
     /// </summary>
     /// <param name="hand">The hand where the button was pressed.</param>
     public delegate void ControllerTouchpadUp(Hand hand);
-
     /// <summary>
     /// Called when the touchpad of a controller is touched.
     /// </summary>
     /// <param name="hand">The hand where the button was pressed.</param>
     public delegate void ControllerTouchpadTouchStart(Hand hand);
-
     /// <summary>
     /// Called when the touchpad of a controller is not touched anymore.
     /// </summary>
     /// <param name="hand">The hand where the button was pressed.</param>
     public delegate void ControllerTouchpadTouchEnd(Hand hand);
-
     /// <summary>
     /// Called when the trigger button of a controller is pressed.
     /// </summary>
     /// <param name="hand">The hand where the button was pressed.</param>
     public delegate void ControllerGripDown(Hand hand);
-
     /// <summary>
     /// Called when the trigger button of a controller is released.
     /// </summary>
@@ -192,7 +185,6 @@ public class IslandVizInteraction : MonoBehaviour {
     /// <param name="col">Collider component of the trigger GameObject.</param>
     /// <param name="hand">The hand that entered the trigger.</param>
     public delegate void ControllerEnter(Collider col, Hand hand);
-
     /// <summary>
     /// Called when a controller exited a trigger.
     /// </summary>

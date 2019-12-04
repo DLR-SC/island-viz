@@ -77,7 +77,7 @@ public class IslandVizVisualization : MonoBehaviour
     /// </summary>
     public ZoomLevelChanged OnZoomLevelChanged;
     /// <summary>
-    /// Called when the position or rotation of the visualization root was changed.
+    /// Called when the scale of the visualization root was changed.
     /// </summary>
     public ScaleChanged OnVisualizationScaleChanged;
     /// <summary>

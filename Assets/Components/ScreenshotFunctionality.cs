@@ -29,7 +29,7 @@ public class ScreenshotFunctionality : AdditionalIslandVizComponent
 
         initiated = true;
 
-        //ControllerButtonHints.ShowTextHint(Player.instance.rightHand, EVRButtonId.k_EButton_Grip, "Take Screenshot");
+        //StartCoroutine(ShowToolTipp());
     }
     #endregion
 
@@ -52,4 +52,15 @@ public class ScreenshotFunctionality : AdditionalIslandVizComponent
         string fileName = "Screenshot " + System.DateTime.Now.Second + ".png";
         ScreenCapture.CaptureScreenshot(fileName, 4);
      }
+
+
+    IEnumerator ShowToolTipp ()
+    {
+        while (true)
+        {
+            ControllerButtonHints.ShowTextHint(Player.instance.rightHand, EVRButtonId.k_EButton_Grip, "Take Screenshot", false);
+            ControllerButtonHints.ShowTextHint(Player.instance.leftHand, EVRButtonId.k_EButton_Grip, "Take Screenshot", false);
+            yield return new WaitForFixedUpdate();
+        }
+    }
 }

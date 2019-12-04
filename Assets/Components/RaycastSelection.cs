@@ -2,28 +2,35 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Valve.VR;
 using Valve.VR.InteractionSystem;
 
 public class RaycastSelection : AdditionalIslandVizComponent
 {
-    public Hand Hand;
+    public Hand[] Hands; // You can attach both or only one hand.
     public RayMode Mode;
     //public float MaxDistance = 100f;    
     public Material laserMaterial;
 
+    public bool ShowTooltipps = true;
+
     private float laserLength = 3f;
     private float laserThickness = 0.01f;
 
-    private RaycastHit hit;
+    private RaycastHit[] hit;
 
-    private GameObject beamObj;
-    private LineRenderer lineRenderer;
+    private GameObject[] beamObjs;
+    private LineRenderer[] lineRenderers;
+    private Vector3[] forwards;
 
     private bool initiated = false;
-    private bool currentlyHitting = false;
-    private Collider currendHittingCollider;
+    private bool tooltippsDisabled = false;
 
-    private Vector3 forward;
+    private bool[] touchpadTouch = new bool[] { false, false };
+    private bool[] currentlyHitting = new bool[] { false, false };
+
+    private Collider[] currendHittingCollider;
+
 
 
 
@@ -41,16 +48,36 @@ public class RaycastSelection : AdditionalIslandVizComponent
     /// </summary>
     public override IEnumerator Init()
     {
-        IslandVizInteraction.Instance.OnControllerTriggerDown += OnTriggerDown;
+        beamObjs = new GameObject[Hands.Length];
+        lineRenderers = new LineRenderer[Hands.Length];
+        forwards = new Vector3[Hands.Length];
+        hit = new RaycastHit[Hands.Length];
+        currendHittingCollider = new Collider[Hands.Length];
 
-        // Laser beam visuals
-        beamObj = new GameObject();
-        beamObj.name = "LaserBeam";
-        beamObj.transform.SetParent(Hand.transform);
-        lineRenderer = beamObj.AddComponent<LineRenderer>();
-        lineRenderer.material = laserMaterial;
-        lineRenderer.startWidth = laserThickness;
-        lineRenderer.endWidth = laserThickness;
+        IslandVizInteraction.Instance.OnControllerTouchpadDown += OnTouchpadPressed;
+        IslandVizInteraction.Instance.OnControllerTouchpadTouchDown += OnTouchpadTouchDown;
+        IslandVizInteraction.Instance.OnControllerTouchpadTouchUp += OnTouchpadTouchUp;
+
+        for (int i = 0; i < Hands.Length; i++)
+        {
+            // Laser beam visuals
+            beamObjs[i] = new GameObject();
+            beamObjs[i].name = "LaserBeam";
+            beamObjs[i].transform.SetParent(Hands[i].transform);
+            lineRenderers[i] = beamObjs[i].AddComponent<LineRenderer>();
+            lineRenderers[i].material = laserMaterial;
+            lineRenderers[i].startWidth = laserThickness;
+            lineRenderers[i].endWidth = laserThickness;
+            beamObjs[i].SetActive(false);
+
+            if (ShowTooltipps)
+            {
+                ControllerButtonHints.ShowTextHint(Hands[i], EVRButtonId.k_EButton_SteamVR_Touchpad, "Touch to enable Selector");
+            }            
+        }
+
+        if (!ShowTooltipps)
+            tooltippsDisabled = true;
 
         yield return null;
 
@@ -60,53 +87,61 @@ public class RaycastSelection : AdditionalIslandVizComponent
 
 
 
-    private void FixedUpdate()
+    private IEnumerator RaySelection (int handID)
     {
-        if (!initiated)
-            return;
+        beamObjs[handID].SetActive(true);
 
-        forward = Mode == RayMode.Laserpointer ? Hand.transform.forward : (Hand.transform.forward - Hand.transform.up) / 2f;
-
-        //if (Physics.Raycast(Hand.transform.position + Hand.transform.forward * 0.1f, Hand.transform.forward * 1.5f, out hit, 5f))
-        if (Physics.SphereCast(Hand.transform.position + forward * 0.1f, laserThickness/2, forward, out hit))
+        while (touchpadTouch[handID])
         {
-            if (hit.collider != currendHittingCollider)
+            forwards[handID] = Mode == RayMode.Laserpointer ? Hands[handID].transform.forward : (Hands[handID].transform.forward - Hands[handID].transform.up) / 2f;
+
+            //if (Physics.Raycast(Hand.transform.position + Hand.transform.forward * 0.1f, Hand.transform.forward * 1.5f, out hit, 5f))
+            if (Physics.SphereCast(Hands[handID].transform.position + forwards[handID] * 0.1f, laserThickness / 2, forwards[handID], out hit[handID]))
             {
-                if (currendHittingCollider != null) // We jumped from one collider to the next, hence, we need to deselect the prior collider.
+                if (hit[handID].collider != currendHittingCollider[handID])
                 {
-                    ToggleSelection(currendHittingCollider, false);
+                    if (currendHittingCollider[handID] != null) // We jumped from one collider to the next, hence, we need to deselect the prior collider.
+                    {
+                        ToggleSelection(currendHittingCollider[handID], false);
+                    }
+                    ToggleSelection(hit[handID].collider, true);
+                    currendHittingCollider[handID] = hit[handID].collider;
                 }
-                ToggleSelection(hit.collider, true);
-                currendHittingCollider = hit.collider;
+
+                // Make laser visuals look like it stops at hit.
+                lineRenderers[handID].SetPosition(0, Hands[handID].transform.position);
+                lineRenderers[handID].SetPosition(1, hit[handID].point);
+
+                if (!currentlyHitting[handID])
+                {
+                    currentlyHitting[handID] = true;
+                }
             }
-
-            // Make laser visuals look like it stops at hit.
-            lineRenderer.SetPosition(0, Hand.transform.position);
-            lineRenderer.SetPosition(1, hit.point);
-
-            if (!currentlyHitting)
+            else if (currentlyHitting[handID] || currendHittingCollider[handID] != null) // We hit something last update, but we do not now.
             {
-                currentlyHitting = true;
+                ToggleSelection(currendHittingCollider[handID], false);
+
+                currentlyHitting[handID] = false;
+                currendHittingCollider[handID] = null;
+
+                // Reset laser visuals
+                lineRenderers[handID].SetPosition(0, Hands[handID].transform.position);
+                lineRenderers[handID].SetPosition(1, Hands[handID].transform.position + forwards[handID] * 5f);
             }
-        }
-        else if (currentlyHitting || currendHittingCollider != null) // We hit something last update, but we do not now.
-        {
-            ToggleSelection(currendHittingCollider, false);
 
-            currentlyHitting = false;
-            currendHittingCollider = null;
+            if (currendHittingCollider[handID] == null)
+            {
+                lineRenderers[handID].SetPosition(0, Hands[handID].transform.position);
+                lineRenderers[handID].SetPosition(1, Hands[handID].transform.position + forwards[handID] * 5f);
+            }
 
-            // Reset laser visuals
-            lineRenderer.SetPosition(0, Hand.transform.position);
-            lineRenderer.SetPosition(1, Hand.transform.position + forward * 5f);
+            yield return new WaitForFixedUpdate();
         }
 
-        if (currendHittingCollider == null)
-        {
-            lineRenderer.SetPosition(0, Hand.transform.position);
-            lineRenderer.SetPosition(1, Hand.transform.position + forward * 5f);
-        }
+        beamObjs[handID].SetActive(false);
     }
+
+
 
 
     public void ToggleSelection(Collider collider, bool select)
@@ -126,19 +161,41 @@ public class RaycastSelection : AdditionalIslandVizComponent
     }
 
 
-
-
-
-
-
-
-    private void OnTriggerDown (Hand hand)
+    private void OnTouchpadPressed (Hand hand)
     {
-        if (currentlyHitting && hand == Hand)
+        int handID = GetHandID(hand);
+
+        if (handID >= 0 && touchpadTouch[handID] && currentlyHitting[handID])
         {
-            IslandVizVisualization.Instance.SelectAndFlyTo(hit.collider.transform);
+            IslandVizVisualization.Instance.SelectAndFlyTo(hit[handID].collider.transform);
         }
     }
+
+    private void OnTouchpadTouchDown(Hand hand)
+    {
+        int handID = GetHandID(hand);
+        
+        if (initiated && handID >= 0 && !touchpadTouch[handID])
+        {
+            touchpadTouch[handID] = true;
+            StartCoroutine(RaySelection(handID));
+
+            if (!tooltippsDisabled)
+            {
+                DIsableTooltipps();
+            }
+        }
+    }
+    private void OnTouchpadTouchUp(Hand hand)
+    {
+        int handID = GetHandID(hand);
+
+        if (handID >= 0 && touchpadTouch[handID])
+        {
+            touchpadTouch[handID] = false;
+        }
+    }
+
 
 
 
@@ -146,5 +203,35 @@ public class RaycastSelection : AdditionalIslandVizComponent
     {
         Laserpointer,
         Pistol
+    }
+
+    private enum HandType
+    {
+        Left,
+        Right
+    }
+
+
+
+
+
+    private int GetHandID (Hand hand)
+    {
+        for (int i = 0; i < Hands.Length; i++)
+        {
+            if (Hands[i] == hand)
+            {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private void DIsableTooltipps ()
+    {
+        foreach (var hand in Hands)
+        {
+            ControllerButtonHints.HideTextHint(hand, EVRButtonId.k_EButton_SteamVR_Touchpad);
+        }
     }
 }
