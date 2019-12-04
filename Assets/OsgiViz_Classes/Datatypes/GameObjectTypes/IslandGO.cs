@@ -13,6 +13,9 @@ namespace OsgiViz.Unity.Island
     {
         public ZoomLevel CurrentZoomLevel;
 
+        public bool Selected;
+        public bool Visible;
+
         private CartographicIsland island;
         private List<Region> regions;
         private GameObject coast;
@@ -43,35 +46,6 @@ namespace OsgiViz.Unity.Island
         }
 
 
-        // ################
-        // Events
-        // ################
-
-        
-        /// <summary>
-        /// Called when the island GameObject is enabled.
-        /// </summary>
-        public IslandEnabled OnIslandVisible;
-        /// <summary>
-        /// Called when the island GameObject is disabled.
-        /// </summary>
-        public IslandDisabled OnIslandInvisible;
-
-
-        // ################
-        // Delegates
-        // ################
-
-        /// <summary>
-        /// Called when the island GameObject is enabled.
-        /// </summary>
-        public delegate void IslandEnabled();
-        /// <summary>
-        /// Called when the island GameObject is disabled.
-        /// </summary>
-        public delegate void IslandDisabled();
-        
-
 
 
 
@@ -84,14 +58,16 @@ namespace OsgiViz.Unity.Island
         {
             if (other.tag == "TableContent")
             {
-                IslandVizVisualization.Instance.MakeIslandVisible(this);
+                MakeIslandVisible();
+                IslandVizVisualization.Instance.OnIslandVisible(this);
             }
         }
         private void OnTriggerExit(Collider other)
         {
             if (other.tag == "TableContent")
             {
-                IslandVizVisualization.Instance.MakeIslandInvisible(this);
+                MakeIslandInvisible();
+                IslandVizVisualization.Instance.OnIslandInvisible(this);
             }
         }
 
@@ -99,11 +75,36 @@ namespace OsgiViz.Unity.Island
 
 
 
-        
+        private void MakeIslandVisible ()
+        {
+            // Enable all children, i.e. make island visible.
+            for (int i = 0; i < transform.childCount; i++)
+            {
+                transform.GetChild(i).gameObject.SetActive(true);
+            }
+            Visible = true;
+        }
 
+        private void MakeIslandInvisible()
+        {
+            // Disable all children, i.e. make island invisible.
+            for (int i = 0; i < transform.childCount; i++)
+            {
+                transform.GetChild(i).gameObject.SetActive(false);
+            }
+            Visible = false;
+        }
+
+
+
+        // ################
+        // Zoom Level
+        // ################
+
+        #region Zoom Level
 
         /// <summary>
-        /// This Method contains and applies the rules of all ZoomLevels to an island. 
+        /// Apply the rules of all ZoomLevels to an island. 
         /// Call this to change the Zoomlevel of an island.
         /// </summary>
         /// <param name="newZoomLevel">The ZoomLevel that you want to apply to the island.</param>
@@ -116,21 +117,21 @@ namespace OsgiViz.Unity.Island
             }
             else if (newZoomLevel == ZoomLevel.Near)
             {
-                yield return NearZoomLevel();
+                yield return ApplyNearZoomLevel();
             }
             else if (newZoomLevel == ZoomLevel.Medium)
             {
-                yield return MediumZoomLevel();
+                yield return ApplyMediumZoomLevel();
             }
             else if (newZoomLevel == ZoomLevel.Far)
             {
-                yield return FarZoomLevel();
+                yield return ApplyFarZoomLevel();
             }
             CurrentZoomLevel = newZoomLevel;
         }
 
 
-        public IEnumerator NearZoomLevel()
+        public IEnumerator ApplyNearZoomLevel()
         {
             // Disable region colliders & enable buildings.
             foreach (var region in regions)
@@ -152,7 +153,7 @@ namespace OsgiViz.Unity.Island
         }
 
 
-        public IEnumerator MediumZoomLevel()
+        public IEnumerator ApplyMediumZoomLevel()
         {
             // NEAR -> MEDIUM 
             if (CurrentZoomLevel == ZoomLevel.Near)
@@ -193,7 +194,7 @@ namespace OsgiViz.Unity.Island
         }
 
 
-        public IEnumerator FarZoomLevel ()
+        public IEnumerator ApplyFarZoomLevel ()
         {
             // Hide Docks.
             if (importDock.activeSelf)
@@ -220,24 +221,8 @@ namespace OsgiViz.Unity.Island
             GetComponent<CapsuleCollider>().enabled = true;
         }
 
+        #endregion
 
-
-
-
-        private void handleActivationDeactivation(Hand hand)
-        {
-            string contentText = "";
-            contentText += "<b><color=green>Name</b></color>";
-            contentText += "\n";
-            contentText += island.getName();
-            contentText += "\n";
-            contentText += "<b><color=green>#Packages</b></color>";
-            contentText += "\n";
-            contentText += island.getPackages().Count;
-
-
-            gameObject.GetComponent<PdaInspectable>().sendContentToPda(contentText);
-        }
 
 
 

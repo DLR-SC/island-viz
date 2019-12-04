@@ -80,6 +80,14 @@ public class IslandVizVisualization : MonoBehaviour
     /// Called when the position or rotation of the visualization root was changed.
     /// </summary>
     public ScaleChanged OnVisualizationScaleChanged;
+    /// <summary>
+    /// Called when a island is set visible.
+    /// </summary>
+    public IslandEnabled OnIslandVisible;
+    /// <summary>
+    /// Called when a island is set invisible.
+    /// </summary>
+    public IslandDisabled OnIslandInvisible;
 
 
     // ################
@@ -100,7 +108,14 @@ public class IslandVizVisualization : MonoBehaviour
     /// Called when the position or rotation of the visualization root was changed.
     /// </summary>
     public delegate void ScaleChanged();
-
+    /// <summary>
+    /// Called when the island GameObject is enabled.
+    /// </summary>
+    public delegate void IslandEnabled(IslandGO island);
+    /// <summary>
+    /// Called when the island GameObject is disabled.
+    /// </summary>
+    public delegate void IslandDisabled(IslandGO island);
 
 
 
@@ -151,6 +166,8 @@ public class IslandVizVisualization : MonoBehaviour
 
         OnTableHeightChanged += ApplyTableHeight;
         OnVisualizationScaleChanged += OnScaleChanged;
+        OnIslandVisible += OnNewVisibleIsland;
+        OnIslandInvisible += OnNewInvisibleIsland;
     }
 
     /// <summary>
@@ -227,7 +244,7 @@ public class IslandVizVisualization : MonoBehaviour
     /// Adds this island to the current visible islands List and sets islandDirty=true.
     /// </summary>
     /// <param name="islandGO">The island that entered the TableContent-Trigger.</param>
-    public void MakeIslandVisible(IslandGO islandGO)
+    public void OnNewVisibleIsland(IslandGO islandGO)
     {
         if (!visibleIslandGOs.Contains(islandGO))
         {
@@ -240,16 +257,7 @@ public class IslandVizVisualization : MonoBehaviour
                                      // to apply the current zoomlevel if needed.
             }
 
-            // Enable all children, i.e. make island visible.
-            for (int i = 0; i < islandGO.transform.childCount; i++)
-            {
-                islandGO.transform.GetChild(i).gameObject.SetActive(true);
-            }
-
-            islandGO.OnIslandVisible?.Invoke();
-
             IslandVizUI.Instance.UpdateCurrentVisibleIslandsUI(((float)visibleIslandGOs.Count/(float)GlobalVar.islandNumber) * 100f); // Update UI.
-            //Debug.Log(currentIslands.Count);
         }
     }
 
@@ -258,22 +266,13 @@ public class IslandVizVisualization : MonoBehaviour
     /// Removes this island from the current visible islands List.
     /// </summary>
     /// <param name="islandGO">The island that exited the TableContent-Trigger.</param>
-    public void MakeIslandInvisible(IslandGO islandGO)
+    public void OnNewInvisibleIsland(IslandGO islandGO)
     {
         if (visibleIslandGOs.Contains(islandGO))
         {
             visibleIslandGOs.Remove(islandGO);
 
-            // Disable all children, i.e. make island invisible.
-            for (int i = 0; i < islandGO.transform.childCount; i++)
-            {
-                islandGO.transform.GetChild(i).gameObject.SetActive(false);
-            }
-
-            islandGO.OnIslandInvisible?.Invoke();
-
             IslandVizUI.Instance.UpdateCurrentVisibleIslandsUI(((float)visibleIslandGOs.Count / (float)GlobalVar.islandNumber) * 100f); // Update UI.
-            //Debug.Log(currentIslands.Count);
         }
     }
 
@@ -304,7 +303,8 @@ public class IslandVizVisualization : MonoBehaviour
     /// </summary>
     IEnumerator ZoomLevelRoutine ()
     {
-        float zoomLevelPercent = 0; // The current ZoomLevel in %. 
+        float zoomLevelPercentage = 0; // The current ZoomLevel in %. 
+        ZoomLevel zoomLevel;
 
         zoomDirty = true;
         islandsDirty = true;
@@ -315,30 +315,17 @@ public class IslandVizVisualization : MonoBehaviour
             {
                 zoomDirty = false; // This has to be done first, because the zoom can be changed at any point.               
 
-                // Calculate current zoom level in percent
-                zoomLevelPercent = Mathf.Sqrt(Mathf.Sqrt((GlobalVar.CurrentZoom - GlobalVar.MinZoom) / (GlobalVar.MaxZoom - GlobalVar.MinZoom))) * 100;
+                zoomLevelPercentage = Mathf.Sqrt(Mathf.Sqrt((GlobalVar.CurrentZoom - GlobalVar.MinZoom) / (GlobalVar.MaxZoom - GlobalVar.MinZoom))) * 100;
+                zoomLevel = PercentageToZoomLevel(zoomLevelPercentage);
 
-                // Check if the ZoomLevel changed.
-                if (zoomLevelPercent <= GlobalVar.FarZoomLevelPercent && CurrentZoomLevel != ZoomLevel.Far)
+                // Check if the current ZoomLevel must be changed.
+                if (CurrentZoomLevel != zoomLevel)
                 {
-                    CurrentZoomLevel = ZoomLevel.Far;
-                    islandsDirty = true;
-                }
-                else if (zoomLevelPercent > GlobalVar.FarZoomLevelPercent && zoomLevelPercent <= GlobalVar.MediumZoomLevelPercent && CurrentZoomLevel != ZoomLevel.Medium)
-                {
-                    CurrentZoomLevel = ZoomLevel.Medium;
-                    islandsDirty = true;
-                }
-                else if (zoomLevelPercent > GlobalVar.MediumZoomLevelPercent && CurrentZoomLevel != ZoomLevel.Near)
-                {                    
-                    CurrentZoomLevel = ZoomLevel.Near;
+                    CurrentZoomLevel = zoomLevel;
                     islandsDirty = true;
                 }
 
-                IslandVizUI.Instance.UpdateZoomLevelUI(zoomLevelPercent);
-                
-                // Debug
-                //Debug.Log(GlobalVar.MinZoomLevel + " - " + GlobalVar.CurrentZoomLevel + " - " + GlobalVar.MaxZoomLevel + " -> " + zoomPercent + "%");
+                IslandVizUI.Instance.UpdateZoomLevelUI(zoomLevelPercentage);
             }
                         
             if (islandsDirty) // Island(s) with wrong ZoomLevel.
@@ -356,7 +343,7 @@ public class IslandVizVisualization : MonoBehaviour
                     }
                 }
 
-                IslandVizUI.Instance.UpdateZoomLevelUI(zoomLevelPercent);
+                IslandVizUI.Instance.UpdateZoomLevelUI(zoomLevelPercentage);
             }
 
             yield return new WaitForFixedUpdate();
@@ -453,8 +440,8 @@ public class IslandVizVisualization : MonoBehaviour
         float value = 0;
         while (value <= 1)
         {
-            VisualizationRoot.localScale = Vector3.Lerp(startScale, endScale, value);
-            VisualizationRoot.position = Vector3.Lerp(startPosition, endPosition, value);
+            VisualizationRoot.localScale = Vector3.Lerp(startScale, endScale, value); // TODO throwing exceptions sometimes
+            VisualizationRoot.position = Vector3.Lerp(startPosition, endPosition, value); // TODO throwing exceptions sometimes 
             GlobalVar.CurrentZoom = VisualizationRoot.localScale.x;
 
             IslandVizVisualization.Instance.OnVisualizationScaleChanged();
@@ -559,6 +546,30 @@ public class IslandVizVisualization : MonoBehaviour
         distance = Vector3.Distance(maxPoint, minPoint);
 
         return centroid;
+    }
+
+    /// <summary>
+    /// Converts a percentage value into a ZoomLevel.
+    /// </summary>
+    /// <param name="zoomLevelPercent"></param>
+    /// <returns></returns>
+    private ZoomLevel PercentageToZoomLevel (float zoomLevelPercent)
+    {
+        if (zoomLevelPercent <= GlobalVar.FarZoomLevelPercent) // ZoomLevel.Far 
+        {
+            return ZoomLevel.Far;
+        }
+        else if (zoomLevelPercent <= GlobalVar.MediumZoomLevelPercent) // ZoomLevel.Medium 
+        {
+            return ZoomLevel.Medium;
+        }
+        else if (zoomLevelPercent > GlobalVar.MediumZoomLevelPercent) // ZoomLevel.Near 
+        {
+            return ZoomLevel.Near;
+        }
+
+        Debug.LogError("PercentToZoomlevel percent value could not be assigend to a ZoomLevel!");
+        return ZoomLevel.Near;
     }
 
     #endregion

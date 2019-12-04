@@ -27,6 +27,7 @@ namespace StaticIslandNamesComponent
         // ################
 
         private Transform target; // The island target this island name is following.
+        private IslandGO targetIsland;
         private float heightIndex = 1f; // The current height index of this island name.
 
         private float yPosition; // The current y-position of this island name.
@@ -42,11 +43,10 @@ namespace StaticIslandNamesComponent
 
         public void Init(Transform target, string name)
         {
-            Debug.Log("StaticIslandName Init");
-
             AlwaysLookAtTarget.Target = Camera.main.transform;
             Name.text = name;
             this.target = target;
+            targetIsland = target.GetComponent<IslandGO>();
 
             heightIndex = StaticIslandNames.Instance.GetHeightIndex(this);
 
@@ -65,7 +65,7 @@ namespace StaticIslandNamesComponent
             if (!initiated)
                 return;
 
-            if (target.gameObject.activeSelf) // && target.GetComponent<Collider>().enabled
+            if (targetIsland.Visible)
             {
                 if (IslandVizVisualization.Instance.CurrentZoomLevel != ZoomLevel.Near)
                 {
@@ -86,28 +86,9 @@ namespace StaticIslandNamesComponent
                     }
                 }
             }
-            else
-            {
-                Destroy(gameObject);
-            }
         }
 
 
-        // ################
-        // Disable & Enable Text
-        // ################
-
-        public void DisableText()
-        {
-            NameParent.SetActive(false);
-            Line.gameObject.SetActive(false);
-        }
-
-        public void EnableText()
-        {
-            NameParent.SetActive(true);
-            Line.gameObject.SetActive(true);
-        }
 
 
         // ################
@@ -117,6 +98,10 @@ namespace StaticIslandNamesComponent
         public Transform GetTarget()
         {
             return target;
+        }
+        public IslandGO GetTargetIsland ()
+        {
+            return targetIsland;
         }
         public float GetHeightIndex()
         {

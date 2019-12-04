@@ -35,6 +35,7 @@ namespace StaticIslandNamesComponent
         private Transform StaticNameParent; // The transform of the initiated IslandNameParentPrefab. This will be the parent of every island name.
 
         Dictionary<Transform, StaticIslandName> currentNames; // Dictionary connecting the selected island transform with the StaticIslandName tag.
+        Dictionary<Transform, StaticIslandName> currentHiddenNames;
 
 
 
@@ -56,12 +57,15 @@ namespace StaticIslandNamesComponent
             Instance = this;
             StaticNameParent = ((GameObject)Instantiate(IslandNameParentPrefab, Vector3.zero, Quaternion.identity)).transform;
             currentNames = new Dictionary<Transform, StaticIslandName>();
+            currentHiddenNames = new Dictionary<Transform, StaticIslandName>();
 
             // Subscribe to events.
             IslandVizInteraction.Instance.OnIslandSelect += OnIslandSelection;
             IslandVizInteraction.Instance.OnRegionSelect += OnRegionSelection;
             IslandVizInteraction.Instance.OnBuildingSelect += OnBuildingSelection;
             IslandVizVisualization.Instance.OnVisualizationScaleChanged += RecalculateAllHeightIndexes;
+            IslandVizVisualization.Instance.OnIslandVisible += UnhideStaticName;
+            IslandVizVisualization.Instance.OnIslandInvisible += HideStaticName;
 
             yield return null;
         }
@@ -144,7 +148,7 @@ namespace StaticIslandNamesComponent
         /// <param name="target">The target Transform the name should be attached to.</param>
         private void CreateStaticName(Transform target)
         {
-            if (!currentNames.ContainsKey(target))
+            if (!currentNames.ContainsKey(target) && !currentNames.ContainsKey(target)) 
             {
                 GameObject islandName = (GameObject)Instantiate(IslandNamePrefab);
                 islandName.transform.parent = StaticNameParent;
@@ -156,8 +160,7 @@ namespace StaticIslandNamesComponent
                 staticIslandName.Init(target, target.name);
             }
         }
-
-
+        
         /// <summary>
         /// By destroying the StaticIslandName GameObject, the island name disappears.
         /// </summary>
@@ -166,8 +169,41 @@ namespace StaticIslandNamesComponent
         {
             if (currentNames.ContainsKey(target))
             {
-                Destroy(currentNames[target].gameObject);
                 currentNames.Remove(target);
+                Destroy(currentNames[target].gameObject);
+            }
+            else if (currentHiddenNames.ContainsKey(target))
+            {
+                currentNames.Remove(target);
+                Destroy(currentNames[target].gameObject);
+            }
+        }
+
+        private void HideStaticName (IslandGO island)
+        {
+            StaticIslandName islandName;
+            if (currentNames.TryGetValue(island.transform, out islandName))
+            {
+                currentHiddenNames.Add(island.transform, islandName);
+                currentNames.Remove(island.transform);
+
+                islandName.gameObject.SetActive(false);
+
+                RecalculateAllHeightIndexes();
+            }
+        }
+
+        private void UnhideStaticName (IslandGO island)
+        {
+            StaticIslandName islandName;
+            if (currentHiddenNames.TryGetValue(island.transform, out islandName))
+            {
+                currentNames.Add(island.transform, islandName);
+                currentHiddenNames.Remove(island.transform);
+
+                islandName.gameObject.SetActive(true);
+
+                RecalculateAllHeightIndexes();
             }
         }
 
