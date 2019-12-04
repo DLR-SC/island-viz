@@ -17,6 +17,7 @@ public class IslandVizUI : MonoBehaviour
     public Transform StaticUI_Parent; // Parent Transform of all static UI elements.
     public GameObject LoadingScreen; // Parent GameObject of all loading screen UI elements.
     public GameObject ZoomLevel; // Parent GameObject of all zoom level UI elements.
+    public GameObject Notification;
 
     [Header("Loading Screen Components")]
     public Text LoadingScreenProgressValue; // Text element containing the loading progress (in %) of the current loading process.
@@ -29,13 +30,18 @@ public class IslandVizUI : MonoBehaviour
     [Header("Current Visible Islands Components")]
     public Text CurrentVisivleIslandsValue; // Text element containing the current number of visible islands (in %). 
 
+    [Header("Current Visible Islands Components")]
+    public Text NotificationValue;
 
 
     void Awake()
     {
         Instance = this;
+
         IslandVizBehaviour.Instance.OnConstructionDone += OnConstructionDone; // Subscribe to the OnConstructionDone event of the IslandVizBehaviour.
+
         StaticUI_Parent.gameObject.SetActive(true); // This is probably disabled because it is annoying in the editor, so we enable it here ;)
+        Notification.SetActive(false);
 
         IslandVizVisualization.Instance.OnTableHeightChanged += TableHeightChanged;
     }
@@ -104,5 +110,27 @@ public class IslandVizUI : MonoBehaviour
     public void UpdateCurrentVisibleIslandsUI (float percentage)
     {
         CurrentVisivleIslandsValue.text = "Currently visible:\n<b>" + percentage.ToString("0") + "%</b> of all islands";
+    }
+
+
+
+
+    // ################
+    // Notifications
+    // ################
+
+    public void MakeNotification (float duration, string text)
+    {
+        StartCoroutine(NotificationRoutine(duration, text));
+    }
+
+    IEnumerator NotificationRoutine (float duration, string text)
+    {
+        Notification.SetActive(true);
+        NotificationValue.text = text;
+
+        yield return new WaitForSeconds(duration);
+
+        Notification.SetActive(false);
     }
 }

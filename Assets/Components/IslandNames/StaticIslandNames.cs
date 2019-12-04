@@ -169,13 +169,13 @@ namespace StaticIslandNamesComponent
         {
             if (currentNames.ContainsKey(target))
             {
-                currentNames.Remove(target);
                 Destroy(currentNames[target].gameObject);
+                currentNames.Remove(target);
             }
             else if (currentHiddenNames.ContainsKey(target))
             {
-                currentNames.Remove(target);
                 Destroy(currentNames[target].gameObject);
+                currentNames.Remove(target);
             }
         }
 

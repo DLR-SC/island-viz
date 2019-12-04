@@ -46,7 +46,12 @@ namespace StaticIslandNamesComponent
             AlwaysLookAtTarget.Target = Camera.main.transform;
             Name.text = name;
             this.target = target;
-            targetIsland = target.GetComponent<IslandGO>();
+            targetIsland = GetIslandFromTransform(target);
+
+            if (targetIsland == null)
+            {
+                Debug.LogError("StaticIslandName was attached to a none island object!");
+            }
 
             heightIndex = StaticIslandNames.Instance.GetHeightIndex(this);
 
@@ -89,6 +94,26 @@ namespace StaticIslandNamesComponent
         }
 
 
+        // ################
+        // Helper Functions
+        // ################
+
+        public IslandGO GetIslandFromTransform (Transform transform)
+        {
+            if (transform.GetComponent<IslandGO>())
+            {
+                return transform.GetComponent<IslandGO>();
+            }
+            else if (transform.GetComponent<Region>())
+            {
+                return transform.GetComponent<Region>().getParentIsland();
+            }
+            else if (transform.GetComponent<Building>())
+            {
+                return transform.parent.GetComponent<Region>().getParentIsland();
+            }
+            else return null;
+        }
 
 
         // ################
@@ -111,5 +136,7 @@ namespace StaticIslandNamesComponent
         {
             heightIndex = index;
         }
+
+
     }
 }

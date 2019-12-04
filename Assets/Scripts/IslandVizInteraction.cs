@@ -86,6 +86,14 @@ public class IslandVizInteraction : MonoBehaviour {
     /// </summary>
     public ControllerTouchpadUp OnControllerTouchpadUp;
     /// <summary>
+    /// Called when the touchpad of a controller is pressed down.
+    /// </summary>
+    public ControllerTouchpadTouchStart OnControllerTouchpadTouchDown;
+    /// <summary>
+    /// Called when the touchpad of a controller is pressed down.
+    /// </summary>
+    public ControllerTouchpadTouchEnd OnControllerTouchpadTouchUp;
+    /// <summary>
     /// Called when a controller entered a trigger.
     /// </summary>
     public ControllerEnter OnControllerEnter;
@@ -105,6 +113,14 @@ public class IslandVizInteraction : MonoBehaviour {
     /// Called when an island was selected or deselected.
     /// </summary>
     public BuildingSelected OnBuildingSelect;
+    /// <summary>
+    /// Called when the grip button of a controller is pressed.
+    /// </summary>
+    public ControllerGripDown OnControllerGripDown;
+    /// <summary>
+    /// Called when the grip button of a controller is released.
+    /// </summary>
+    public ControllerGripUp OnControllerGripUp;
     #endregion
 
 
@@ -138,6 +154,29 @@ public class IslandVizInteraction : MonoBehaviour {
     /// <param name="hand">The hand where the button was pressed.</param>
     public delegate void ControllerTouchpadUp(Hand hand);
 
+    /// <summary>
+    /// Called when the touchpad of a controller is touched.
+    /// </summary>
+    /// <param name="hand">The hand where the button was pressed.</param>
+    public delegate void ControllerTouchpadTouchStart(Hand hand);
+
+    /// <summary>
+    /// Called when the touchpad of a controller is not touched anymore.
+    /// </summary>
+    /// <param name="hand">The hand where the button was pressed.</param>
+    public delegate void ControllerTouchpadTouchEnd(Hand hand);
+
+    /// <summary>
+    /// Called when the trigger button of a controller is pressed.
+    /// </summary>
+    /// <param name="hand">The hand where the button was pressed.</param>
+    public delegate void ControllerGripDown(Hand hand);
+
+    /// <summary>
+    /// Called when the trigger button of a controller is released.
+    /// </summary>
+    /// <param name="hand">The hand where the button was released.</param>
+    public delegate void ControllerGripUp(Hand hand);
     #endregion
 
 
@@ -220,6 +259,22 @@ public class IslandVizInteraction : MonoBehaviour {
             if (OnControllerTouchpadUp != null && Player.hands[i].controller.GetPressUp(SteamVR_Controller.ButtonMask.Touchpad))
             {
                 OnControllerTouchpadUp(Player.hands[i]);
+            }
+            if (OnControllerTouchpadTouchDown != null && Player.hands[i].controller.GetTouchDown(SteamVR_Controller.ButtonMask.Touchpad))
+            {
+                OnControllerTouchpadTouchDown(Player.hands[i]);
+            }
+            if (OnControllerTouchpadTouchUp != null && Player.hands[i].controller.GetTouchUp(SteamVR_Controller.ButtonMask.Touchpad))
+            {
+                OnControllerTouchpadTouchUp(Player.hands[i]);
+            }
+            if (OnControllerGripDown != null && Player.hands[i].controller.GetPressDown(SteamVR_Controller.ButtonMask.Grip))
+            {
+                OnControllerGripDown(Player.hands[i]);
+            }
+            if (OnControllerGripDown != null && Player.hands[i].controller.GetPressUp(SteamVR_Controller.ButtonMask.Grip))
+            {
+                OnControllerGripDown(Player.hands[i]);
             }
         }
     }
