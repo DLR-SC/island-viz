@@ -121,6 +121,15 @@ public class IslandVizInteraction : MonoBehaviour {
     /// Called when the grip button of a controller is released.
     /// </summary>
     public ControllerGripUp OnControllerGripUp;
+    /// <summary>
+    /// Called when the grip button of a controller is pressed.
+    /// </summary>
+    public ControllerMenuDown OnControllerMenuDown;
+    /// <summary>
+    /// Called when the grip button of a controller is released.
+    /// </summary>
+    public ControllerMenuUp OnControllerMenuUp;
+
     #endregion
 
 
@@ -170,6 +179,17 @@ public class IslandVizInteraction : MonoBehaviour {
     /// </summary>
     /// <param name="hand">The hand where the button was released.</param>
     public delegate void ControllerGripUp(Hand hand);
+    /// <summary>
+    /// Called when the menu button of a controller is pressed.
+    /// </summary>
+    /// <param name="hand">The hand where the button was pressed.</param>
+    public delegate void ControllerMenuDown(Hand hand);
+    /// <summary>
+    /// Called when the menu button of a controller is released.
+    /// </summary>
+    /// <param name="hand">The hand where the button was released.</param>
+    public delegate void ControllerMenuUp(Hand hand);
+
     #endregion
 
 
@@ -273,6 +293,14 @@ public class IslandVizInteraction : MonoBehaviour {
             if (OnControllerGripDown != null && Player.hands[i].controller.GetPressUp(SteamVR_Controller.ButtonMask.Grip))
             {
                 OnControllerGripDown(Player.hands[i]);
+            }
+            if (OnControllerMenuDown != null && Player.hands[i].controller.GetPressDown(SteamVR_Controller.ButtonMask.ApplicationMenu))
+            {
+                OnControllerMenuDown(Player.hands[i]);
+            }
+            if (OnControllerMenuUp != null && Player.hands[i].controller.GetPressUp(SteamVR_Controller.ButtonMask.ApplicationMenu))
+            {
+                OnControllerMenuUp(Player.hands[i]);
             }
         }
     }

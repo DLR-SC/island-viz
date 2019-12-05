@@ -159,13 +159,15 @@ public class Neo4jOsgiConstructor : MonoBehaviour {
                 }
             }
             osgiProject.addBundle(bundle);
-            IslandVizUI.Instance.UpdateLoadingScreenUI("OSGi-Project from Neo4J", "Downloaded Bundles: " + osgiProject.getBundles().Count);
+            IslandVizUI.Instance.UpdateLoadingScreenUI("OSGi-Project from Neo4J", osgiProject.getBundles().Count + "/" + bundleNameList.Count + " Bundles loaded");
             yield return null;
         }
 
         GlobalVar.maximumLOCinProject = maxLOC;
 
         IslandVizUI.Instance.UpdateLoadingScreenUI("OSGi-Project from Neo4J", "Loading Services...");
+
+        yield return null;
 
         // Find all services
         result = neo4j.Transaction("MATCH (s:Service) RETURN s.fileName as fileName");

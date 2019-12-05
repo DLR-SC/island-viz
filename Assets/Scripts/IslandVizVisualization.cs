@@ -467,7 +467,12 @@ public class IslandVizVisualization : MonoBehaviour
             //    islands.Add(item.transform);
             //}
             //SelectAndFlyTo(islands.ToArray());
-            IslandSelectionComponent.Instance.SelectIslands(IslandGameObjects);
+            //IslandSelectionComponent.Instance.SelectIslands(IslandGameObjects);
+
+            foreach (var item in IslandGameObjects)
+            {
+                IslandVizInteraction.Instance.OnIslandSelect(item, IslandVizInteraction.SelectionType.Highlight, true);
+            }
         }
     }
 

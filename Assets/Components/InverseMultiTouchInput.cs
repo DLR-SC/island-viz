@@ -3,6 +3,7 @@ using OsgiViz.Core;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Valve.VR;
 using Valve.VR.InteractionSystem;
 
 /// <summary>
@@ -24,6 +25,10 @@ public class InverseMultiTouchInput : AdditionalIslandVizComponent {
     private List<Hand> usingHandList;
     private Vector3 currentTranslationVelocity;
     private bool initiated = false;
+    private bool tooltippsDisabled = false;
+
+    // Settings
+    private string mapNavigationAreaTag = "MapNavigationArea";
 
 
 
@@ -43,7 +48,7 @@ public class InverseMultiTouchInput : AdditionalIslandVizComponent {
 
         // Init GameObject
         mapNavigationArea = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-        mapNavigationArea.name = "MapNavigationArea";
+        mapNavigationArea.name = mapNavigationAreaTag;
         mapNavigationArea.transform.localScale = new Vector3(1.75f, 0.15f, 1.75f);
         mapNavigationArea.transform.position = new Vector3(0f, OsgiViz.Core.GlobalVar.hologramTableHeight, 0f);
 
@@ -57,8 +62,8 @@ public class InverseMultiTouchInput : AdditionalIslandVizComponent {
         meshCollider.isTrigger = true;
 
         // Physics Settings
-        mapNavigationArea.tag = "MapNavigationArea";
-        mapNavigationArea.layer = LayerMask.NameToLayer("MapNavigationArea"); // TODO ?
+        mapNavigationArea.tag = mapNavigationAreaTag;
+        mapNavigationArea.layer = LayerMask.NameToLayer(mapNavigationAreaTag); // TODO ?
         
         // Subscribe input methods
         IslandVizInteraction.Instance.OnControllerEnter += OnControllerEnterEvent;
@@ -85,17 +90,27 @@ public class InverseMultiTouchInput : AdditionalIslandVizComponent {
 
     private void OnControllerEnterEvent(Collider collider, Hand hand)
     {
-        if (collider.tag == "MapNavigationArea" && !touchingHandList.Contains(hand))
+        if (collider.tag == mapNavigationAreaTag && !touchingHandList.Contains(hand))
         {
             touchingHandList.Add(hand);
+
+            if (!tooltippsDisabled)
+            {
+                EnableTooltips(hand);
+            }
         }
     }
 
     private void OnControllerExitEvent(Collider collider, Hand hand)
     {
-        if (collider.tag == "MapNavigationArea" && touchingHandList.Contains(hand))
+        if (collider.tag == mapNavigationAreaTag && touchingHandList.Contains(hand))
         {
             touchingHandList.Remove(hand);
+
+            if (!tooltippsDisabled)
+            {
+                DisableTooltips(hand);
+            }
         }
     }
 
@@ -104,6 +119,12 @@ public class InverseMultiTouchInput : AdditionalIslandVizComponent {
         if (!usingHandList.Contains(hand) && touchingHandList.Contains(hand))
         {
             usingHandList.Add(hand);
+
+            if (!tooltippsDisabled)
+            {
+                tooltippsDisabled = true;
+                DisableTooltips();
+            }
         }
     }
 
@@ -124,49 +145,6 @@ public class InverseMultiTouchInput : AdditionalIslandVizComponent {
     // ################
 
     #region Interaction - Movement
-
-
-    //void Update()
-    //{
-    //    if (!initiated)
-    //    {
-    //        return;
-    //    }
-
-    //    if (usingHandList.Count == 1)
-    //    {
-    //        Vector3 delta = usingHandList[0].GetTrackedObjectVelocity() * Time.deltaTime * TranslationMult;
-    //        delta.y = 0;
-    //        IslandVizVisualization.Instance.VisualizationRoot.position += delta;
-    //    }
-    //    else if (usingHandList.Count == 2)
-    //    {
-    //        float currentDistance = Vector3.Distance(usingHandList[0].transform.position, usingHandList[1].transform.position);
-
-    //        Vector3 nextPosition1 = usingHandList[0].GetTrackedObjectVelocity() * Time.deltaTime + usingHandList[0].transform.position;
-    //        Vector3 nextPosition2 = usingHandList[1].GetTrackedObjectVelocity() * Time.deltaTime + usingHandList[1].transform.position;
-    //        float nextDistance = Vector3.Distance(nextPosition1, nextPosition2);
-
-    //        float amountScale = 1f - (nextDistance - currentDistance) * ScaleMult;
-    //        amountScale *= -1f;
-
-    //        Debug.Log(amountScale);
-
-    //        Vector3 pivot = (usingHandList[0].transform.position + usingHandList[1].transform.position) / 2f;
-
-    //        Vector3 diff = IslandVizVisualization.Instance.VisualizationRoot.position - pivot;
-    //        Vector3 newPos = Vector3.Scale(diff, new Vector3(amountScale, 1, amountScale));
-    //        newPos += pivot;
-
-    //        IslandVizVisualization.Instance.VisualizationRoot.localScale = Vector3.Scale(new Vector3(amountScale, amountScale, amountScale), IslandVizVisualization.Instance.VisualizationRoot.localScale);
-    //        IslandVizVisualization.Instance.VisualizationRoot.position = newPos;
-
-    //        GlobalVar.CurrentZoom = IslandVizVisualization.Instance.VisualizationRoot.localScale.x;
-    //        IslandVizVisualization.Instance.ZoomChanged();
-    //    }
-    //}
-
-
 
     //From InverseMultiTouchController.cs
 
@@ -256,6 +234,32 @@ public class InverseMultiTouchInput : AdditionalIslandVizComponent {
         GlobalVar.CurrentZoom = IslandVizVisualization.Instance.VisualizationRoot.localScale.x;
         IslandVizVisualization.Instance.OnVisualizationScaleChanged();
         #endregion
+    }
+
+    #endregion
+
+
+
+    // ################
+    // Tooltips
+    // ################
+
+    #region Tooltips
+
+    private void EnableTooltips(Hand hand)
+    {
+        ControllerButtonHints.ShowTextHint(hand, EVRButtonId.k_EButton_SteamVR_Trigger, "HOLD and MOVE to navigate");
+    }
+
+    private void DisableTooltips(Hand hand)
+    {
+        ControllerButtonHints.HideTextHint(hand, EVRButtonId.k_EButton_SteamVR_Trigger);
+    }
+
+    private void DisableTooltips()
+    {
+        ControllerButtonHints.HideTextHint(Player.instance.leftHand, EVRButtonId.k_EButton_SteamVR_Trigger);
+        ControllerButtonHints.HideTextHint(Player.instance.rightHand, EVRButtonId.k_EButton_SteamVR_Trigger);
     }
 
     #endregion

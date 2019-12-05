@@ -1,7 +1,9 @@
 ﻿using OsgiViz.Core;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Valve.VR.InteractionSystem;
 
 /// <summary>
 /// This is the main class of the IslandViz application. 
@@ -9,6 +11,9 @@ using UnityEngine;
 public class IslandVizBehaviour : MonoBehaviour
 {
     public static IslandVizBehaviour Instance; // The instance of this class.
+
+    public List<Action> UndoList;
+
 
 
     // ################
@@ -53,8 +58,11 @@ public class IslandVizBehaviour : MonoBehaviour
         Shader.SetGlobalFloat("hologramOutlineWidth", GlobalVar.hologramOutlineWidth);
         Shader.SetGlobalVector("hologramOutlineColor", GlobalVar.hologramOutlineColor);        
         Shader.SetGlobalVector("hologramCenter", new Vector3(0, 0, 0));
-        Shader.SetGlobalFloat("hologramScale", 0.8f);        
-        
+        Shader.SetGlobalFloat("hologramScale", 0.8f);
+
+        UndoList = new List<Action>();
+        IslandVizInteraction.Instance.OnControllerMenuDown += Undo;
+
         StartCoroutine(IslandVizConstructionRoutine()); // Start the islandviz construction coroutine.
     }
 
@@ -82,7 +90,28 @@ public class IslandVizBehaviour : MonoBehaviour
     #endregion
 
 
+    // ################
+    // Undo
+    // ################
 
-   
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="hand"></param>
+    public void Undo (Hand hand)
+    {
+        if (UndoList.Count >= 2) // [Last Action|Current Action] --> We want the last action, so we take the second last item.
+        {
+            IslandVizUI.Instance.MakeNotification(0.5f, "Undo");
+
+            UndoList[UndoList.Count-2]?.Invoke();
+            UndoList.RemoveAt(UndoList.Count - 2);
+        }
+        else
+        {
+            Debug.LogError("Undo List is empty!");
+            // TODO
+        }
+    }
 
 }

@@ -152,9 +152,15 @@ public class RaycastSelection : AdditionalIslandVizComponent
 
         if (handID >= 0 && touchpadTouch[handID] && currentlyHitting[handID])
         {
-            ToggleSelection(hit[handID].collider, true);
+            Collider collider = hit[handID].collider; // This local variable is very important for the undo to work!
 
-            IslandVizVisualization.Instance.FlyTo(hit[handID].collider.transform);
+            ToggleSelection(collider, true);
+            IslandVizVisualization.Instance.FlyTo(collider.transform);
+
+            IslandVizBehaviour.Instance.UndoList.Add(delegate () {
+                ToggleSelection(collider, true);
+                IslandVizVisualization.Instance.FlyTo(collider.transform);
+            });
         }
     }
 
@@ -269,10 +275,10 @@ public class RaycastSelection : AdditionalIslandVizComponent
 
 
     // ################
-    // Tooltipps
+    // Tooltips
     // ################
 
-    #region Tooltipps
+    #region Tooltips
 
     private void EnableTooltips()
     {
