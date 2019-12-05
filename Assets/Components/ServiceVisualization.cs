@@ -49,7 +49,7 @@ public class ServiceVisualization : AdditionalIslandVizComponent
 
         foreach (IslandGO islandGO in IslandVizVisualization.Instance.IslandGameObjects)
         {
-            if (islandGO == null || islandGO.isIslandEmpty())
+            if (islandGO == null || islandGO.IsIslandEmpty())
             {
                 continue;
             }

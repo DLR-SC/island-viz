@@ -94,7 +94,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
                     continue;
                 else
                 {
-                    if (!islandGO.isIslandEmpty())
+                    if (!islandGO.IsIslandEmpty())
                     {
                         foreach (Region region in islandGO.getRegions())
                             foreach (Building b in region.getBuildings())

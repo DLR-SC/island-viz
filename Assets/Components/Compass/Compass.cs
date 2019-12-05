@@ -76,8 +76,4 @@ public class Compass : AdditionalIslandVizComponent
     }
 
 
-    public void OnVisualizationRotationChanged () // TODO
-    {
-
-    }
 }

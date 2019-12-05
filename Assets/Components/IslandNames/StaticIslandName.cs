@@ -33,6 +33,7 @@ namespace StaticIslandNamesComponent
         private float yPosition; // The current y-position of this island name.
 
         private bool isIsland; // TODO remove or extend?
+        private IslandVizInteraction.SelectionType selectionType;
         private bool initiated = false;
 
 
@@ -41,10 +42,11 @@ namespace StaticIslandNamesComponent
         // Initiation
         // ################
 
-        public void Init(Transform target, string name)
+        public void Init(Transform target, string name, IslandVizInteraction.SelectionType selectionType)
         {
             AlwaysLookAtTarget.Target = Camera.main.transform;
             Name.text = name;
+            this.selectionType = selectionType;
             this.target = target;
             targetIsland = GetIslandFromTransform(target);
 
@@ -136,7 +138,10 @@ namespace StaticIslandNamesComponent
         {
             heightIndex = index;
         }
-
+        public IslandVizInteraction.SelectionType GetSelectionType ()
+        {
+            return selectionType;
+        }
 
     }
 }

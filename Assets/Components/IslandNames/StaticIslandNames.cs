@@ -84,15 +84,29 @@ namespace StaticIslandNamesComponent
         /// </summary>
         /// <param name="island">The island that was selected.</param>
         /// <param name="selected">Wether the island was selected or deselected.</param>
-        private void OnIslandSelection(IslandGO island, bool selected)
+        private void OnIslandSelection(IslandGO island, IslandVizInteraction.SelectionType selectionType, bool selected)
         {
-            if (selected)
+            if (selectionType == IslandVizInteraction.SelectionType.Select)
             {
-                CreateStaticName(island.transform);
+                if (selected)
+                {
+                    CreateStaticName(island.transform, selectionType);
+                }
+                else
+                {
+                    RemoveStaticName(island.transform);
+                }
             }
-            else
+            else if (selectionType == IslandVizInteraction.SelectionType.Highlight && !island.Selected)
             {
-                RemoveStaticName(island.transform);
+                if (selected)
+                {
+                    CreateStaticName(island.transform, selectionType);
+                }
+                else
+                {
+                    RemoveStaticName(island.transform);
+                }
             }
         }
 
@@ -102,11 +116,11 @@ namespace StaticIslandNamesComponent
         /// </summary>
         /// <param name="region">The region that was selected.</param>
         /// <param name="selected">Wether the region was selected or deselected.</param>
-        private void OnRegionSelection(Region region, bool selected)
+        private void OnRegionSelection(Region region, IslandVizInteraction.SelectionType selectionType, bool selected)
         {
             if (selected)
             {
-                CreateStaticName(region.transform);
+                CreateStaticName(region.transform, selectionType);
             }
             else
             {
@@ -120,11 +134,11 @@ namespace StaticIslandNamesComponent
         /// </summary>
         /// <param name="building">The building that was selected.</param>
         /// <param name="selected">Wether the building was selected or deselected.</param>
-        private void OnBuildingSelection(Building building, bool selected)
+        private void OnBuildingSelection(Building building, IslandVizInteraction.SelectionType selectionType, bool selected)
         {
             if (selected)
             {
-                CreateStaticName(building.transform);
+                CreateStaticName(building.transform, selectionType);
             }
             else
             {
@@ -146,7 +160,7 @@ namespace StaticIslandNamesComponent
         /// Called when an island (or a region or a building) was selected. 
         /// </summary>
         /// <param name="target">The target Transform the name should be attached to.</param>
-        private void CreateStaticName(Transform target)
+        private void CreateStaticName(Transform target, IslandVizInteraction.SelectionType selectionType)
         {
             if (!currentNames.ContainsKey(target) && !currentNames.ContainsKey(target)) 
             {
@@ -157,8 +171,9 @@ namespace StaticIslandNamesComponent
 
                 currentNames.Add(target, staticIslandName);
 
-                staticIslandName.Init(target, target.name);
+                staticIslandName.Init(target, target.name, selectionType);
             }
+
         }
         
         /// <summary>
@@ -178,6 +193,24 @@ namespace StaticIslandNamesComponent
                 currentNames.Remove(target);
             }
         }
+
+        //private void RemoveAllSelectStaticName()
+        //{
+        //    foreach (var name in currentNames)
+        //    {
+        //        if (name.Value.GetSelectionType() == IslandVizInteraction.SelectionType.Select)
+        //        {
+        //            RemoveStaticName(name.Key);
+        //        }
+        //    }
+        //    foreach (var name in currentHiddenNames)
+        //    {
+        //        if (name.Value.GetSelectionType() == IslandVizInteraction.SelectionType.Select)
+        //        {
+        //            RemoveStaticName(name.Key);
+        //        }
+        //    }
+        //}
 
         private void HideStaticName (IslandGO island)
         {

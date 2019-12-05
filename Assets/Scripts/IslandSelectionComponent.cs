@@ -89,15 +89,15 @@ public class IslandSelectionComponent : MonoBehaviour
         if (collider.GetComponent<IslandGO>()) // IslandVizVisualization.Instance.CurrentZoomLevel == ZoomLevel.Far && 
         {
             //SelectIsland(collider.GetComponent<IslandGO>());
-            IslandVizInteraction.Instance.OnIslandSelect(collider.GetComponent<IslandGO>(), true);
+            IslandVizInteraction.Instance.OnIslandSelect(collider.GetComponent<IslandGO>(), IslandVizInteraction.SelectionType.Select, true);
         }
         else if (collider.GetComponent<Region>()) // IslandVizVisualization.Instance.CurrentZoomLevel == ZoomLevel.Medium &&
         {
-            IslandVizInteraction.Instance.OnRegionSelect(collider.GetComponent<Region>(), true);
+            IslandVizInteraction.Instance.OnRegionSelect(collider.GetComponent<Region>(), IslandVizInteraction.SelectionType.Select, true);
         }
         else if (collider.GetComponent<Building>()) // IslandVizVisualization.Instance.CurrentZoomLevel == ZoomLevel.Near && 
         {
-            IslandVizInteraction.Instance.OnBuildingSelect(collider.GetComponent<Building>(), true);
+            IslandVizInteraction.Instance.OnBuildingSelect(collider.GetComponent<Building>(), IslandVizInteraction.SelectionType.Select, true);
         }
     }
 
@@ -105,15 +105,15 @@ public class IslandSelectionComponent : MonoBehaviour
     {
         if (collider.GetComponent<IslandGO>())
         {
-            IslandVizInteraction.Instance.OnIslandSelect(collider.GetComponent<IslandGO>(), false);
+            IslandVizInteraction.Instance.OnIslandSelect(collider.GetComponent<IslandGO>(), IslandVizInteraction.SelectionType.Select, false);
         }
         else if (collider.GetComponent<Region>())
         {
-            IslandVizInteraction.Instance.OnRegionSelect(collider.GetComponent<Region>(), false);
+            IslandVizInteraction.Instance.OnRegionSelect(collider.GetComponent<Region>(), IslandVizInteraction.SelectionType.Select, false);
         }
         else if (collider.GetComponent<Building>())
         {
-            IslandVizInteraction.Instance.OnBuildingSelect(collider.GetComponent<Building>(), false);
+            IslandVizInteraction.Instance.OnBuildingSelect(collider.GetComponent<Building>(), IslandVizInteraction.SelectionType.Select, false);
         }
     }
 
@@ -123,7 +123,7 @@ public class IslandSelectionComponent : MonoBehaviour
 
         if (!currentSelectedIslands.Contains(island))
         {
-            IslandVizInteraction.Instance.OnIslandSelect(island, true);
+            IslandVizInteraction.Instance.OnIslandSelect(island, IslandVizInteraction.SelectionType.Select, true);
             currentSelectedIslands.Add(island);
         }
     }
@@ -136,7 +136,7 @@ public class IslandSelectionComponent : MonoBehaviour
         {
             if (!currentSelectedIslands.Contains(island))
             {
-                IslandVizInteraction.Instance.OnIslandSelect(island, true);
+                IslandVizInteraction.Instance.OnIslandSelect(island, IslandVizInteraction.SelectionType.Select, true);
                 currentSelectedIslands.Add(island);
             }
         }
@@ -192,7 +192,7 @@ public class IslandSelectionComponent : MonoBehaviour
         {
             for (int i = currentSelectedIslands.Count - 1; i >= 0; i--)
             {
-                IslandVizInteraction.Instance.OnIslandSelect(currentSelectedIslands[i], false);
+                IslandVizInteraction.Instance.OnIslandSelect(currentSelectedIslands[i], IslandVizInteraction.SelectionType.Select, false);
                 currentSelectedIslands.Remove(currentSelectedIslands[i]);
             }
         }
@@ -206,7 +206,7 @@ public class IslandSelectionComponent : MonoBehaviour
             {             
                 if (currentSelectedIslands[i] != exception)
                 {
-                    IslandVizInteraction.Instance.OnIslandSelect(currentSelectedIslands[i], false);
+                    IslandVizInteraction.Instance.OnIslandSelect(currentSelectedIslands[i], IslandVizInteraction.SelectionType.Select, false);
                     currentSelectedIslands.Remove(currentSelectedIslands[i]);
                 }                
             }
@@ -221,7 +221,7 @@ public class IslandSelectionComponent : MonoBehaviour
             {
                 if (!exceptions.Contains(currentSelectedIslands[i]))
                 {
-                    IslandVizInteraction.Instance.OnIslandSelect(currentSelectedIslands[i], false);
+                    IslandVizInteraction.Instance.OnIslandSelect(currentSelectedIslands[i], IslandVizInteraction.SelectionType.Select, false);
                     currentSelectedIslands.Remove(currentSelectedIslands[i]);
                 }
             }

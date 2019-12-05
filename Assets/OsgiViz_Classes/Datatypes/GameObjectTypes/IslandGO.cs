@@ -30,23 +30,30 @@ namespace OsgiViz.Unity.Island
             exportDock = null;
             coast = null;
 
-            //#region clickable
-            //InteractableViaClickTouch ict = gameObject.GetComponent<InteractableViaClickTouch>();
-            //if (ict == null)
-            //    ict = gameObject.AddComponent<InteractableViaClickTouch>();
-
-            //ict.handleActivationDeactivation.Add(handleActivationDeactivation);
-            //#endregion
-
-            //#region PdaInspectable
-            //PdaInspectable pi = gameObject.GetComponent<PdaInspectable>();
-            //if (pi == null)
-            //    pi = gameObject.AddComponent<PdaInspectable>();
-            //#endregion
+            IslandVizInteraction.Instance.OnIslandSelect += OnSelection;
         }
 
 
 
+        // ################
+        // Selection Events
+        // ################
+
+        private void OnSelection (IslandGO island, IslandVizInteraction.SelectionType selectionType, bool selected)
+        {
+            if (island != this && selectionType == IslandVizInteraction.SelectionType.Select && selected) // Another island was selected while this island was selected.
+            {
+                if (Selected)
+                {
+                    Selected = false;
+                    IslandVizInteraction.Instance.OnIslandSelect(this, IslandVizInteraction.SelectionType.Select, false);
+                }
+            }
+            else if (island == this && selectionType == IslandVizInteraction.SelectionType.Select) // This island was selected/deselected.
+            {
+                Selected = selected;
+            }
+        }
 
 
         // ################
@@ -98,6 +105,10 @@ namespace OsgiViz.Unity.Island
             }
             Visible = false;
         }
+
+
+
+
 
 
 
@@ -234,7 +245,7 @@ namespace OsgiViz.Unity.Island
 
 
         //Returns true if island does not contain a single CU. Returns false otherwise.
-        public bool isIslandEmpty()
+        public bool IsIslandEmpty()
         {
             foreach (Region reg in regions)
                 if (reg.getBuildings().Count > 0)

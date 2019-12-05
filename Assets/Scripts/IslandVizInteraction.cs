@@ -205,17 +205,23 @@ public class IslandVizInteraction : MonoBehaviour {
     /// Called when an island GameObject was selected or deselected.
     /// </summary>
     /// <param name="island">The island that was selected.</param>
-    public delegate void IslandSelected(IslandGO island, bool selected);
+    /// <param name="selectionType">The type of the selection.</param>
+    /// <param name="selected">True = select, false = deselect.</param>
+    public delegate void IslandSelected(IslandGO island, SelectionType selectionType, bool selected);
     /// <summary>
-    /// Called when an island GameObject was selected or deselected.
+    /// Called when a region GameObject was selected or deselected.
     /// </summary>
     /// <param name="region">The region that was selected.</param>
-    public delegate void RegionSelected(Region region, bool selected);
+    /// <param name="selectionType">The type of the selection.</param>
+    /// <param name="selected">True = select, false = deselect.</param>
+    public delegate void RegionSelected(Region region, SelectionType selectionType, bool selected);
     /// <summary>
-    /// Called when an island GameObject was selected or deselected.
+    /// Called when a building GameObject was selected or deselected.
     /// </summary>
     /// <param name="building">The building that was selected.</param>
-    public delegate void BuildingSelected(Building building, bool selected);
+    /// <param name="selectionType">The type of the selection.</param>
+    /// <param name="selected">True = select, false = deselect.</param>
+    public delegate void BuildingSelected(Building building, SelectionType selectionType, bool selected);
 
     #endregion
 
@@ -272,12 +278,24 @@ public class IslandVizInteraction : MonoBehaviour {
     }
 
 
+
+    // ################
+    // Enums
+    // ################
+
+    public enum SelectionType
+    {
+        Select,
+        Highlight        
+    }
+
+
     // ################
     // Helper Functions
     // ################
 
     #region HelperFunctions
-    
+
     //public float GetPlayerEyeHeight ()
     //{
     //    return Player.eyeHeight;
