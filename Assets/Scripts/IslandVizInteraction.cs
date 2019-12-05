@@ -1,4 +1,5 @@
-﻿using OsgiViz.Unity.Island;
+﻿using OsgiViz;
+using OsgiViz.Unity.Island;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -113,6 +114,10 @@ public class IslandVizInteraction : MonoBehaviour {
     /// Called when an island was selected or deselected.
     /// </summary>
     public BuildingSelected OnBuildingSelect;
+    /// <summary>
+    /// Called when an island was selected or deselected.
+    /// </summary>
+    public DockSelected OnDockSelect;
     /// <summary>
     /// Called when the grip button of a controller is pressed.
     /// </summary>
@@ -242,6 +247,13 @@ public class IslandVizInteraction : MonoBehaviour {
     /// <param name="selectionType">The type of the selection.</param>
     /// <param name="selected">True = select, false = deselect.</param>
     public delegate void BuildingSelected(Building building, SelectionType selectionType, bool selected);
+    /// <summary>
+    /// Called when a building GameObject was selected or deselected.
+    /// </summary>
+    /// <param name="dock">The dock that was selected.</param>
+    /// <param name="selectionType">The type of the selection.</param>
+    /// <param name="selected">True = select, false = deselect.</param>
+    public delegate void DockSelected(DependencyDock dock, SelectionType selectionType, bool selected);
 
     #endregion
 

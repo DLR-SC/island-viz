@@ -166,7 +166,7 @@ namespace StaticIslandNamesComponent
             {
                 GameObject islandName = (GameObject)Instantiate(IslandNamePrefab);
                 islandName.transform.parent = StaticNameParent;
-                islandName.transform.position = new Vector3(target.position.x, GlobalVar.hologramTableHeight + 0.075f, target.position.z);
+                islandName.transform.position = new Vector3(target.position.x, 0f, target.position.z);
                 StaticIslandName staticIslandName = islandName.GetComponent<StaticIslandName>();
 
                 currentNames.Add(target, staticIslandName);

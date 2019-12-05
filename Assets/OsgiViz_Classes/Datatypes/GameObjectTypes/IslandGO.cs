@@ -183,7 +183,7 @@ namespace OsgiViz.Unity.Island
                     yield return null;
                 }
                 if (GetComponent<CapsuleCollider>().enabled)
-                    GetComponent<CapsuleCollider>().enabled = true;
+                    GetComponent<CapsuleCollider>().enabled = true;                
             }
             // FAR -> MEDIUM
             else
@@ -200,6 +200,7 @@ namespace OsgiViz.Unity.Island
                 {
                     if (!region.GetComponent<MeshCollider>().enabled)
                         region.GetComponent<MeshCollider>().enabled = true;
+                    GetComponent<CapsuleCollider>().radius /= 2f;
                 }
 
                 // Disable island collider.
@@ -223,6 +224,9 @@ namespace OsgiViz.Unity.Island
             {
                 if (region.GetComponent<MeshCollider>().enabled)
                     region.GetComponent<MeshCollider>().enabled = false;
+
+                if (CurrentZoomLevel == ZoomLevel.Medium)
+                    GetComponent<CapsuleCollider>().radius *= 2f;
 
                 foreach (var building in region.getBuildings())
                 {

@@ -20,6 +20,8 @@ namespace OsgiViz
     [RequireComponent(typeof(Valve.VR.InteractionSystem.Interactable))]
     public class DependencyDock : MonoBehaviour
     {
+        public bool Selected = false;
+
         private GameObject dependencyContainer;
         private ConnectionPool connectionPool;
         private GameObject rotPivot;
@@ -62,6 +64,9 @@ namespace OsgiViz
                 connectionPool = pools[0];
             else
                 throw new Exception("No connection pool component found, or too many connection pools! There can only be one.");
+
+            // Subscribe to events
+            IslandVizInteraction.Instance.OnDockSelect += OnDockSelected;
         }
 
         public void setDockType(DockType type)
@@ -190,6 +195,30 @@ namespace OsgiViz
             IslandVizVisualization.Instance.SelectAndFlyTo(connectedDockTransforms.ToArray());
         }
 
+
+
+        private void OnDockSelected (DependencyDock dock, IslandVizInteraction.SelectionType selectionType, bool selected)
+        {
+            if (Selected && dock != this && selectionType == IslandVizInteraction.SelectionType.Select && selected)
+            {
+                HideAllDependencies();
+                Selected = false;
+                IslandVizInteraction.Instance.OnDockSelect(this, IslandVizInteraction.SelectionType.Select, false);
+            }
+            else if (dock == this && selectionType == IslandVizInteraction.SelectionType.Select && selected)
+            {
+                if (selected)
+                {
+                    ShowAllDependencies();
+                    Selected = true;
+                }
+                else
+                {
+                    HideAllDependencies();
+                    Selected = false;
+                }
+            }
+        }
     }
 }
 

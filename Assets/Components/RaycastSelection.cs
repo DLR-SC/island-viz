@@ -1,4 +1,5 @@
-﻿using OsgiViz.Unity.Island;
+﻿using OsgiViz;
+using OsgiViz.Unity.Island;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -154,13 +155,24 @@ public class RaycastSelection : AdditionalIslandVizComponent
         {
             Collider collider = hit[handID].collider; // This local variable is very important for the undo to work!
 
-            ToggleSelection(collider, true);
-            IslandVizVisualization.Instance.FlyTo(collider.transform);
-
-            IslandVizBehaviour.Instance.UndoList.Add(delegate () {
+            if (collider.GetComponent<DependencyDock>() == null) // TODO better abfrage
+            {
                 ToggleSelection(collider, true);
                 IslandVizVisualization.Instance.FlyTo(collider.transform);
-            });
+
+                IslandVizBehaviour.Instance.UndoList.Add(delegate () {
+                    ToggleSelection(collider, true);
+                    IslandVizVisualization.Instance.FlyTo(collider.transform);
+                });
+            }
+            else
+            {
+                ToggleSelection(collider, true);
+
+                IslandVizBehaviour.Instance.UndoList.Add(delegate () {
+                    ToggleSelection(collider, true);
+                });
+            }
         }
     }
 
@@ -253,6 +265,10 @@ public class RaycastSelection : AdditionalIslandVizComponent
         {
             IslandVizInteraction.Instance.OnBuildingSelect(collider.GetComponent<Building>(), IslandVizInteraction.SelectionType.Highlight, select);
         }
+        else if (collider.GetComponent<DependencyDock>())
+        {
+            IslandVizInteraction.Instance.OnDockSelect(collider.GetComponent<DependencyDock>(), IslandVizInteraction.SelectionType.Highlight, select);
+        }
     }
 
     public void ToggleSelection(Collider collider, bool select)
@@ -268,6 +284,10 @@ public class RaycastSelection : AdditionalIslandVizComponent
         else if (collider.GetComponent<Building>())
         {
             IslandVizInteraction.Instance.OnBuildingSelect(collider.GetComponent<Building>(), IslandVizInteraction.SelectionType.Select, select);
+        }
+        else if (collider.GetComponent<DependencyDock>())
+        {
+            IslandVizInteraction.Instance.OnDockSelect(collider.GetComponent<DependencyDock>(), IslandVizInteraction.SelectionType.Select, select);
         }
     }
 

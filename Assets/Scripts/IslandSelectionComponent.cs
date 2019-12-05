@@ -45,11 +45,11 @@ public class IslandSelectionComponent : MonoBehaviour
 
     private void OnControllerEnterEvent(Collider collider, Hand hand)
     {
-        Debug.Log("OnControllerEnterEvent " + collider.name);
+        //Debug.Log("OnControllerEnterEvent " + collider.name);
         if (ColliderIsIsland(collider) && !TouchAlreadyExists(collider, hand))
         {
             currentTouches.Add(new Touch(collider, hand));
-            Debug.Log("Added Touch ...");
+            //Debug.Log("Added Touch ...");
         }        
     }
 
