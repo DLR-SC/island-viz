@@ -11,6 +11,12 @@ namespace OsgiViz.Unity.Island
 
     public class IslandGO : MonoBehaviour
     {
+        public List<Region> Regions { get { return regions; } }
+        public GameObject Coast { get { return coast; } set { coast = value; } }
+        public GameObject ImportDock { get { return importDock; } set { importDock = value; } }
+        public GameObject ExportDock { get { return exportDock; } set { exportDock = value; } }
+        public CartographicIsland CartoIsland { get { return island; } set { island = value; } }
+
         public ZoomLevel CurrentZoomLevel;
 
         public bool Selected;
@@ -106,11 +112,7 @@ namespace OsgiViz.Unity.Island
             Visible = false;
         }
 
-
-
-
-
-
+        
 
         // ################
         // Zoom Level
@@ -144,8 +146,7 @@ namespace OsgiViz.Unity.Island
             }
             CurrentZoomLevel = newZoomLevel;
         }
-
-
+        
         public IEnumerator ApplyNearZoomLevel()
         {
             // Disable region colliders & enable buildings.
@@ -166,8 +167,7 @@ namespace OsgiViz.Unity.Island
             if (GetComponent<CapsuleCollider>().enabled)
                 GetComponent<CapsuleCollider>().enabled = false;
         }
-
-
+        
         public IEnumerator ApplyMediumZoomLevel()
         {
             // NEAR -> MEDIUM 
@@ -208,8 +208,7 @@ namespace OsgiViz.Unity.Island
                     GetComponent<CapsuleCollider>().enabled = true;
             }
         }
-
-
+        
         public IEnumerator ApplyFarZoomLevel ()
         {
             // Hide Docks.
@@ -245,8 +244,9 @@ namespace OsgiViz.Unity.Island
 
 
 
-
-
+        // ################
+        // Helper Functions
+        // ################
 
         //Returns true if island does not contain a single CU. Returns false otherwise.
         public bool IsIslandEmpty()
@@ -258,47 +258,9 @@ namespace OsgiViz.Unity.Island
             return true;
         }
 
-        public GameObject getCoast()
-        {
-            return coast;
-        }
-        public GameObject getImportDock()
-        {
-            return importDock;
-        }
-        public GameObject getExportDock()
-        {
-            return exportDock;
-        }
-        public List<Region> getRegions()
-        {
-            return regions;
-        }
-        public CartographicIsland getIslandStructure()
-        {
-            return island;
-        }
-
-        public void addRegion(Region reg)
+        public void AddRegion(Region reg)
         {
             regions.Add(reg);
-        }
-
-        public void setCoast(GameObject c)
-        {
-            coast = c;
-        }
-        public void setImportDock(GameObject i)
-        {
-            importDock = i;
-        }
-        public void setExportDock(GameObject e)
-        {
-            exportDock = e;
-        }
-        public void setIslandStructure(CartographicIsland i)
-        {
-            island = i;
         }
 
     }

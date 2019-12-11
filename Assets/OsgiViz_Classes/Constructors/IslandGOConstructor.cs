@@ -101,7 +101,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
             RNG = new System.Random(rngSeed);
             GameObject islandGO = new GameObject(islandStructure.getName());
             IslandGO islandGOComponent = islandGO.AddComponent<IslandGO>();
-            islandGOComponent.setIslandStructure(islandStructure);
+            islandGOComponent.CartoIsland = islandStructure;
             islandStructure.setIslandGO(islandGO);
 
             #region create regions
@@ -120,7 +120,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
                 regionComponent = regionObject.AddComponent<Region>();
                 regionComponent.setParentIsland(islandGOComponent);
                 regionObject.transform.SetParent(islandGO.transform);
-                islandGOComponent.addRegion(regionComponent);
+                islandGOComponent.AddRegion(regionComponent);
 
                 #region RegionArea (obsolete)
                 // Extra GameObject for region
@@ -214,7 +214,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
 
             #region create coastline
             GameObject coastline = new GameObject("Coastline");
-            islandGOComponent.setCoast(coastline);
+            islandGOComponent.Coast = coastline;
             coastline.transform.SetParent(islandGO.transform);
             MeshFilter coastMFilter = coastline.AddComponent<MeshFilter>();
             MeshRenderer coastMRender = coastline.AddComponent<MeshRenderer>();
@@ -251,7 +251,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
                 importD.name = islandStructure.getName() + " import dock";
                 importD.transform.localScale = new Vector3(1, 1, 1);
                 importD.transform.SetParent(islandGO.transform);
-                islandGOComponent.setImportDock(importD);
+                islandGOComponent.ImportDock = importD;
                 //setUVsToSingularCoord(new Vector2(0.7f, 0.1f), importD.GetComponent<MeshFilter>());
 
                 //Export Dock
@@ -260,7 +260,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
                 exportD.name = islandStructure.getName() + " export dock";
                 exportD.transform.localScale = new Vector3(1, 1, 1);
                 exportD.transform.SetParent(islandGO.transform);
-                islandGOComponent.setExportDock(exportD);
+                islandGOComponent.ExportDock = exportD;
                 //setUVsToSingularCoord(new Vector2(0.1f, 0.1f), exportD.GetComponent<MeshFilter>());
             }
             #endregion
@@ -278,7 +278,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
             #region Create colliders
 
             #region RegionCollider
-            List<Region> regions = islandGOComponent.getRegions();
+            List<Region> regions = islandGOComponent.Regions;
             foreach(Region region in regions)
             {
                 region.gameObject.layer = LayerMask.NameToLayer("InteractionSystemLayer");
@@ -296,9 +296,9 @@ namespace OsgiViz.Unity.MainThreadConstructors
             islandGO.layer = LayerMask.NameToLayer("InteractionSystemLayer");
             CapsuleCollider cColliderIsland = islandGO.AddComponent<CapsuleCollider>();
             cColliderIsland.radius = islandStructure.getRadius();
-            cColliderIsland.height = islandGOComponent.getCoast().GetComponent<MeshFilter>().sharedMesh.bounds.size.y;
+            cColliderIsland.height = islandGOComponent.Coast.GetComponent<MeshFilter>().sharedMesh.bounds.size.y;
             Vector3 newCenter = islandStructure.getWeightedCenter();
-            newCenter.y = -islandGOComponent.getCoast().GetComponent<MeshFilter>().sharedMesh.bounds.size.y + (cColliderIsland.height * 0.5f);
+            newCenter.y = -islandGOComponent.Coast.GetComponent<MeshFilter>().sharedMesh.bounds.size.y + (cColliderIsland.height * 0.5f);
             cColliderIsland.center = newCenter;
             //cColliderIsland.isTrigger = true;
             #endregion

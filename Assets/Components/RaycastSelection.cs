@@ -160,7 +160,7 @@ public class RaycastSelection : AdditionalIslandVizComponent
                 ToggleSelection(collider, true);
                 IslandVizVisualization.Instance.FlyTo(collider.transform);
 
-                IslandVizBehaviour.Instance.UndoList.Add(delegate () {
+                IslandVizBehaviour.Instance.AddUndoAction(delegate () {
                     ToggleSelection(collider, true);
                     IslandVizVisualization.Instance.FlyTo(collider.transform);
                 });
@@ -169,7 +169,7 @@ public class RaycastSelection : AdditionalIslandVizComponent
             {
                 ToggleSelection(collider, true);
 
-                IslandVizBehaviour.Instance.UndoList.Add(delegate () {
+                IslandVizBehaviour.Instance.AddUndoAction(delegate () {
                     ToggleSelection(collider, true);
                 });
             }

@@ -96,7 +96,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
                 {
                     if (!islandGO.IsIslandEmpty())
                     {
-                        foreach (Region region in islandGO.getRegions())
+                        foreach (Region region in islandGO.Regions)
                             foreach (Building b in region.getBuildings())
                             {
                                 ServiceLayerGO serviceLayer = b.GetComponent<ServiceLayerGO>();

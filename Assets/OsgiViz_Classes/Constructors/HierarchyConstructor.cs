@@ -87,7 +87,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
                 TextLabelComponent islandTLC = islandGOs[i].gameObject.GetComponent<TextLabelComponent>();
                 islandTLC.relativeHeight = 0.3f;
 
-                List<Region> regions = islandGOs[i].getRegions();
+                List<Region> regions = islandGOs[i].Regions;
                 for (int c = 0; c < regions.Count; c++)
                 {
                     Add_HC_TLC(regions[c].gameObject, GlobalVar.subdivisionDistanceCountrySquared);
@@ -123,19 +123,19 @@ namespace OsgiViz.Unity.MainThreadConstructors
                 }
 
                 #region ExportDock
-                Add_HC_TLC(islandGOs[i].getExportDock(), GlobalVar.subdivisionDistanceCUSquared);
-                HierarchicalComponent exportDockHC = islandGOs[i].getExportDock().GetComponent<HierarchicalComponent>();
+                Add_HC_TLC(islandGOs[i].ExportDock, GlobalVar.subdivisionDistanceCUSquared);
+                HierarchicalComponent exportDockHC = islandGOs[i].ExportDock.GetComponent<HierarchicalComponent>();
                 exportDockHC.parentComponent = islandHC;
                 islandHC.childrenComponents.Add(exportDockHC);
                 #endregion
                 #region ImportDock
-                Add_HC_TLC(islandGOs[i].getImportDock(), GlobalVar.subdivisionDistanceCUSquared);
-                HierarchicalComponent importDockHC = islandGOs[i].getImportDock().GetComponent<HierarchicalComponent>();
+                Add_HC_TLC(islandGOs[i].ImportDock, GlobalVar.subdivisionDistanceCUSquared);
+                HierarchicalComponent importDockHC = islandGOs[i].ImportDock.GetComponent<HierarchicalComponent>();
                 importDockHC.parentComponent = islandHC;
                 islandHC.childrenComponents.Add(importDockHC);
                 #endregion
                 #region Coast
-                HierarchicalComponent coastHC = islandGOs[i].getCoast().AddComponent<HierarchicalComponent>();
+                HierarchicalComponent coastHC = islandGOs[i].Coast.AddComponent<HierarchicalComponent>();
                 coastHC.parentComponent = islandHC;
                 coastHC.subdivisionDistanceSquared = GlobalVar.subdivisionDistanceCUSquared;
                 islandHC.childrenComponents.Add(coastHC);
@@ -154,7 +154,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
 
         private void Deactivate(IslandGO islandGO)
         {
-            List<Region> regions = islandGO.getRegions();
+            List<Region> regions = islandGO.Regions;
             for (int c = 0; c < regions.Count; c++)
             {
                 List<Building> building = regions[c].getBuildings();
@@ -164,9 +164,9 @@ namespace OsgiViz.Unity.MainThreadConstructors
                 }
                 regions[c].gameObject.SetActive(false);
             }
-            islandGO.getExportDock().SetActive(false);
-            islandGO.getImportDock().SetActive(false);
-            islandGO.getCoast().SetActive(false);
+            islandGO.ExportDock.SetActive(false);
+            islandGO.ImportDock.SetActive(false);
+            islandGO.Coast.SetActive(false);
         }
 
         private void bakeRegionMesh(Region reg)
@@ -219,7 +219,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
             GameObject islandGO = islandGOComponent.gameObject;
             List<CombineInstance> currentCiList = new List<CombineInstance>();
 
-            foreach (Region region in islandGOComponent.getRegions())
+            foreach (Region region in islandGOComponent.Regions)
             {
                 foreach (Building b in region.getBuildings())
                 {
@@ -248,15 +248,15 @@ namespace OsgiViz.Unity.MainThreadConstructors
 
             #region Add coast to FinalCombineList
             CombineInstance ciCoast = new CombineInstance();
-            ciCoast.mesh = islandGOComponent.getCoast().GetComponent<MeshFilter>().sharedMesh;
+            ciCoast.mesh = islandGOComponent.Coast.GetComponent<MeshFilter>().sharedMesh;
             ciCoast.subMeshIndex = 0;
             ciCoast.transform = Matrix4x4.identity;
             currentCiList.Add(ciCoast);
             #endregion
 
             #region Add docks to FinalCombineList
-            GameObject expDock = islandGOComponent.getExportDock();
-            GameObject impDock = islandGOComponent.getImportDock();
+            GameObject expDock = islandGOComponent.ExportDock;
+            GameObject impDock = islandGOComponent.ImportDock;
 
             CombineInstance eDockCI = new CombineInstance();
             eDockCI.mesh = eDockLod1Prefab.GetComponent<MeshFilter>().sharedMesh;

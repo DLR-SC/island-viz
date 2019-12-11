@@ -14,7 +14,21 @@ using OsgiViz.Unity.Island;
 /// </summary>
 public class IslandVizVisualization : MonoBehaviour
 {
-    public static IslandVizVisualization Instance; // The instance of this class.
+    // ################
+    // Public - Code
+    // ################
+
+    public static IslandVizVisualization Instance { get { return instance; } } // The instance of this class.
+    public Transform VisualizationRoot { get { return visualizationRoot; } }
+    public List<CartographicIsland> IslandStructures { get { return islandStructures; } }
+    public List<IslandGO> IslandGOs { get { return islandGOs; } }
+    public List<IslandGO> VisibleIslandGOs { get { return visibleIslandGOs; } }
+    public VisualizationTransformContainer TransformContainer { get { return transformContainer; } } // 
+
+
+    // ################
+    // Public - Unity Editor
+    // ################
 
     [Header("Settings")]
     public int RandomSeed; // The seed that is used for all procedrual generations, e.g. the island distribution.
@@ -30,18 +44,18 @@ public class IslandVizVisualization : MonoBehaviour
     public GameObject VisualizationComponentsGameObject; // GameObject containing all additional visualization components, 
                                                          // that are being loaded at the end of the IslandViz construction.
 
-    [HideInInspector]
-    public VisualizationTransformContainer TransformContainer; // 
 
-    [HideInInspector]
-    public Transform VisualizationRoot;
+    // ################
+    // Private
+    // ################
 
-    [HideInInspector]
-    public List<CartographicIsland> IslandStructures;
-
-    [HideInInspector]
-    public List<IslandGO> IslandGameObjects;
-
+    private Transform visualizationRoot;
+    private List<CartographicIsland> islandStructures;
+    private static IslandVizVisualization instance;
+    private List<IslandGO> islandGOs;
+    private List<IslandGO> visibleIslandGOs;
+    private VisualizationTransformContainer transformContainer; 
+    
     // Mandatory coomonents for visualization.
     private IslandGOConstructor islandGOConstructor;
     private DockGOConstructor dockGOConstructor;
@@ -55,8 +69,7 @@ public class IslandVizVisualization : MonoBehaviour
     private System.Random RNG;
     private System.Diagnostics.Stopwatch stopwatch;
 
-    private List<IslandGO> visibleIslandGOs;
-
+    [HideInInspector]
     public ZoomLevel CurrentZoomLevel;
     private bool zoomDirty; // This is set to TRUE when the current Zoom was changed (called by a IslandVizInteraction Component).
     private bool islandsDirty; // This is set to TRUE when ZoomLevel changed or when appearing island displays the wrong ZoomLevel.
@@ -133,7 +146,7 @@ public class IslandVizVisualization : MonoBehaviour
     /// </summary>
     void Awake()
     {
-        Instance = this;
+        instance = this;
 
         // Get all optimal additional visualization components.
         visualizationComponents = VisualizationComponentsGameObject.GetComponents<AdditionalIslandVizComponent>();
@@ -142,20 +155,19 @@ public class IslandVizVisualization : MonoBehaviour
         islandGOConstructor = VisualizationComponentsGameObject.AddComponent<IslandGOConstructor>();
         dockGOConstructor = VisualizationComponentsGameObject.AddComponent<DockGOConstructor>();
         hierarchyConstructor = VisualizationComponentsGameObject.AddComponent<HierarchyConstructor>();
-
         isConstructor = new IslandStructureConstructor(1, 2, 8);
         bdConstructor = new Graph_Layout_Constructor();
 
         // Create root transforms and add some stuff.
-        TransformContainer = new VisualizationTransformContainer();
-        VisualizationRoot = new GameObject("Visualization").transform;
-        TransformContainer.IslandContainer = new GameObject("VisualizationContainer").transform;
-        TransformContainer.IslandContainer.SetParent(VisualizationRoot);
-        TransformContainer.DependencyContainer = new GameObject("DependencyContainer").transform;
-        TransformContainer.DependencyContainer.SetParent(VisualizationRoot);
+        transformContainer = new VisualizationTransformContainer();
+        visualizationRoot = new GameObject("Visualization").transform;
+        transformContainer.IslandContainer = new GameObject("VisualizationContainer").transform;
+        transformContainer.IslandContainer.SetParent(visualizationRoot);
+        transformContainer.DependencyContainer = new GameObject("DependencyContainer").transform;
+        transformContainer.DependencyContainer.SetParent(visualizationRoot);
         
         // Create water visual.
-        GameObject water = (GameObject)Instantiate(Water_Plane_Prefab, TransformContainer.IslandContainer);
+        GameObject water = (GameObject)Instantiate(Water_Plane_Prefab, transformContainer.IslandContainer);
         water.name = Water_Plane_Prefab.name; // Just making sure since there are still a alot GameObject.Find... TODO: remove in future
         water.transform.localPosition = Vector3.zero;
         water.transform.localScale = new Vector3(1000, 1, 1000);
@@ -164,10 +176,11 @@ public class IslandVizVisualization : MonoBehaviour
         stopwatch = new System.Diagnostics.Stopwatch();
         visibleIslandGOs = new List<IslandGO>();
 
+        // Event subscribtions
         OnTableHeightChanged += ApplyTableHeight;
-        OnVisualizationScaleChanged += OnScaleChanged;
-        OnIslandVisible += OnNewVisibleIsland;
-        OnIslandInvisible += OnNewInvisibleIsland;
+        OnVisualizationScaleChanged += SetZoomDirty;
+        OnIslandVisible += AddVisibleIsland;
+        OnIslandInvisible += RemoveInvisibleIsland;
     }
 
     /// <summary>
@@ -193,13 +206,13 @@ public class IslandVizVisualization : MonoBehaviour
             yield return bdConstructor.ConstructRndLayout(IslandVizData.Instance.OsgiProject.getDependencyGraph(), minBounds, maxBounds, 0.075f, 10000, RNG);
         }
 
-        IslandStructures = isConstructor.getIslandStructureList();
+        islandStructures = isConstructor.getIslandStructureList();
 
         // Construct and store the island GameObjects.
-        yield return islandGOConstructor.Construct(IslandVizVisualization.Instance.IslandStructures, TransformContainer.IslandContainer.gameObject);
-        IslandGameObjects = islandGOConstructor.getIslandGOs();
+        yield return islandGOConstructor.Construct(islandStructures, transformContainer.IslandContainer.gameObject);
+        islandGOs = islandGOConstructor.getIslandGOs();
         
-        yield return dockGOConstructor.Construct(islandGOConstructor.getIslandGOs(), TransformContainer.IslandContainer.gameObject); // Construct the dock GameObjects.
+        yield return dockGOConstructor.Construct(islandGOConstructor.getIslandGOs(), transformContainer.IslandContainer.gameObject); // Construct the dock GameObjects.
 
         // Construct the island hierarchy. TODO enable in the future?
         //yield return hierarchyConstructor.Construct(islandGOConstructor.getIslandGOs());
@@ -244,7 +257,7 @@ public class IslandVizVisualization : MonoBehaviour
     /// Adds this island to the current visible islands List and sets islandDirty=true.
     /// </summary>
     /// <param name="islandGO">The island that entered the TableContent-Trigger.</param>
-    public void OnNewVisibleIsland(IslandGO islandGO)
+    public void AddVisibleIsland(IslandGO islandGO)
     {
         if (!visibleIslandGOs.Contains(islandGO))
         {
@@ -266,7 +279,7 @@ public class IslandVizVisualization : MonoBehaviour
     /// Removes this island from the current visible islands List.
     /// </summary>
     /// <param name="islandGO">The island that exited the TableContent-Trigger.</param>
-    public void OnNewInvisibleIsland(IslandGO islandGO)
+    public void RemoveInvisibleIsland(IslandGO islandGO)
     {
         if (visibleIslandGOs.Contains(islandGO))
         {
@@ -289,7 +302,7 @@ public class IslandVizVisualization : MonoBehaviour
     /// <summary>
     /// Called by (additional) input components when the visualization was zoomed in or out.
     /// </summary>
-    public void OnScaleChanged ()
+    public void SetZoomDirty ()
     {
         zoomDirty = true;
     }
@@ -313,7 +326,7 @@ public class IslandVizVisualization : MonoBehaviour
         {
             if (zoomDirty) // Zoom was changed.
             {
-                zoomDirty = false; // This has to be done first, because the zoom can be changed at any point.               
+                zoomDirty = false;              
 
                 zoomLevelPercentage = Mathf.Sqrt(Mathf.Sqrt((GlobalVar.CurrentZoom - GlobalVar.MinZoom) / (GlobalVar.MaxZoom - GlobalVar.MinZoom))) * 100;
                 zoomLevel = PercentageToZoomLevel(zoomLevelPercentage);
@@ -328,7 +341,7 @@ public class IslandVizVisualization : MonoBehaviour
                 IslandVizUI.Instance.UpdateZoomLevelUI(zoomLevelPercentage);
             }
                         
-            if (islandsDirty) // Island(s) with wrong ZoomLevel.
+            if (islandsDirty) // Island(s) with wrong ZoomLevel, e.g. because zoomlevel was changed or a new island appeared.
             {
                 islandsDirty = false; // This has to be done first, because dirty islands can appear at any point.
 
@@ -355,7 +368,7 @@ public class IslandVizVisualization : MonoBehaviour
 
 
     // ################
-    // Selection
+    // Fly To
     // ################
 
     public void FlyTo (Transform target)
@@ -378,35 +391,23 @@ public class IslandVizVisualization : MonoBehaviour
             endScale *= GlobalVar.MinZoom * 4;
         }
 
-        Vector3 startPosition = VisualizationRoot.position;
+        Vector3 startPosition = visualizationRoot.position;
         Vector3 endPosition = (startPosition / GlobalVar.CurrentZoom - target.position / GlobalVar.CurrentZoom) * endScale.x;
         endPosition.y = GlobalVar.hologramTableHeight;
 
         StartCoroutine(FlyToPosition(endPosition, endScale));
     }
 
-    public void SelectAndFlyTo(Transform[] targets)
+    public void FlyTo(Transform[] targets)
     {
-        List<IslandGO> islands = new List<IslandGO>();
-
-        foreach (var item in targets)
-        {
-            if (item.GetComponent<IslandGO>() != null)
-            {
-                islands.Add(item.GetComponent<IslandGO>());
-            }
-        }
-
-        IslandSelectionComponent.Instance.SelectIslands(islands);
-
         StartCoroutine(FlyToMultiple(targets));
     }
         
-    IEnumerator FlyToMultiple(Transform[] targetTransforms)
+    private IEnumerator FlyToMultiple(Transform[] targetTransforms)
     {
         float distance;
         Vector3 centerLocalPosition = FindCentroid(targetTransforms, out distance);
-        Vector3 centerWorldPosition = centerLocalPosition * GlobalVar.CurrentZoom + VisualizationRoot.transform.position;
+        Vector3 centerWorldPosition = centerLocalPosition * GlobalVar.CurrentZoom + visualizationRoot.transform.position;
 
         float zoomMultiplier = 0.75f / (GlobalVar.CurrentZoom * distance);        
         Vector3 startScale = Vector3.one * GlobalVar.CurrentZoom;
@@ -415,61 +416,63 @@ public class IslandVizVisualization : MonoBehaviour
         // Debug
         GameObject DebugCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
         DebugCube.transform.localScale = new Vector3(0.01f, 100, 0.01f);
-        DebugCube.transform.parent = VisualizationRoot;
+        DebugCube.transform.parent = visualizationRoot;
         DebugCube.transform.localPosition = centerLocalPosition;
         Debug.Log("DebugCube Position: " + DebugCube.transform.position + " --- WorldPosition: " + centerWorldPosition);
         
-        Vector3 startPosition = VisualizationRoot.position;
+        Vector3 startPosition = visualizationRoot.position;
         Vector3 endPosition = (startPosition / GlobalVar.CurrentZoom - DebugCube.transform.position / GlobalVar.CurrentZoom) * endScale.x;
         endPosition.y = startPosition.y;
 
-        Debug.Log("startScale: " + startScale + " --- endScale: " + endScale);
-        Debug.Log("startPosition: " + startPosition + " --- worldCenterPosition: " + DebugCube.transform.position + " --- endPosition: " + endPosition);
-
         Destroy(DebugCube); // TODO this is inly a quick hack! Remove in future;
 
+        Debug.Log("startScale: " + startScale + " --- endScale: " + endScale);
+        Debug.Log("startPosition: " + startPosition + " --- worldCenterPosition: " + DebugCube.transform.position + " --- endPosition: " + endPosition);
+        
         yield return FlyToPosition(endPosition, endScale);
     }
 
-    IEnumerator FlyToPosition(Vector3 endPosition, Vector3 endScale, float speed = 0.5f)
+    private IEnumerator FlyToPosition(Vector3 endPosition, Vector3 endScale, float speed = 0.5f)
     {
         Vector3 startScale = Vector3.one * GlobalVar.CurrentZoom;
-        Vector3 startPosition = VisualizationRoot.localPosition;
+        Vector3 startPosition = visualizationRoot.localPosition;
         startPosition.y = GlobalVar.hologramTableHeight;
 
         float value = 0;
         while (value <= 1)
         {
-            VisualizationRoot.localScale = Vector3.Lerp(startScale, endScale, value); // TODO throwing exceptions sometimes
-            VisualizationRoot.position = Vector3.Lerp(startPosition, endPosition, value); // TODO throwing exceptions sometimes 
-            GlobalVar.CurrentZoom = VisualizationRoot.localScale.x;
+            visualizationRoot.localScale = Vector3.Lerp(startScale, endScale, value); // TODO throwing exceptions sometimes
+            visualizationRoot.position = Vector3.Lerp(startPosition, endPosition, value); // TODO throwing exceptions sometimes 
+            GlobalVar.CurrentZoom = visualizationRoot.localScale.x;
 
-            IslandVizVisualization.Instance.OnVisualizationScaleChanged();
+            OnVisualizationScaleChanged();
 
             value += 0.01f * speed;
             yield return new WaitForFixedUpdate();
         }
     }
 
+
+
     // TODO remove in future! Only for Debug
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.KeypadEnter))
         {
-            StartCoroutine(FlyToMultiple(new Transform[] { IslandGameObjects[0].transform, IslandGameObjects[1].transform}));
+            StartCoroutine(FlyToMultiple(new Transform[] { islandGOs[0].transform, islandGOs[1].transform}));
         }
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
             //List<Transform> islands = new List<Transform>();
-            //foreach (var item in IslandGameObjects)
+            //foreach (var item in islandGameObjects)
             //{
             //    islands.Add(item.transform);
             //}
             //SelectAndFlyTo(islands.ToArray());
-            //IslandSelectionComponent.Instance.SelectIslands(IslandGameObjects);
+            //IslandSelectionComponent.Instance.SelectIslands(islandGameObjects);
 
-            foreach (var item in IslandGameObjects)
+            foreach (var item in islandGOs)
             {
                 IslandVizInteraction.Instance.OnIslandSelect(item, IslandVizInteraction.SelectionType.Highlight, true);
             }
@@ -507,9 +510,9 @@ public class IslandVizVisualization : MonoBehaviour
         }
         yield return null;
 
-        VisualizationRoot.localScale *= maxDistance / furthestDistance;
-        GlobalVar.CurrentZoom = VisualizationRoot.localScale.x;
-        GlobalVar.MinZoom = VisualizationRoot.localScale.x;
+        visualizationRoot.localScale *= maxDistance / furthestDistance;
+        GlobalVar.CurrentZoom = visualizationRoot.localScale.x;
+        GlobalVar.MinZoom = visualizationRoot.localScale.x;
     }
 
     /// <summary>
@@ -519,7 +522,7 @@ public class IslandVizVisualization : MonoBehaviour
     public void ApplyTableHeight (float newHeight)
     {
         Table.transform.position = new Vector3(Table.transform.position.x, newHeight, Table.transform.position.z);
-        VisualizationRoot.transform.position = new Vector3(VisualizationRoot.transform.position.x, newHeight, VisualizationRoot.transform.position.z);
+        visualizationRoot.transform.position = new Vector3(visualizationRoot.transform.position.x, newHeight, visualizationRoot.transform.position.z);
         GlobalVar.hologramTableHeight = newHeight;
     }
 

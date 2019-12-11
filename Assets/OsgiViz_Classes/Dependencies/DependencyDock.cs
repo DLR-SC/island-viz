@@ -178,6 +178,11 @@ namespace OsgiViz
             expanded = false;
             foreach (GameObject arrow in connectionArrows)
                 arrow.SetActive(false);
+
+            foreach (var item in connectedDocks)
+            {
+                IslandVizInteraction.Instance.OnIslandSelect(item.transform.parent.GetComponent<IslandGO>(), IslandVizInteraction.SelectionType.Highlight, false);
+            }
         }
 
         public void ShowAllDependencies()
@@ -190,9 +195,12 @@ namespace OsgiViz
             foreach (var item in connectedDocks)
             {
                 connectedDockTransforms.Add(item.transform.parent);
+                IslandVizInteraction.Instance.OnIslandSelect(item.transform.parent.GetComponent<IslandGO>(), IslandVizInteraction.SelectionType.Highlight, true);
             }
             connectedDockTransforms.Add(this.transform.parent);
-            IslandVizVisualization.Instance.SelectAndFlyTo(connectedDockTransforms.ToArray());
+            IslandVizInteraction.Instance.OnIslandSelect(this.transform.parent.GetComponent<IslandGO>(), IslandVizInteraction.SelectionType.Select, true);
+
+            IslandVizVisualization.Instance.FlyTo(connectedDockTransforms.ToArray());
         }
 
 
@@ -216,7 +224,15 @@ namespace OsgiViz
                 {
                     HideAllDependencies();
                     Selected = false;
+                    IslandVizInteraction.Instance.OnDockSelect(this, IslandVizInteraction.SelectionType.Select, false);
                 }
+            }
+            else if (dock == this && selectionType == IslandVizInteraction.SelectionType.Highlight)
+            {
+                //if (!selected && Selected)
+                //    return;
+
+                IslandVizInteraction.Instance.OnIslandSelect(this.transform.parent.GetComponent<IslandGO>(), IslandVizInteraction.SelectionType.Highlight, selected);
             }
         }
     }

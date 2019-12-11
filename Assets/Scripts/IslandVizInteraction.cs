@@ -14,19 +14,18 @@ using Valve.VR.InteractionSystem;
 /// </summary>
 public class IslandVizInteraction : MonoBehaviour {
 
-    public static IslandVizInteraction Instance;
+    public static IslandVizInteraction Instance { get { return instance; } }
 
-    public Player Player;
+    public Player Player; // Set in Unity Editor.
 
     [Header("Additional Components Container")]
     public GameObject InteractionComponentsGameObject; // GameObject where all additional input components are located. 
                                                        // Note: Components are executed top down!
 
+    private static IslandVizInteraction instance; // Current instance of this class.
     private AdditionalIslandVizComponent[] inputComponents; // Array of all additional input componets.
-
     private IslandSelectionComponent islandSelectionComponent;
     
-
 
 
     // ################
@@ -40,7 +39,7 @@ public class IslandVizInteraction : MonoBehaviour {
     /// </summary>
     void Awake()
     {
-        Instance = this;
+        instance = this;
         inputComponents = InteractionComponentsGameObject.GetComponents<AdditionalIslandVizComponent>();
 
         islandSelectionComponent = InteractionComponentsGameObject.AddComponent<IslandSelectionComponent>();
