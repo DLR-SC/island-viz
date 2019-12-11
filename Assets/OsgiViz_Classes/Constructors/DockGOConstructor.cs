@@ -53,12 +53,12 @@ namespace OsgiViz.Unity.MainThreadConstructors
                 if (eDock != null)
                 {
                     dockList.Add(eDock);
-                    eDock.GetComponent<DependencyDock>().constructConnectionArrows();
+                    eDock.GetComponent<DependencyDock>().ConstructConnectionArrows();
                 }
                 if (iDock != null)
                 {
                     dockList.Add(iDock);
-                    iDock.GetComponent<DependencyDock>().constructConnectionArrows();
+                    iDock.GetComponent<DependencyDock>().ConstructConnectionArrows();
                 }
 
                 if (i % 5 == 0) // Only wait every 5th Dock construction for better performance.
@@ -151,11 +151,11 @@ namespace OsgiViz.Unity.MainThreadConstructors
                 importD.transform.localScale = new Vector3(importSize, importSize, importSize);
                 //Link dependencies
                 DependencyDock dockComponent = importD.GetComponent<DependencyDock>();
-                dockComponent.setDockType(DockType.ImportDock);
+                dockComponent.DockType =DockType.ImportDock;
                 foreach(GraphEdge e in edgeList)
                 {
                     GameObject ed = e.Target.getIsland().getIslandGO().GetComponent<IslandGO>().ExportDock;
-                    dockComponent.addDockConnection(ed.GetComponent<DependencyDock>(), e.getWeight());
+                    dockComponent.AddDockConnection(ed.GetComponent<DependencyDock>(), e.getWeight());
                 }
                 
                 #region determine optimal Position for ImportDock
@@ -184,11 +184,11 @@ namespace OsgiViz.Unity.MainThreadConstructors
                 exportD.transform.localScale = new Vector3(exportSize, exportSize, exportSize);
                 //Link dependencies
                 dockComponent = exportD.GetComponent<DependencyDock>();
-                dockComponent.setDockType(DockType.ExportDock);
+                dockComponent.DockType = DockType.ExportDock;
                 foreach (GraphEdge e in edgeList)
                 {
                     GameObject id = e.Source.getIsland().getIslandGO().GetComponent<IslandGO>().ImportDock;
-                    dockComponent.addDockConnection(id.GetComponent<DependencyDock>(), e.getWeight());
+                    dockComponent.AddDockConnection(id.GetComponent<DependencyDock>(), e.getWeight());
                 }
                 
                 #region determine optimal Position for ExportDock

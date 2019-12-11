@@ -14,15 +14,12 @@ using Valve.VR.InteractionSystem;
 /// </summary>
 public class IslandVizInteraction : MonoBehaviour {
 
-    public static IslandVizInteraction Instance { get { return instance; } }
+    public static IslandVizInteraction Instance { get; private set; }
 
     public Player Player; // Set in Unity Editor.
 
     [Header("Additional Components Container")]
     public GameObject InteractionComponentsGameObject; // GameObject where all additional input components are located. 
-                                                       // Note: Components are executed top down!
-
-    private static IslandVizInteraction instance; // Current instance of this class.
     private AdditionalIslandVizComponent[] inputComponents; // Array of all additional input componets.
     private IslandSelectionComponent islandSelectionComponent;
     
@@ -39,7 +36,7 @@ public class IslandVizInteraction : MonoBehaviour {
     /// </summary>
     void Awake()
     {
-        instance = this;
+        Instance = this;
         inputComponents = InteractionComponentsGameObject.GetComponents<AdditionalIslandVizComponent>();
 
         islandSelectionComponent = InteractionComponentsGameObject.AddComponent<IslandSelectionComponent>();
@@ -328,6 +325,14 @@ public class IslandVizInteraction : MonoBehaviour {
         Highlight        
     }
 
+    //public enum SelectableType
+    //{
+    //    Island,
+    //    Region,
+    //    Building,
+    //    Dock,
+    //    NotSelectable
+    //}
 
     // ################
     // Helper Functions
@@ -344,5 +349,34 @@ public class IslandVizInteraction : MonoBehaviour {
     {
         Debug.Log("Input with " + hand.GuessCurrentHandType().ToString() + " hand!");
     }
+
+    /// <summary>
+    /// Return the selectable type of 
+    /// </summary>
+    /// <param name="component">Can by any Unity Component, e.g. Collider, Transform, ...</param>
+    /// <returns></returns>
+    //public SelectableType SelectableTypeFromTarget (Component component)
+    //{
+    //    if (component.GetComponent<IslandGO>())
+    //    {
+    //        return SelectableType.Island;
+    //    }
+    //    else if (component.GetComponent<Region>())
+    //    {
+    //        return SelectableType.Region;
+    //    }
+    //    else if (component.GetComponent<Building>())
+    //    {
+    //        return SelectableType.Building;
+    //    }
+    //    else if (component.GetComponent<DependencyDock>())
+    //    {
+    //        return SelectableType.Dock;
+    //    }
+    //    else
+    //    {
+    //        return SelectableType.NotSelectable;
+    //    }
+    //}
     #endregion
 }

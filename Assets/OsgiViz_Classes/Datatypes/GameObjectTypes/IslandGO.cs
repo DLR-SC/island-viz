@@ -11,30 +11,23 @@ namespace OsgiViz.Unity.Island
 
     public class IslandGO : MonoBehaviour
     {
-        public List<Region> Regions { get { return regions; } }
-        public GameObject Coast { get { return coast; } set { coast = value; } }
-        public GameObject ImportDock { get { return importDock; } set { importDock = value; } }
-        public GameObject ExportDock { get { return exportDock; } set { exportDock = value; } }
-        public CartographicIsland CartoIsland { get { return island; } set { island = value; } }
+        public List<Region> Regions { get; private set; }
+        public GameObject Coast { get; set; }
+        public GameObject ImportDock { get; set; }
+        public GameObject ExportDock { get; set; }
+        public CartographicIsland CartoIsland { get; set; }
 
         public ZoomLevel CurrentZoomLevel;
 
         public bool Selected;
         public bool Visible;
 
-        private CartographicIsland island;
-        private List<Region> regions;
-        private GameObject coast;
-        private GameObject importDock;
-        private GameObject exportDock;
-
-
         void Awake()
         {
-            regions = new List<Region>();
-            importDock = null;
-            exportDock = null;
-            coast = null;
+            Regions = new List<Region>();
+            ImportDock = null;
+            ExportDock = null;
+            Coast = null;
 
             IslandVizInteraction.Instance.OnIslandSelect += OnSelection;
         }
@@ -150,7 +143,7 @@ namespace OsgiViz.Unity.Island
         public IEnumerator ApplyNearZoomLevel()
         {
             // Disable region colliders & enable buildings.
-            foreach (var region in regions)
+            foreach (var region in Regions)
             {
                 if (region.GetComponent<MeshCollider>().enabled)
                     region.GetComponent<MeshCollider>().enabled = true; // TODO?
@@ -173,7 +166,7 @@ namespace OsgiViz.Unity.Island
             // NEAR -> MEDIUM 
             if (CurrentZoomLevel == ZoomLevel.Near)
             {
-                foreach (var region in regions)
+                foreach (var region in Regions)
                 {
                     foreach (var building in region.getBuildings())
                     {
@@ -189,14 +182,14 @@ namespace OsgiViz.Unity.Island
             else
             {
                 // Enable Docks.
-                if (!importDock.activeSelf)
+                if (!ImportDock.activeSelf)
                 {
-                    importDock.SetActive(true);
-                    exportDock.SetActive(true);
+                    ImportDock.SetActive(true);
+                    ExportDock.SetActive(true);
                 }                
 
                 // Enable region colliders.
-                foreach (var region in regions)
+                foreach (var region in Regions)
                 {
                     if (!region.GetComponent<MeshCollider>().enabled)
                         region.GetComponent<MeshCollider>().enabled = true;
@@ -212,14 +205,14 @@ namespace OsgiViz.Unity.Island
         public IEnumerator ApplyFarZoomLevel ()
         {
             // Hide Docks.
-            if (importDock.activeSelf)
+            if (ImportDock.activeSelf)
             {
-                importDock.SetActive(false);
-                exportDock.SetActive(false);
+                ImportDock.SetActive(false);
+                ExportDock.SetActive(false);
             }   
 
             // Disable region colliders & hide buildings.
-            foreach (var region in regions)
+            foreach (var region in Regions)
             {
                 if (region.GetComponent<MeshCollider>().enabled)
                     region.GetComponent<MeshCollider>().enabled = false;
@@ -251,7 +244,7 @@ namespace OsgiViz.Unity.Island
         //Returns true if island does not contain a single CU. Returns false otherwise.
         public bool IsIslandEmpty()
         {
-            foreach (Region reg in regions)
+            foreach (Region reg in Regions)
                 if (reg.getBuildings().Count > 0)
                     return false;
 
@@ -260,7 +253,7 @@ namespace OsgiViz.Unity.Island
 
         public void AddRegion(Region reg)
         {
-            regions.Add(reg);
+            Regions.Add(reg);
         }
 
     }
