@@ -39,6 +39,14 @@ public class IslandVizVisualization : MonoBehaviour
     public GameObject ImportArrowPrefab; //  = (GameObject) Resources.Load("Prefabs/ImportArrow")
     public GameObject ExportArrowPrefab; // = (GameObject) Resources.Load("Prefabs/ExportArrow");
     public GameObject ArrowHeadPrefab; // = (GameObject) Resources.Load("Prefabs/ArrowHead");
+    public GameObject ImportDockPrefab; // = (GameObject) Resources.Load("Prefabs/Docks/iDock_1");
+    public GameObject ExportDockPrefab; // = (GameObject) Resources.Load("Prefabs/Docks/eDock_1");
+    public GameObject[] CUPrefabs; // = Resources.LoadAll<GameObject>("Prefabs/CU/LOD0").ToList<GameObject>();
+    public GameObject[] SIPrefabs; // = Resources.LoadAll<GameObject>("Prefabs/ServiceImpl/LOD0").ToList<GameObject>();
+    public GameObject[] SDPrefabs; // = Resources.LoadAll<GameObject>("Prefabs/ServiceDeclare/LOD0").ToList<GameObject>();
+
+    [Header("Materials")]
+    public Material CombinedHoloMaterial; // = (Material) Resources.Load("Materials/Combined HoloMaterial")
 
     [Header("Environment GameObjects")]
     public GameObject Table; // GameObject of the table.
@@ -144,7 +152,7 @@ public class IslandVizVisualization : MonoBehaviour
         // Since we stored all additional visualization components in "visualizationComponents", we can add the remaining mandatory visualization components.
         islandGOConstructor = VisualizationComponentsGameObject.AddComponent<IslandGOConstructor>();
         dockGOConstructor = VisualizationComponentsGameObject.AddComponent<DockGOConstructor>();
-        hierarchyConstructor = VisualizationComponentsGameObject.AddComponent<HierarchyConstructor>();
+        //hierarchyConstructor = VisualizationComponentsGameObject.AddComponent<HierarchyConstructor>();
         isConstructor = new IslandStructureConstructor(1, 2, 8);
         bdConstructor = new Graph_Layout_Constructor();
 

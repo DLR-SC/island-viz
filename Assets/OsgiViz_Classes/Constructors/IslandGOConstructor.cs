@@ -30,31 +30,31 @@ namespace OsgiViz.Unity.MainThreadConstructors
 
         private GameObject importDockPrefab;
         private GameObject exportDockPrefab;
-        private List<GameObject> CUPrefabs;
-        private List<GameObject> SIPrefabs;
-        private List<GameObject> SDPrefabs;
+        private GameObject[] CUPrefabs;
+        private GameObject[] SIPrefabs;
+        private GameObject[] SDPrefabs;
 
         // Use this for initialization
         void Start()
         {
             status = Status.Idle;
             islandGOs = new List<IslandGO>();
-            combinedHoloMaterial = (Material)Resources.Load("Materials/Combined HoloMaterial");
+            combinedHoloMaterial = IslandVizVisualization.Instance.CombinedHoloMaterial;
 
             #region load prefabs
-            importDockPrefab = (GameObject)Resources.Load("Prefabs/Docks/iDock_1");
-            exportDockPrefab = (GameObject)Resources.Load("Prefabs/Docks/eDock_1");
+            importDockPrefab = IslandVizVisualization.Instance.ImportDockPrefab;
+            exportDockPrefab = IslandVizVisualization.Instance.ExportDockPrefab;
 
-            CUPrefabs = Resources.LoadAll<GameObject>("Prefabs/CU/LOD0").ToList<GameObject>();
-            SIPrefabs = Resources.LoadAll<GameObject>("Prefabs/ServiceImpl/LOD0").ToList<GameObject>();
-            SDPrefabs = Resources.LoadAll<GameObject>("Prefabs/ServiceDeclare/LOD0").ToList<GameObject>();
+            CUPrefabs = IslandVizVisualization.Instance.CUPrefabs;
+            SIPrefabs = IslandVizVisualization.Instance.SIPrefabs;
+            SDPrefabs = IslandVizVisualization.Instance.SDPrefabs;
 
             // TODO make more scalable
-            if (CUPrefabs.Count < GlobalVar.numLocLevels)
+            if (CUPrefabs.Length < GlobalVar.numLocLevels)
                 throw new Exception("For the selected number of discreet LOC levels, there are not enough CU prefabs!");
-            if (SIPrefabs.Count < GlobalVar.numLocLevels)
+            if (SIPrefabs.Length < GlobalVar.numLocLevels)
                 throw new Exception("For the selected number of discreet LOC levels, there are not enough SI prefabs!");
-            if (SDPrefabs.Count < GlobalVar.numLocLevels)
+            if (SDPrefabs.Length < GlobalVar.numLocLevels)
                 throw new Exception("For the selected number of discreet LOC levels, there are not enough SD prefabs!");
             #endregion
 

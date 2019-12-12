@@ -16,10 +16,11 @@ public class IslandVizInteractionController : MonoBehaviour {
         hand = GetComponent<Hand>();
     }
 
+    // TODO Add this via script.
 
     void OnTriggerEnter(Collider other)
     {
-        if (IslandVizInteraction.Instance.OnControllerEnter != null)
+        if (IslandVizInteraction.Instance != null && IslandVizInteraction.Instance.OnControllerEnter != null)
         {
             IslandVizInteraction.Instance.OnControllerEnter(other, hand);
         }
@@ -27,7 +28,7 @@ public class IslandVizInteractionController : MonoBehaviour {
 
     void OnTriggerExit(Collider other)
     {
-        if (IslandVizInteraction.Instance.OnControllerExit != null)
+        if (IslandVizInteraction.Instance != null && IslandVizInteraction.Instance.OnControllerExit != null)
         {
             IslandVizInteraction.Instance.OnControllerExit(other, hand);
         }
