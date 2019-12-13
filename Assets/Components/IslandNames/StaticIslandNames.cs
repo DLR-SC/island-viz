@@ -137,10 +137,14 @@ namespace StaticIslandNamesComponent
         {
             if (selected)
             {
+                //CreateStaticName(building.transform.parent, selectionType); // Also show the name of the Region.
+                IslandVizInteraction.Instance.OnRegionSelect(building.transform.parent.GetComponent<Region>(), IslandVizInteraction.SelectionType.Highlight, true);
                 CreateStaticName(building.transform, selectionType);
             }
             else
             {
+                //RemoveStaticName(building.transform.parent); // Also show the name of the Region.
+                IslandVizInteraction.Instance.OnRegionSelect(building.transform.parent.GetComponent<Region>(), IslandVizInteraction.SelectionType.Highlight, false);
                 RemoveStaticName(building.transform);
             }
         }

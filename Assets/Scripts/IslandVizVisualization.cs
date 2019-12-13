@@ -424,8 +424,8 @@ public class IslandVizVisualization : MonoBehaviour
 
         Destroy(DebugCube); // TODO this is inly a quick hack! Remove in future;
 
-        Debug.Log("startScale: " + startScale + " --- endScale: " + endScale);
-        Debug.Log("startPosition: " + startPosition + " --- worldCenterPosition: " + DebugCube.transform.position + " --- endPosition: " + endPosition);
+        //Debug.Log("startScale: " + startScale + " --- endScale: " + endScale);
+        //Debug.Log("startPosition: " + startPosition + " --- worldCenterPosition: " + DebugCube.transform.position + " --- endPosition: " + endPosition);
         
         yield return FlyToPosition(endPosition, endScale);
     }
