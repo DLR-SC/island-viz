@@ -48,17 +48,17 @@ namespace OsgiViz.Unity.MainThreadConstructors
             for (int i = 0; i < islands.Count; i++)
             {
                 IslandGO islandGOComponent = islands[i].GetComponent<IslandGO>();
-                GameObject eDock = islandGOComponent.getExportDock();
-                GameObject iDock = islandGOComponent.getImportDock();
+                GameObject eDock = islandGOComponent.ExportDock;
+                GameObject iDock = islandGOComponent.ImportDock;
                 if (eDock != null)
                 {
                     dockList.Add(eDock);
-                    eDock.GetComponent<DependencyDock>().constructConnectionArrows();
+                    eDock.GetComponent<DependencyDock>().ConstructConnectionArrows();
                 }
                 if (iDock != null)
                 {
                     dockList.Add(iDock);
-                    iDock.GetComponent<DependencyDock>().constructConnectionArrows();
+                    iDock.GetComponent<DependencyDock>().ConstructConnectionArrows();
                 }
 
                 if (i % 5 == 0) // Only wait every 5th Dock construction for better performance.
@@ -126,7 +126,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
         private void constructDockGO(IslandGO island)
         {
 
-            CartographicIsland islandStructure = island.getIslandStructure();
+            CartographicIsland islandStructure = island.CartoIsland;
 
             //Get graph vertex associated with the island
             BidirectionalGraph<GraphVertex, GraphEdge> depGraph = islandStructure.getBundle().getParentProject().getDependencyGraph();
@@ -143,7 +143,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
                 List<GraphEdge> edgeList = outEdges.ToList();
                 importSize = Helperfunctions.mapDependencycountToSize(edgeList.Count);
                 //Import Dock
-                GameObject importD = island.getImportDock();
+                GameObject importD = island.ImportDock;
 
                 //if (importSize == 0f)
                 //    Debug.LogError("Island " + island.gameObject.name + " has no size");
@@ -151,16 +151,16 @@ namespace OsgiViz.Unity.MainThreadConstructors
                 importD.transform.localScale = new Vector3(importSize, importSize, importSize);
                 //Link dependencies
                 DependencyDock dockComponent = importD.GetComponent<DependencyDock>();
-                dockComponent.setDockType(DockType.ImportDock);
+                dockComponent.DockType =DockType.ImportDock;
                 foreach(GraphEdge e in edgeList)
                 {
-                    GameObject ed = e.Target.getIsland().getIslandGO().GetComponent<IslandGO>().getExportDock();
-                    dockComponent.addDockConnection(ed.GetComponent<DependencyDock>(), e.getWeight());
+                    GameObject ed = e.Target.getIsland().getIslandGO().GetComponent<IslandGO>().ExportDock;
+                    dockComponent.AddDockConnection(ed.GetComponent<DependencyDock>(), e.getWeight());
                 }
                 
                 #region determine optimal Position for ImportDock
                 List<GameObject> doNotCollideList = new List<GameObject>();
-                doNotCollideList.Add(island.getCoast());
+                doNotCollideList.Add(island.Coast);
                 bool foundLocation = findSuitablePosition2D(importD, doNotCollideList, island.gameObject, 500);
                 if(!foundLocation)
                     Debug.LogWarning("Could not find suitable location for " + importD.name);
@@ -173,7 +173,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
                 edgeList = outEdges.ToList();
                 exportSize = Helperfunctions.mapDependencycountToSize(edgeList.Count);
                 //Export Dock
-                GameObject exportD = island.getExportDock();
+                GameObject exportD = island.ExportDock;
                 float eDockWidth = exportD.GetComponent<MeshFilter>().sharedMesh.bounds.size.x * exportSize;
                 float iDockWidth = importD.GetComponent<MeshFilter>().sharedMesh.bounds.size.x * importSize;
                 //exportD.transform.position = importD.transform.position + Vector3.left * (iDockWidth + eDockWidth) * 0.5f;     
@@ -184,16 +184,16 @@ namespace OsgiViz.Unity.MainThreadConstructors
                 exportD.transform.localScale = new Vector3(exportSize, exportSize, exportSize);
                 //Link dependencies
                 dockComponent = exportD.GetComponent<DependencyDock>();
-                dockComponent.setDockType(DockType.ExportDock);
+                dockComponent.DockType = DockType.ExportDock;
                 foreach (GraphEdge e in edgeList)
                 {
-                    GameObject id = e.Source.getIsland().getIslandGO().GetComponent<IslandGO>().getImportDock();
-                    dockComponent.addDockConnection(id.GetComponent<DependencyDock>(), e.getWeight());
+                    GameObject id = e.Source.getIsland().getIslandGO().GetComponent<IslandGO>().ImportDock;
+                    dockComponent.AddDockConnection(id.GetComponent<DependencyDock>(), e.getWeight());
                 }
                 
                 #region determine optimal Position for ExportDock
                 doNotCollideList.Clear();
-                doNotCollideList.Add(island.getCoast());
+                doNotCollideList.Add(island.Coast);
                 foundLocation = findSuitablePosition2D(exportD, doNotCollideList, importD, 500);
                 if (!foundLocation)
                     Debug.Log("Could not find suitable location for " + exportD.name);

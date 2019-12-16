@@ -79,12 +79,17 @@ namespace StaticIslandNamesComponent
                     yPosition = GlobalVar.hologramTableHeight + 0.075f + heightIndex * StaticIslandNames.Instance.VerticalTextOffset;
                     transform.position = new Vector3(target.position.x, yPosition, target.position.z);
                 }
-                else
+                else // ZoomLevel.Near
                 {
-                    if (isIsland)
+                    if (target.GetComponent<IslandGO>())
                     {
                         yPosition = GlobalVar.hologramTableHeight + 0.2f + GlobalVar.CurrentZoom * 2f;
                         transform.position = new Vector3(target.position.x, yPosition, target.position.z);
+                    }
+                    else if (target.GetComponent<Region>())
+                    {
+                        yPosition = GlobalVar.hologramTableHeight + 0.2f + GlobalVar.CurrentZoom + heightIndex * StaticIslandNames.Instance.VerticalTextOffset;
+                        transform.position = new Vector3(target.GetComponent<MeshCollider>().bounds.center.x, yPosition, target.GetComponent<MeshCollider>().bounds.center.z);
                     }
                     else
                     {
@@ -142,6 +147,6 @@ namespace StaticIslandNamesComponent
         {
             return selectionType;
         }
-
+        
     }
 }

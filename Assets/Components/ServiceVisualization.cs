@@ -47,14 +47,14 @@ public class ServiceVisualization : AdditionalIslandVizComponent
             yield return ConstructServicesAndComponents(kvp.Value, kvp.Key);
         }
 
-        foreach (IslandGO islandGO in IslandVizVisualization.Instance.IslandGameObjects)
+        foreach (IslandGO islandGO in IslandVizVisualization.Instance.IslandGOs)
         {
             if (islandGO == null || islandGO.IsIslandEmpty())
             {
                 continue;
             }
 
-            foreach (Region region in islandGO.getRegions())
+            foreach (Region region in islandGO.Regions)
             {
                 foreach (Building building in region.getBuildings())
                 {

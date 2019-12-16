@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Valve.VR.InteractionSystem;
-using QuickGraph;
-using System.Linq;
 using OsgiViz.Relations;
 using OsgiViz.Core;
 using OsgiViz.Unity.Island;
@@ -22,17 +19,17 @@ namespace OsgiViz
     {
         public bool Selected = false;
 
+        public DockType DockType { get; set; }
+
+
+
         private GameObject dependencyContainer;
         private ConnectionPool connectionPool;
         private GameObject rotPivot;
-        private GameObject importArrowPrefab;
-        private GameObject exportArrowPrefab;
-        private GameObject arrowHeadPrefab;
         private List<GameObject> connectionArrows;
         private List<DependencyDock> connectedDocks;
         private List<float> dockWeights;
         //If not set, defaults to ImportDock
-        private DockType dockType;
         public bool expanded;
 
         void Awake()
@@ -41,20 +38,9 @@ namespace OsgiViz
             connectedDocks = new List<DependencyDock>();
             dockWeights = new List<float>();
             dependencyContainer = IslandVizVisualization.Instance.TransformContainer.DependencyContainer.gameObject;
-
-            #region clickable
-            InteractableViaClickTouch ict = gameObject.GetComponent<InteractableViaClickTouch>();
-            if (ict == null)
-                ict = gameObject.AddComponent<InteractableViaClickTouch>();
-
-            ict.handleActivationDeactivation.Add(handleActivationDeactivation);
-            #endregion
-
+            
             expanded = false;
-            dockType = DockType.ImportDock;
-            importArrowPrefab = (GameObject)Resources.Load("Prefabs/ImportArrow");
-            exportArrowPrefab = (GameObject)Resources.Load("Prefabs/ExportArrow");
-            arrowHeadPrefab = (GameObject)Resources.Load("Prefabs/ArrowHead");
+            DockType = DockType.ImportDock;
             rotPivot = new GameObject("Rotation Pivot");
             rotPivot.transform.position = transform.position;
             rotPivot.transform.SetParent(transform);
@@ -69,27 +55,11 @@ namespace OsgiViz
             IslandVizInteraction.Instance.OnDockSelect += OnDockSelected;
         }
 
-        public void setDockType(DockType type)
-        {
-            dockType = type;
-        }
 
-        private void handleActivationDeactivation(Hand hand)
-        {
-            if (expanded)
-            {
-                HideAllDependencies();
-            }
-            else
-            {
-                ShowAllDependencies();
-            }
-        }
-
-        public void addDockConnection(DependencyDock dock, float w)
+        public void AddDockConnection(DependencyDock dock, float weight)
         {
             connectedDocks.Add(dock);
-            dockWeights.Add(w);
+            dockWeights.Add(weight);
         }
 
 
@@ -98,26 +68,24 @@ namespace OsgiViz
         // Connection Arrow Construction
         // ################
 
-        public void constructConnectionArrows()
-        {
-            
+        public void ConstructConnectionArrows()
+        {            
             //Construct new Arrows
             int cc = 0;
             foreach (DependencyDock dock in connectedDocks)
             {
-
                 //Check if Arrow already exists
                 IDPair pair = new IDPair(this.GetInstanceID(), dock.GetInstanceID());
                 GameObject conArrow = connectionPool.getConnection(pair);
                 if (conArrow == null)
                 {
                     GameObject arrowBody;
-                    if (dockType == DockType.ImportDock)
-                        arrowBody = Instantiate(importArrowPrefab, transform.position, Quaternion.identity);
+                    if (DockType == DockType.ImportDock)
+                        arrowBody = Instantiate(IslandVizVisualization.Instance.ImportArrowPrefab, transform.position, Quaternion.identity);
                     else
-                        arrowBody = Instantiate(exportArrowPrefab, transform.position, Quaternion.identity);
+                        arrowBody = Instantiate(IslandVizVisualization.Instance.ExportArrowPrefab, transform.position, Quaternion.identity);
 
-                    GameObject arrowHead = Instantiate(arrowHeadPrefab, transform.position, Quaternion.identity);
+                    GameObject arrowHead = Instantiate(IslandVizVisualization.Instance.ArrowHeadPrefab, transform.position, Quaternion.identity);
                     conArrow = new GameObject();
                     conArrow.name = "Connection To " + dock.gameObject.name;
                     #region adjust transform
@@ -135,7 +103,7 @@ namespace OsgiViz
                     newScale.x = GlobalVar.depArrowWidth * dockWeights[cc];
                     newScale.y = 1f;
                     arrowHead.transform.localScale = newScale;
-                    if(dockType == DockType.ImportDock)
+                    if(DockType == DockType.ImportDock)
                     {
                         arrowHead.transform.position += new Vector3(-connectionLength * 0.5f, 0f, 0f);
                         arrowHead.transform.localEulerAngles = new Vector3(0f, 180f, -39f);
@@ -169,6 +137,7 @@ namespace OsgiViz
                 connectionArrows.Add(conArrow);
                 cc++;
             }
+            Destroy(rotPivot);
         }
 
 
@@ -178,6 +147,11 @@ namespace OsgiViz
             expanded = false;
             foreach (GameObject arrow in connectionArrows)
                 arrow.SetActive(false);
+
+            foreach (var item in connectedDocks)
+            {
+                IslandVizInteraction.Instance.OnIslandSelect(item.transform.parent.GetComponent<IslandGO>(), IslandVizInteraction.SelectionType.Highlight, false);
+            }
         }
 
         public void ShowAllDependencies()
@@ -190,12 +164,14 @@ namespace OsgiViz
             foreach (var item in connectedDocks)
             {
                 connectedDockTransforms.Add(item.transform.parent);
+                IslandVizInteraction.Instance.OnIslandSelect(item.transform.parent.GetComponent<IslandGO>(), IslandVizInteraction.SelectionType.Highlight, true);
             }
             connectedDockTransforms.Add(this.transform.parent);
-            IslandVizVisualization.Instance.SelectAndFlyTo(connectedDockTransforms.ToArray());
+            IslandVizInteraction.Instance.OnIslandSelect(this.transform.parent.GetComponent<IslandGO>(), IslandVizInteraction.SelectionType.Select, true);
+
+            IslandVizVisualization.Instance.FlyTo(connectedDockTransforms.ToArray());
         }
-
-
+        
 
         private void OnDockSelected (DependencyDock dock, IslandVizInteraction.SelectionType selectionType, bool selected)
         {
@@ -216,7 +192,15 @@ namespace OsgiViz
                 {
                     HideAllDependencies();
                     Selected = false;
+                    IslandVizInteraction.Instance.OnDockSelect(this, IslandVizInteraction.SelectionType.Select, false);
                 }
+            }
+            else if (dock == this && selectionType == IslandVizInteraction.SelectionType.Highlight)
+            {
+                //if (!selected && Selected)
+                //    return;
+
+                IslandVizInteraction.Instance.OnIslandSelect(this.transform.parent.GetComponent<IslandGO>(), IslandVizInteraction.SelectionType.Highlight, selected);
             }
         }
     }

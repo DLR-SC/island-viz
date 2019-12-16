@@ -7,29 +7,31 @@ using Valve.VR.InteractionSystem;
 
 /// <summary>
 /// This is the main class of the IslandViz application. 
+/// This class handles the initiation of the islandViz and handles undo calls.
 /// </summary>
 public class IslandVizBehaviour : MonoBehaviour
 {
-    public static IslandVizBehaviour Instance; // The instance of this class.
+    public static IslandVizBehaviour Instance { get; private set; }
 
-    public List<Action> UndoList;
+    private List<Action> undoList; // List of the last user actions.
 
 
 
     // ################
-    // Delegates
+    // Events
     // ################
-
-    /// <summary>
-    /// Called when the IslandVizConstructionRoutine has finished.
-    /// </summary>
-    public delegate void ConstructionDone();
 
     /// <summary>
     /// Called when the IslandVizConstructionRoutine has finished.
     /// </summary>
     public ConstructionDone OnConstructionDone;
 
+    /// <summary>
+    /// Called when the IslandVizConstructionRoutine has finished.
+    /// </summary>
+    public delegate void ConstructionDone();
+
+    
 
 
 
@@ -60,58 +62,70 @@ public class IslandVizBehaviour : MonoBehaviour
         Shader.SetGlobalVector("hologramCenter", new Vector3(0, 0, 0));
         Shader.SetGlobalFloat("hologramScale", 0.8f);
 
-        UndoList = new List<Action>();
+        undoList = new List<Action>();
         IslandVizInteraction.Instance.OnControllerMenuDown += Undo;
 
-        StartCoroutine(IslandVizConstructionRoutine()); // Start the islandviz construction coroutine.
+        StartCoroutine(IslandVizInitiationRoutine()); // Start the islandviz construction coroutine.
     }
-
-
+    
     /// <summary>
     /// The main construction routine of the islandviz application.
     /// </summary>
-    IEnumerator IslandVizConstructionRoutine ()
+    IEnumerator IslandVizInitiationRoutine ()
     {
         yield return null;
 
-        // Load the data we want to visualize.
-        yield return IslandVizData.Instance.ConstructOsgiProject();
+        yield return IslandVizData.Instance.ConstructOsgiProject(); // Load the data we want to visualize.
+        
+        yield return IslandVizVisualization.Instance.ConstructVisualization(); // Construct the basic visualization, i.e. islands, ports, and dependencies.
+                
+        yield return IslandVizVisualization.Instance.InitVisualizationComponents(); // Load additional visualization components.
+        yield return IslandVizInteraction.Instance.InitInputComponents(); // Load additional interaction components.
 
-        // Construct the basic visualization, i.e. islands, ports, and dependencies.
-        yield return IslandVizVisualization.Instance.ConstructVisualization();
-
-        // Load additional components
-        yield return IslandVizVisualization.Instance.InitVisualizationComponents();
-        yield return IslandVizInteraction.Instance.InitInputComponents();
-
-        OnConstructionDone?.Invoke();
+        OnConstructionDone?.Invoke(); // Call the OnConstructionDone event.
     }
 
     #endregion
+
+
+
 
 
     // ################
     // Undo
     // ################
 
+    #region Undo
+
     /// <summary>
-    /// 
+    /// Add the current action to the undo list, so that the user can return to this action in the future. 
+    /// Note that pressing undo will execute the second last action in the undo list. (Then pressing redo, the last action in the undo list will be executed)
     /// </summary>
-    /// <param name="hand"></param>
+    /// <param name="action">A action that will be executed when user presses undo.</param>
+    public void AddUndoAction (Action action)
+    {
+        undoList.Add(action);
+    }
+
+    /// <summary>
+    /// Called by a OnButtonEvent. Pressing the undo button will execute the second last action in the undo list.
+    /// Note that the last action in the undo list is the current action. (Pressing redo after the first undo would execute the last action in the undo list)
+    /// </summary>
+    /// <param name="hand">The hand where the undo button was pressed.</param>
     public void Undo (Hand hand)
     {
-        if (UndoList.Count >= 2) // [Last Action|Current Action] --> We want the last action, so we take the second last item.
+        if (undoList.Count >= 2) // [Last Action|Current Action] --> We want the last action, so we take the second last item.
         {
             IslandVizUI.Instance.MakeNotification(0.5f, "Undo");
 
-            UndoList[UndoList.Count-2]?.Invoke();
-            UndoList.RemoveAt(UndoList.Count - 2);
+            undoList[undoList.Count-2]?.Invoke();
+            undoList.RemoveAt(undoList.Count - 2);
         }
         else
         {
-            Debug.LogError("Undo List is empty!");
-            // TODO
+            // No action to undo.
         }
     }
 
+    #endregion
 }

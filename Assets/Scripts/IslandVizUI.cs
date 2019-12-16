@@ -48,7 +48,7 @@ public class IslandVizUI : MonoBehaviour
 
 
     // ################
-    // General
+    // Event Handling
     // ################
 
     /// <summary>
@@ -68,6 +68,9 @@ public class IslandVizUI : MonoBehaviour
     }
 
 
+
+
+
     // ################
     // Loading Screen
     // ################
@@ -84,6 +87,8 @@ public class IslandVizUI : MonoBehaviour
     }
        
 
+
+
     // ################
     // Zoom Level
     // ################
@@ -97,6 +102,8 @@ public class IslandVizUI : MonoBehaviour
         ZoomLevelSlider.value = 100 - zoomLevelInPercentage; // Invert the percentage value to be represented correctly by the slider.
         ZoomLevelValue.text = zoomLevelInPercentage.ToString("0") + "%";
     }
+
+
 
 
     // ################

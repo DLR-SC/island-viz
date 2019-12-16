@@ -11,24 +11,23 @@ namespace OsgiViz.Unity.Island
 
     public class IslandGO : MonoBehaviour
     {
+        public List<Region> Regions { get; private set; }
+        public GameObject Coast { get; set; }
+        public GameObject ImportDock { get; set; }
+        public GameObject ExportDock { get; set; }
+        public CartographicIsland CartoIsland { get; set; }
+
         public ZoomLevel CurrentZoomLevel;
 
         public bool Selected;
         public bool Visible;
 
-        private CartographicIsland island;
-        private List<Region> regions;
-        private GameObject coast;
-        private GameObject importDock;
-        private GameObject exportDock;
-
-
         void Awake()
         {
-            regions = new List<Region>();
-            importDock = null;
-            exportDock = null;
-            coast = null;
+            Regions = new List<Region>();
+            ImportDock = null;
+            ExportDock = null;
+            Coast = null;
 
             IslandVizInteraction.Instance.OnIslandSelect += OnSelection;
         }
@@ -106,11 +105,7 @@ namespace OsgiViz.Unity.Island
             Visible = false;
         }
 
-
-
-
-
-
+        
 
         // ################
         // Zoom Level
@@ -144,12 +139,11 @@ namespace OsgiViz.Unity.Island
             }
             CurrentZoomLevel = newZoomLevel;
         }
-
-
+        
         public IEnumerator ApplyNearZoomLevel()
         {
             // Disable region colliders & enable buildings.
-            foreach (var region in regions)
+            foreach (var region in Regions)
             {
                 if (region.GetComponent<MeshCollider>().enabled)
                     region.GetComponent<MeshCollider>().enabled = true; // TODO?
@@ -166,14 +160,13 @@ namespace OsgiViz.Unity.Island
             if (GetComponent<CapsuleCollider>().enabled)
                 GetComponent<CapsuleCollider>().enabled = false;
         }
-
-
+        
         public IEnumerator ApplyMediumZoomLevel()
         {
             // NEAR -> MEDIUM 
             if (CurrentZoomLevel == ZoomLevel.Near)
             {
-                foreach (var region in regions)
+                foreach (var region in Regions)
                 {
                     foreach (var building in region.getBuildings())
                     {
@@ -189,14 +182,14 @@ namespace OsgiViz.Unity.Island
             else
             {
                 // Enable Docks.
-                if (!importDock.activeSelf)
+                if (!ImportDock.activeSelf)
                 {
-                    importDock.SetActive(true);
-                    exportDock.SetActive(true);
+                    ImportDock.SetActive(true);
+                    ExportDock.SetActive(true);
                 }                
 
                 // Enable region colliders.
-                foreach (var region in regions)
+                foreach (var region in Regions)
                 {
                     if (!region.GetComponent<MeshCollider>().enabled)
                         region.GetComponent<MeshCollider>().enabled = true;
@@ -208,19 +201,18 @@ namespace OsgiViz.Unity.Island
                     GetComponent<CapsuleCollider>().enabled = true;
             }
         }
-
-
+        
         public IEnumerator ApplyFarZoomLevel ()
         {
             // Hide Docks.
-            if (importDock.activeSelf)
+            if (ImportDock.activeSelf)
             {
-                importDock.SetActive(false);
-                exportDock.SetActive(false);
+                ImportDock.SetActive(false);
+                ExportDock.SetActive(false);
             }   
 
             // Disable region colliders & hide buildings.
-            foreach (var region in regions)
+            foreach (var region in Regions)
             {
                 if (region.GetComponent<MeshCollider>().enabled)
                     region.GetComponent<MeshCollider>().enabled = false;
@@ -245,60 +237,23 @@ namespace OsgiViz.Unity.Island
 
 
 
-
-
+        // ################
+        // Helper Functions
+        // ################
 
         //Returns true if island does not contain a single CU. Returns false otherwise.
         public bool IsIslandEmpty()
         {
-            foreach (Region reg in regions)
+            foreach (Region reg in Regions)
                 if (reg.getBuildings().Count > 0)
                     return false;
 
             return true;
         }
 
-        public GameObject getCoast()
+        public void AddRegion(Region reg)
         {
-            return coast;
-        }
-        public GameObject getImportDock()
-        {
-            return importDock;
-        }
-        public GameObject getExportDock()
-        {
-            return exportDock;
-        }
-        public List<Region> getRegions()
-        {
-            return regions;
-        }
-        public CartographicIsland getIslandStructure()
-        {
-            return island;
-        }
-
-        public void addRegion(Region reg)
-        {
-            regions.Add(reg);
-        }
-
-        public void setCoast(GameObject c)
-        {
-            coast = c;
-        }
-        public void setImportDock(GameObject i)
-        {
-            importDock = i;
-        }
-        public void setExportDock(GameObject e)
-        {
-            exportDock = e;
-        }
-        public void setIslandStructure(CartographicIsland i)
-        {
-            island = i;
+            Regions.Add(reg);
         }
 
     }

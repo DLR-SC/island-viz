@@ -10,7 +10,7 @@
 
 ---
 
-![IslandViz Virtual Reality Screenshots](./Documentation/IslandVizScreenshots.PNG)
+![IslandViz Virtual Reality Screenshots](./Documentation/IslandVizScreenshots_2.PNG)
 
 IslandViz is a software visualization tool which represents the architecture of OSGi-based software systems in virtual reality. Using an island metaphor, each module is represented as an independent island. The resulting island system is displayed on a virtual table where users can interact with the visualization and explore the island system. IslandViz allows users to get an initial overview of the complexity of a software system by examining the modules and their dependencies.
 

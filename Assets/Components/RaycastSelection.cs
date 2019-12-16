@@ -1,7 +1,6 @@
 ﻿using OsgiViz;
 using OsgiViz.Unity.Island;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Valve.VR;
 using Valve.VR.InteractionSystem;
@@ -12,14 +11,14 @@ using Valve.VR.InteractionSystem;
 public class RaycastSelection : AdditionalIslandVizComponent
 {
     // ################
-    // Public
+    // Public - Unity
     // ################
 
     public Hand[] Hands; // Attach both or only one hand in the editor.
     public RayMode Mode; // This changes the angle of the ray. Choose whatever you prever.
     public Material LaserMaterial; // The material of the laser pointer visual.
 
-    [Tooltip("Wether tooltips should be shown on start. Tooltipps will stay until the touchpad was touched.")]
+    [Tooltip("Should tooltips be shown on start. Tooltipps will stay until the touchpad was touched.")]
     public bool ShowTooltips = true;
 
     // ################
@@ -41,7 +40,7 @@ public class RaycastSelection : AdditionalIslandVizComponent
     private bool[] currentlyHitting; // True if the SphereCast is currently hitting something.
 
     private bool initiated = false;
-    private bool tooltippsDisabled = false;
+    private bool tooltipsDisabled = false;
 
 
 
@@ -93,7 +92,7 @@ public class RaycastSelection : AdditionalIslandVizComponent
         }
         else
         {
-            tooltippsDisabled = true;
+            tooltipsDisabled = true;
         }
 
         yield return null;
@@ -122,7 +121,7 @@ public class RaycastSelection : AdditionalIslandVizComponent
             touchpadTouch[handID] = true;
             StartCoroutine(RaySelection(handID));
 
-            if (!tooltippsDisabled)
+            if (!tooltipsDisabled)
             {
                 DisableTooltips();
             }
@@ -160,7 +159,7 @@ public class RaycastSelection : AdditionalIslandVizComponent
                 ToggleSelection(collider, true);
                 IslandVizVisualization.Instance.FlyTo(collider.transform);
 
-                IslandVizBehaviour.Instance.UndoList.Add(delegate () {
+                IslandVizBehaviour.Instance.AddUndoAction(delegate () {
                     ToggleSelection(collider, true);
                     IslandVizVisualization.Instance.FlyTo(collider.transform);
                 });
@@ -169,7 +168,7 @@ public class RaycastSelection : AdditionalIslandVizComponent
             {
                 ToggleSelection(collider, true);
 
-                IslandVizBehaviour.Instance.UndoList.Add(delegate () {
+                IslandVizBehaviour.Instance.AddUndoAction(delegate () {
                     ToggleSelection(collider, true);
                 });
             }
@@ -188,6 +187,12 @@ public class RaycastSelection : AdditionalIslandVizComponent
 
     #region Selection
 
+    /// <summary>
+    /// Shoot a raycast every fixed update from one hand and handle the hits.
+    /// This Coroutine is started when the player touches the touchpad of the controller (OnTouchpadTouchDown).
+    /// </summary>
+    /// <param name="handID">The hand from which the raycast comes from.</param>
+    /// <returns></returns>
     private IEnumerator RaySelection (int handID)
     {
         laserBeamObjs[handID].SetActive(true);
@@ -196,7 +201,6 @@ public class RaycastSelection : AdditionalIslandVizComponent
         {
             forward[handID] = Mode == RayMode.Laserpointer ? Hands[handID].transform.forward : (Hands[handID].transform.forward - Hands[handID].transform.up) / 2f;
 
-            //if (Physics.Raycast(Hand.transform.position + Hand.transform.forward * 0.1f, Hand.transform.forward * 1.5f, out hit, 5f))
             if (Physics.SphereCast(Hands[handID].transform.position + forward[handID] * 0.1f, laserThickness / 2, forward[handID], out hit[handID], laserLength))
             {
                 if (hit[handID].collider != hittingCollider[handID])
@@ -238,6 +242,7 @@ public class RaycastSelection : AdditionalIslandVizComponent
 
             yield return new WaitForFixedUpdate();
         }
+        // On ray selection ended ...
 
         if (currentlyHitting[handID])
         {
@@ -247,10 +252,12 @@ public class RaycastSelection : AdditionalIslandVizComponent
         }
         laserBeamObjs[handID].SetActive(false);
     }
-
-
-
-
+    
+    /// <summary>
+    /// Throw a highlight event for this collider.
+    /// </summary>
+    /// <param name="collider">The collider whose highlight status is to be changed.</param>
+    /// <param name="select">Wether it should be highlighted (true) or unhighlighted (false).</param>
     public void ToggleHighlight(Collider collider, bool select)
     {
         if (collider.GetComponent<IslandGO>())
@@ -261,7 +268,7 @@ public class RaycastSelection : AdditionalIslandVizComponent
         {
             IslandVizInteraction.Instance.OnRegionSelect(collider.GetComponent<Region>(), IslandVizInteraction.SelectionType.Highlight, select);
         }
-        else if (collider.GetComponent<Building>()) 
+        else if (collider.GetComponent<Building>())
         {
             IslandVizInteraction.Instance.OnBuildingSelect(collider.GetComponent<Building>(), IslandVizInteraction.SelectionType.Highlight, select);
         }
@@ -271,6 +278,11 @@ public class RaycastSelection : AdditionalIslandVizComponent
         }
     }
 
+    /// <summary>
+    /// Throw a selection event for this collider.
+    /// </summary>
+    /// <param name="collider">The collider whose selection status is to be changed.</param>
+    /// <param name="select">Wether it should be selected (true) or unselected (false).</param>
     public void ToggleSelection(Collider collider, bool select)
     {
         if (collider.GetComponent<IslandGO>())
@@ -314,7 +326,7 @@ public class RaycastSelection : AdditionalIslandVizComponent
         {
             ControllerButtonHints.HideTextHint(hand, EVRButtonId.k_EButton_SteamVR_Touchpad);
         }
-        tooltippsDisabled = true;
+        tooltipsDisabled = true;
     }
 
     #endregion
