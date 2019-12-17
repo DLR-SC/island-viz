@@ -39,7 +39,7 @@ The IslandViz can currently import a software system either as a Json file or by
 
 ## Controls
 
-![HTC Vive Controller](./Documentation/HTCViveController.PNG)
+![HTC Vive Controller](./Documentation/HTCViveController.png)
 
 | Button | User-Action | Result                                     |
 |--------|-------------|--------------------------------------------|
