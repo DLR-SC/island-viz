@@ -29,7 +29,7 @@ IslandViz is a software visualization tool which represents the architecture of 
 
 ---
 
-## Importing a OSGi-based Software Systems
+## Importing a OSGi-based Software System
 
 The IslandViz can currently import a software system either as a Json file or by connecting to a Neo4J server. 
 
