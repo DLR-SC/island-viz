@@ -37,6 +37,22 @@ The IslandViz can currently import a software system either as a Json file or by
 
 ---
 
+## Controls
+
+![HTC Vive Controller](./Documentation/HTCViveController.PNG)
+
+| Button | User-Action | Result                                     |
+|--------|-------------|--------------------------------------------|
+| 1      | PRESS       | Undo last Action                           |
+| 2      | TOUCH       | RaycastSelection: Highlight                |
+| 2      | PRESS       | RaycastSelection: Select                   |
+| 3      | PRESS       | TableHeightAdjuster; InverseMultiTouchInput|
+| 4      | -           | -                                          |
+
+>More infos to come ...
+
+---
+
 ## For Developers
 
 This revised branch is currently not targeted at developers, as things are going to change a lot. However, if you still want to customize the IslandViz or work on your own tool, here are some helpful information:  

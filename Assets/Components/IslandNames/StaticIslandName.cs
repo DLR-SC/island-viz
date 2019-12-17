@@ -44,8 +44,6 @@ namespace StaticIslandNamesComponent
 
         public void Init(Transform target, string name, IslandVizInteraction.SelectionType selectionType)
         {
-            Debug.Log("StaticIslandName: Init " + name);
-
             AlwaysLookAtTarget.Target = Camera.main.transform;
             Name.text = name;
             this.selectionType = selectionType;
@@ -80,7 +78,6 @@ namespace StaticIslandNamesComponent
                 {
                     yPosition = GlobalVar.hologramTableHeight + 0.075f + heightIndex * StaticIslandNames.Instance.VerticalTextOffset;
                     transform.position = new Vector3(target.position.x, yPosition, target.position.z);
-                    Debug.Log("Current yposition = " + yPosition);
                 }
                 else // ZoomLevel.Near
                 {

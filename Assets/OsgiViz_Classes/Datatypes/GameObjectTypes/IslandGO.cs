@@ -72,7 +72,6 @@ namespace OsgiViz.Unity.Island
         {
             if (other.tag == "TableContent")
             {
-                Debug.Log("TEEEEEEEEEST");
                 MakeIslandInvisible();
                 IslandVizVisualization.Instance.OnIslandInvisible(this);
             }

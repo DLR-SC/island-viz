@@ -267,8 +267,6 @@ public class RaycastSelection : AdditionalIslandVizComponent
     /// <param name="select">Wether it should be highlighted (true) or unhighlighted (false).</param>
     public void ToggleHighlight(Collider collider, bool select)
     {
-        Debug.Log("RaycastSelection: ToggleHighlight(" + collider.name + ", " + select + ")");
-
         if (collider.GetComponent<IslandGO>())
         {
             IslandVizInteraction.Instance.OnIslandSelect(collider.GetComponent<IslandGO>(), IslandVizInteraction.SelectionType.Highlight, select);
