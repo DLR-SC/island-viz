@@ -63,13 +63,14 @@ public class InverseMultiTouchInput : AdditionalIslandVizComponent {
 
         // Physics Settings
         mapNavigationArea.tag = mapNavigationAreaTag;
-        mapNavigationArea.layer = LayerMask.NameToLayer(mapNavigationAreaTag); // TODO ?
+        mapNavigationArea.layer = LayerMask.NameToLayer("Interaction");
         
         // Subscribe input methods
         IslandVizInteraction.Instance.OnControllerEnter += OnControllerEnterEvent;
         IslandVizInteraction.Instance.OnControllerExit += OnControllerExitEvent;
-        IslandVizInteraction.Instance.OnControllerTriggerDown += OnControllerTriggerPressed;
-        IslandVizInteraction.Instance.OnControllerTriggerUp += OnControllerTriggerReleased;
+        IslandVizInteraction.Instance.OnControllerTriggerDown += OnControllerTriggerPressedEvent;
+        IslandVizInteraction.Instance.OnControllerTriggerUp += OnControllerTriggerReleasedEvent;
+        IslandVizVisualization.Instance.OnTableHeightChanged += OnTableHeightChangedEvent;
 
         touchingHandList = new List<Hand>();
         usingHandList = new List<Hand>();
@@ -114,7 +115,7 @@ public class InverseMultiTouchInput : AdditionalIslandVizComponent {
         }
     }
 
-    private void OnControllerTriggerPressed (Hand hand)
+    private void OnControllerTriggerPressedEvent (Hand hand)
     {
         if (!usingHandList.Contains(hand) && touchingHandList.Contains(hand))
         {
@@ -128,12 +129,31 @@ public class InverseMultiTouchInput : AdditionalIslandVizComponent {
         }
     }
 
-    private void OnControllerTriggerReleased(Hand hand)
+    private void OnControllerTriggerReleasedEvent (Hand hand)
     {
         if (usingHandList.Contains(hand))
         {
             usingHandList.Remove(hand);
         }
+    }
+
+    #endregion
+
+
+
+    // ################
+    // Interaction - Event Handling
+    // ################
+
+    #region Interaction - Event Handling
+
+    /// <summary>
+    /// Called by IslandVizInteraction when table height was changed.
+    /// </summary>
+    /// <param name="newHeight">New height of the table.</param>
+    public void OnTableHeightChangedEvent(float newHeight)
+    {
+        mapNavigationArea.transform.position = new Vector3(0f, newHeight, 0f);
     }
 
     #endregion

@@ -114,7 +114,7 @@ public class ServiceVisualization : AdditionalIslandVizComponent
                 continue;
 
             GameObject serviceGO = Instantiate(InterfacePrefab, transform.position, Quaternion.identity);
-            serviceGO.layer = LayerMask.NameToLayer("InteractionSystemLayer");
+            serviceGO.layer = LayerMask.NameToLayer("Interaction");
             serviceGO.name = service.getName();
             Vector3 cuPosition = serviceCU.getGameObject().transform.position;
             Vector3 cuScale = serviceCU.getGameObject().transform.localScale;
@@ -135,7 +135,7 @@ public class ServiceVisualization : AdditionalIslandVizComponent
             {
                 CompilationUnit componentCU = sc.getImplementationCU();
                 GameObject scGO = Instantiate(ImplementationPrefab, transform.position, Quaternion.identity);
-                scGO.layer = LayerMask.NameToLayer("InteractionSystemLayer");
+                scGO.layer = LayerMask.NameToLayer("Interaction");
                 scGO.name = sc.getName();
 
                 cuPosition = componentCU.getGameObject().transform.position;
@@ -156,7 +156,7 @@ public class ServiceVisualization : AdditionalIslandVizComponent
             {
                 CompilationUnit componentCU = sc.getImplementationCU();
                 GameObject scGO = Instantiate(ReferencePrefab, transform.position, Quaternion.identity);
-                scGO.layer = LayerMask.NameToLayer("InteractionSystemLayer");
+                scGO.layer = LayerMask.NameToLayer("Interaction");
                 scGO.name = sc.getName();
 
                 cuPosition = componentCU.getGameObject().transform.position;
