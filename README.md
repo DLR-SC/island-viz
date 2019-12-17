@@ -47,7 +47,7 @@ The IslandViz can currently import a software system either as a Json file or by
 | 2      | TOUCH       | RaycastSelection: Highlight                |
 | 2      | PRESS       | RaycastSelection: Select                   |
 | 3      | PRESS       | TableHeightAdjuster; InverseMultiTouchInput|
-| 4      | -           | -                                          |
+| 4      | PRESS       | Screenshot                                 |
 
 >More infos to come ...
 
