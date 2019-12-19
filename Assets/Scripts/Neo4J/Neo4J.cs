@@ -60,6 +60,71 @@ namespace Neo4JDriver
             return result;
         }
 
+
+        public IStatementResult ReadTransaktion(string command)
+        {
+            if (debug)
+            {
+                Debug.Log("Neo4j .NET driver: Executing statement #" + command + "#");
+            }
+            using (var session = driver.Session())
+            {
+                return session.ReadTransaction(tx =>
+                {
+                    // Runs the statement and returns a result.
+                    return tx.Run(command);
+                });
+            }
+        }
+
+        public IStatementResult ReadTransaktion(string command, Dictionary<string, object> parameters)
+        {
+            if (debug)
+            {
+                Debug.Log("Neo4j .NET driver: Executing statement #" + command + "#");
+            }
+            using (var session = driver.Session())
+            {
+                return session.ReadTransaction(tx =>
+                {
+                    // Runs the statement and returns a result.
+                    return tx.Run(command, parameters);
+                });
+            }
+        }
+
+        public IStatementResult WriteTransaktion(string command)
+        {
+            if (debug)
+            {
+                Debug.Log("Neo4j .NET driver: Executing statement #" + command + "#");
+            }
+            using (var session = driver.Session())
+            {
+                return session.WriteTransaction(tx =>
+                {
+                    // Runs the statement and returns a result.
+                    return tx.Run(command);
+                });
+            }
+        }
+
+        public IStatementResult WriteTransaktion(string command, Dictionary<string, object> parameters)
+        {
+            if (debug)
+            {
+                Debug.Log("Neo4j .NET driver: Executing statement #" + command + "#");
+            }
+            using (var session = driver.Session())
+            {
+                return session.WriteTransaction(tx =>
+                {
+                    // Runs the statement and returns a result.
+                    return tx.Run(command, parameters);
+                });
+            }
+        }
+
         // Implement IDisposable.
         public void Dispose()
         {
