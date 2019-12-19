@@ -29,9 +29,25 @@ IslandViz is a software visualization tool which represents the architecture of 
 
 ---
 
-## Importing a OSGi-based Software Systems
+## Importing a OSGi-based Software System
 
 The IslandViz can currently import a software system either as a Json file or by connecting to a Neo4J server. 
+
+>More infos to come ...
+
+---
+
+## Controls
+
+![HTC Vive Controller](./Documentation/HTCViveController.png)
+
+| Button | User-Action | Result                                     |
+|--------|-------------|--------------------------------------------|
+| 1      | PRESS       | Undo last Action                           |
+| 2      | TOUCH       | RaycastSelection: Highlight                |
+| 2      | PRESS       | RaycastSelection: Select                   |
+| 3      | PRESS       | TableHeightAdjuster; InverseMultiTouchInput|
+| 4      | PRESS       | Screenshot                                 |
 
 >More infos to come ...
 

@@ -45,7 +45,7 @@ public class TableHeightAdjuster : AdditionalIslandVizComponent
 
         // Physics Settings
         handle.tag = "TableHeightAdjusterGrip"; // Set a tag, so we can later recognize the handle in the ControllerEnterEvents.
-        handle.layer = LayerMask.NameToLayer("MapNavigationArea"); // TODO ?
+        handle.layer = LayerMask.NameToLayer("Interaction");
 
         // Subscribe input methods
         IslandVizInteraction.Instance.OnControllerEnter += OnControllerEnterEvent;

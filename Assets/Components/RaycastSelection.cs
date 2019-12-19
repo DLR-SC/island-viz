@@ -25,10 +25,11 @@ public class RaycastSelection : AdditionalIslandVizComponent
     // Private
     // ################
 
+    private int laserLayerMask = 1 << 8; // Bit shift the index of the layer (8) to get a bit mask.
     private float laserLength = 3f; // The length of the SphereCast and the laser beam.
     private float laserThickness = 0.01f; // The thickness of the SphereCast and the laser beam.
 
-    // Every field in the arrays belongs to one hand, i.e. the first hand always stores the values in the 0th field and so on.
+    // Every field in these arrays belongs to one hand, i.e. the first hand always stores the values in the 0th field and so on.
     private RaycastHit[] hit; // Current RaycastHits of the hands.
     private Vector3[] forward; // Current forward vetors of the hands.
     private Collider[] hittingCollider; // Current colliders the hands are hitting with the SphereCast.
@@ -163,6 +164,8 @@ public class RaycastSelection : AdditionalIslandVizComponent
                     ToggleSelection(collider, true);
                     IslandVizVisualization.Instance.FlyTo(collider.transform);
                 });
+
+                //Hands[handID].controller.TriggerHapticPulse(500); // Vibrate
             }
             else
             {
@@ -171,6 +174,8 @@ public class RaycastSelection : AdditionalIslandVizComponent
                 IslandVizBehaviour.Instance.AddUndoAction(delegate () {
                     ToggleSelection(collider, true);
                 });
+
+                //Hands[handID].controller.TriggerHapticPulse(500); // Vibrate
             }
         }
     }
@@ -197,20 +202,22 @@ public class RaycastSelection : AdditionalIslandVizComponent
     {
         laserBeamObjs[handID].SetActive(true);
 
-        while (touchpadTouch[handID])
+        while (touchpadTouch[handID]) // While touchpad is pressed.
         {
             forward[handID] = Mode == RayMode.Laserpointer ? Hands[handID].transform.forward : (Hands[handID].transform.forward - Hands[handID].transform.up) / 2f;
 
-            if (Physics.SphereCast(Hands[handID].transform.position + forward[handID] * 0.1f, laserThickness / 2, forward[handID], out hit[handID], laserLength))
+            if (Physics.SphereCast(Hands[handID].transform.position + forward[handID] * 0.1f, laserThickness / 2, forward[handID], out hit[handID], laserLength, laserLayerMask))
             {
                 if (hit[handID].collider != hittingCollider[handID])
                 {
-                    if (hittingCollider[handID] != null) // We jumped from one collider to the next, hence, we need to deselect the prior collider.
+                    if (hittingCollider[handID] != null) // We jumped from one collider to the next, hence, we need to deselect the collider that we hit last fixed update.
                     {
                         ToggleHighlight(hittingCollider[handID], false);
                     }
                     ToggleHighlight(hit[handID].collider, true);
                     hittingCollider[handID] = hit[handID].collider;
+
+                    Hands[handID].controller.TriggerHapticPulse(250); // Vibrate
                 }
 
                 // Make laser visuals look like it stops at hit.

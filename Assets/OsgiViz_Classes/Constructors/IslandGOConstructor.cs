@@ -194,7 +194,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
                     regionComponent.addBuilding(buildingComponent);
                     //////////////////////////
                     #region BuildingCollider
-                    building.layer = LayerMask.NameToLayer("InteractionSystemLayer");
+                    building.layer = LayerMask.NameToLayer("Visualization");
                     CapsuleCollider capsuleCol = building.AddComponent<CapsuleCollider>();
                     //capsuleCol.isTrigger = true;
                     #endregion
@@ -247,7 +247,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
                 Vector3 dockPosition = islandStructure.getWeightedCenter() + dockDirection;
                 dockPosition.y -= Mathf.Abs(GlobalVar.islandHeightProfile[GlobalVar.islandHeightProfile.Length - 1]) * GlobalVar.islandAboveOcean;
                 GameObject importD = Instantiate(importDockPrefab, dockPosition, Quaternion.identity);
-                importD.layer = LayerMask.NameToLayer("InteractionSystemLayer");
+                importD.layer = LayerMask.NameToLayer("Visualization");
                 importD.name = islandStructure.getName() + " import dock";
                 importD.transform.localScale = new Vector3(1, 1, 1);
                 importD.transform.SetParent(islandGO.transform);
@@ -256,7 +256,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
 
                 //Export Dock
                 GameObject exportD = Instantiate(exportDockPrefab, dockPosition, Quaternion.identity);
-                exportD.layer = LayerMask.NameToLayer("InteractionSystemLayer");
+                exportD.layer = LayerMask.NameToLayer("Visualization");
                 exportD.name = islandStructure.getName() + " export dock";
                 exportD.transform.localScale = new Vector3(1, 1, 1);
                 exportD.transform.SetParent(islandGO.transform);
@@ -281,7 +281,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
             List<Region> regions = islandGOComponent.Regions;
             foreach(Region region in regions)
             {
-                region.gameObject.layer = LayerMask.NameToLayer("InteractionSystemLayer");
+                region.gameObject.layer = LayerMask.NameToLayer("Visualization");
                 MeshCollider cColliderCountry = region.gameObject.AddComponent<MeshCollider>();
                 cColliderCountry.sharedMesh = region.getRegionMesh().sharedMesh;
                 // TODO
@@ -293,7 +293,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
             #endregion
 
             #region IslandCollider
-            islandGO.layer = LayerMask.NameToLayer("InteractionSystemLayer");
+            islandGO.layer = LayerMask.NameToLayer("Visualization");
             CapsuleCollider cColliderIsland = islandGO.AddComponent<CapsuleCollider>();
             cColliderIsland.radius = islandStructure.getRadius();
             cColliderIsland.height = islandGOComponent.Coast.GetComponent<MeshFilter>().sharedMesh.bounds.size.y;
