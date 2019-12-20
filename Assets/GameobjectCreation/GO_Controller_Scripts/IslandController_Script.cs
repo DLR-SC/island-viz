@@ -56,6 +56,7 @@ public class IslandController_Script : MonoBehaviour
         deathArea.transform.parent = gameObject.transform;
         deathArea.transform.localPosition = new Vector3(0, 0, 0);
         deathArea.GetComponent<DeathAreaController_Script>().SetGrid(bundleMaster.GetGrid());
+        deathArea.GetComponent<MeshRenderer>().material = (Material)Resources.Load("Materials/Combined HoloMaterial");
 
         importDock = Instantiate(importDockPrefab, new Vector3(0, 0, 0), Quaternion.identity);
         importDock.name = "ImportDock";
@@ -75,6 +76,7 @@ public class IslandController_Script : MonoBehaviour
             region.transform.parent = gameObject.transform;
             region.transform.localPosition = new Vector3(0, 0, 0);
             region.GetComponent<RegionController_Script>().SetPackage(pm);
+            region.GetComponent<MeshRenderer>().material = (Material)Resources.Load("Materials/Combined HoloMaterial");
             region.GetComponent<RegionController_Script>().InitColor(regionCount);
             //TODO timedephight global regeln
             yield return region.GetComponent<RegionController_Script>().CreateBuildingManagers();

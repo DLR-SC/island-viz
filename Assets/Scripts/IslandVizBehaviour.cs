@@ -75,12 +75,23 @@ public class IslandVizBehaviour : MonoBehaviour
     {
         yield return null;
 
-        yield return IslandVizData.Instance.ConstructOsgiProject(); // Load the data we want to visualize.
+        /*yield return IslandVizData.Instance.ConstructOsgiProject(); // Load the data we want to visualize.
         
-        yield return IslandVizVisualization.Instance.ConstructVisualization(); // Construct the basic visualization, i.e. islands, ports, and dependencies.
+        yield return IslandVizVisualization.Instance.ConstructVisualization(); // Construct the basic visualization, i.e. islands, ports, and dependencies.*/
                 
         yield return IslandVizVisualization.Instance.InitVisualizationComponents(); // Load additional visualization components.
         yield return IslandVizInteraction.Instance.InitInputComponents(); // Load additional interaction components.
+
+        GameObject IV_Container = GameObject.Find("VisualizationContainer");
+        GameObject objectContainer = GameObject.Find("IslandObjectContainer");
+
+        objectContainer.transform.SetParent(IV_Container.transform, false);
+        //objectContainer.transform.parent = IV_Container.transform;
+
+        GameObject vis = GameObject.Find("Visualization");
+        //TODO Richtige Höhe für Visualisierung
+        vis.transform.position = new Vector3(0f, 1f, 0f);
+        vis.transform.localScale = new Vector3(0.00145f, 0.00145f, 0.00145f);
 
         OnConstructionDone?.Invoke(); // Call the OnConstructionDone event.
     }
