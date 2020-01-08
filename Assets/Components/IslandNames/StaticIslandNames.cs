@@ -40,6 +40,8 @@ namespace StaticIslandNamesComponent
 
 
 
+        private void Start() { } // When this has no Start method, you will not be able to disable this in the editor.
+
 
         // ################
         // Initiation

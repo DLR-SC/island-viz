@@ -15,6 +15,11 @@ public class IslandVizData : MonoBehaviour
     public DataLoadingType DataLoading; // Wether the osgi project is loaded from a json file or a neo4j database.
     //public string DataLocation; // TODO
 
+    [Header("Additional Components Container")]
+    public GameObject DataComponentsGameObject; // GameObject where all additional data components are located. 
+
+    private AdditionalIslandVizComponent[] inputComponents; // Array of all additional data componets.
+
     private static IslandVizData instance; // The instance of this class.
     private OsgiProject osgiProject; // The OSGI project.
 
@@ -40,6 +45,7 @@ public class IslandVizData : MonoBehaviour
     void Awake()
     {
         instance = this;
+        inputComponents = DataComponentsGameObject.GetComponents<AdditionalIslandVizComponent>();
     }
 
     /// <summary>
@@ -87,6 +93,20 @@ public class IslandVizData : MonoBehaviour
         
         stopwatch.Stop();
         Debug.Log("IslandVizData Construction finished after " + stopwatch.Elapsed.TotalSeconds.ToString("0.00") + " seconds!");
+    }
+
+
+    /// <summary>
+    /// Initialize all input components. Called by IslandVizBehavior.
+    /// </summary>
+    /// <returns></returns>
+    public IEnumerator InitInputComponents()
+    {
+        foreach (var item in inputComponents)
+        {
+            if (item.enabled)
+                yield return item.Init();
+        }
     }
 
     #endregion

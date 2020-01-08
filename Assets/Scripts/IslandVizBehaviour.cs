@@ -78,7 +78,8 @@ public class IslandVizBehaviour : MonoBehaviour
         yield return IslandVizData.Instance.ConstructOsgiProject(); // Load the data we want to visualize.
         
         yield return IslandVizVisualization.Instance.ConstructVisualization(); // Construct the basic visualization, i.e. islands, ports, and dependencies.
-                
+
+        yield return IslandVizData.Instance.InitInputComponents(); // Load additional data components.
         yield return IslandVizVisualization.Instance.InitVisualizationComponents(); // Load additional visualization components.
         yield return IslandVizInteraction.Instance.InitInputComponents(); // Load additional interaction components.
 

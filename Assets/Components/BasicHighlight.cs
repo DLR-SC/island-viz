@@ -13,8 +13,11 @@ public class BasicHighlight : AdditionalIslandVizComponent
     public HighlightMode Building;
     public HighlightMode Dock;
 
+    private Dictionary<Transform, GameObject> Highlights;
 
-    private Dictionary<Transform, GameObject> Highlights; 
+
+    private void Start() { } // When this has no Start method, you will not be able to disable this in the editor.
+    
 
     // ################
     // Initiation
