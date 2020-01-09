@@ -40,6 +40,8 @@ namespace StaticIslandNamesComponent
 
 
 
+        private void Start() { } // When this has no Start method, you will not be able to disable this in the editor.
+
 
         // ################
         // Initiation
@@ -138,13 +140,13 @@ namespace StaticIslandNamesComponent
             if (selected)
             {
                 //CreateStaticName(building.transform.parent, selectionType); // Also show the name of the Region.
-                IslandVizInteraction.Instance.OnRegionSelect(building.transform.parent.GetComponent<Region>(), IslandVizInteraction.SelectionType.Highlight, true);
+                //IslandVizInteraction.Instance.OnRegionSelect(building.transform.parent.GetComponent<Region>(), IslandVizInteraction.SelectionType.Highlight, true);
                 CreateStaticName(building.transform, selectionType);
             }
             else
             {
                 //RemoveStaticName(building.transform.parent); // Also show the name of the Region.
-                IslandVizInteraction.Instance.OnRegionSelect(building.transform.parent.GetComponent<Region>(), IslandVizInteraction.SelectionType.Highlight, false);
+                //IslandVizInteraction.Instance.OnRegionSelect(building.transform.parent.GetComponent<Region>(), IslandVizInteraction.SelectionType.Highlight, false);
                 RemoveStaticName(building.transform);
             }
         }
@@ -190,9 +192,9 @@ namespace StaticIslandNamesComponent
                 currentNames.Remove(target);
             }
             else if (currentHiddenNames.ContainsKey(target))
-            {
-                Destroy(currentNames[target].gameObject);
-                currentNames.Remove(target);
+            {                
+                Destroy(currentHiddenNames[target].gameObject);
+                currentHiddenNames.Remove(target);
             }
         }
 

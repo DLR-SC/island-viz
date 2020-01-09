@@ -130,6 +130,10 @@ public class IslandVizInteraction : MonoBehaviour {
     /// Called when the grip button of a controller is released.
     /// </summary>
     public ControllerMenuUp OnControllerMenuUp;
+    /// <summary>
+    /// Called when a ui button was selected or deselected.
+    /// </summary>
+    public UIButtonSelected OnUIButtonSelected;
 
     #endregion
 
@@ -250,7 +254,13 @@ public class IslandVizInteraction : MonoBehaviour {
     /// <param name="selectionType">The type of the selection.</param>
     /// <param name="selected">True = select, false = deselect.</param>
     public delegate void DockSelected(DependencyDock dock, SelectionType selectionType, bool selected);
-
+    /// <summary>
+    /// Called when a building GameObject was selected or deselected.
+    /// </summary>
+    /// <param name="button">The UI button that was selected.</param>
+    /// <param name="selectionType">The type of the selection.</param>
+    /// <param name="selected">True = select, false = deselect.</param>
+    public delegate void UIButtonSelected(UI_Button button, SelectionType selectionType, bool selected);
     #endregion
 
 

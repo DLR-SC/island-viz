@@ -17,6 +17,8 @@ public class ScreenshotFunctionality : AdditionalIslandVizComponent
 
     #region Initiation
 
+    private void Start(){} // When this has no Start method, you will not be able to disable this in the editor.
+
     /// <summary>
     /// Initialize this input component. 
     /// This method is called by the IslandVizInteraction class.
