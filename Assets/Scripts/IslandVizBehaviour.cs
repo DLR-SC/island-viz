@@ -76,12 +76,16 @@ public class IslandVizBehaviour : MonoBehaviour
         yield return null;
 
         /*yield return IslandVizData.Instance.ConstructOsgiProject(); // Load the data we want to visualize.
-        
-<<<<<<< HEAD
-        yield return IslandVizVisualization.Instance.ConstructVisualization(); // Construct the basic visualization, i.e. islands, ports, and dependencies.*/
-                
+       
+        yield return IslandVizVisualization.Instance.ConstructVisualization(); // Construct the basic visualization, i.e. islands, ports, and dependencies.
+        */
+        yield return IslandVizData.Instance.InitInputComponents(); // Load additional data components.
         yield return IslandVizVisualization.Instance.InitVisualizationComponents(); // Load additional visualization components.
         yield return IslandVizInteraction.Instance.InitInputComponents(); // Load additional interaction components.
+        
+        //IslandVizUI.Instance.InitBundleNames(); // TODO Move */
+
+        
 
         GameObject IV_Container = GameObject.Find("VisualizationContainer");
         GameObject objectContainer = GameObject.Find("IslandObjectContainer");
@@ -93,15 +97,7 @@ public class IslandVizBehaviour : MonoBehaviour
         //TODO Richtige Höhe für Visualisierung
         vis.transform.position = new Vector3(0f, 1f, 0f);
         vis.transform.localScale = new Vector3(0.00145f, 0.00145f, 0.00145f);
-=======
-        yield return IslandVizVisualization.Instance.ConstructVisualization(); // Construct the basic visualization, i.e. islands, ports, and dependencies.
 
-        yield return IslandVizData.Instance.InitInputComponents(); // Load additional data components.
-        yield return IslandVizVisualization.Instance.InitVisualizationComponents(); // Load additional visualization components.
-        yield return IslandVizInteraction.Instance.InitInputComponents(); // Load additional interaction components.
-
-        IslandVizUI.Instance.InitBundleNames(); // TODO Move 
->>>>>>> revised
 
         OnConstructionDone?.Invoke(); // Call the OnConstructionDone event.
     }
