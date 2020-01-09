@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,6 +19,7 @@ public class IslandVizUI : MonoBehaviour
     public GameObject LoadingScreen; // Parent GameObject of all loading screen UI elements.
     public GameObject ZoomLevel; // Parent GameObject of all zoom level UI elements.
     public GameObject Notification;
+    public GameObject BundleNameSelection; // The the Scroll View containing the bundle names.
 
     [Header("Loading Screen Components")]
     public Text LoadingScreenProgressValue; // Text element containing the loading progress (in %) of the current loading process.
@@ -33,6 +35,9 @@ public class IslandVizUI : MonoBehaviour
     [Header("Current Visible Islands Components")]
     public Text NotificationValue;
 
+    [Header("Bundle Name Selection Components")]
+    public Transform BundleNameSelectionContent; // The "Content" child of the Scroll View containing the bundle names.
+    public GameObject BundleNamePrefab;
 
     void Awake()
     {
@@ -139,5 +144,20 @@ public class IslandVizUI : MonoBehaviour
         yield return new WaitForSeconds(duration);
 
         Notification.SetActive(false);
+    }
+
+
+    // ################
+    // Bundle Name Selection
+    // ################
+
+    public void InitBundleNames ()
+    {
+        List<OsgiViz.Unity.Island.IslandGO> islandList = IslandVizVisualization.Instance.IslandGOs.OrderBy(o => o.name).ToList();
+
+        for (int i = 0; i < islandList.Count; i++)
+        {
+            ((GameObject)Instantiate(BundleNamePrefab, BundleNameSelectionContent)).GetComponent<IslandNameSelectionName>().Init(islandList[i]);
+        }
     }
 }

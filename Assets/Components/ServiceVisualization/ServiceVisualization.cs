@@ -27,10 +27,16 @@ public class ServiceVisualization : AdditionalIslandVizComponent
 
 
 
+    private void Start() // When this has no Start method, you will not be able to disable this in the editor. 
+    {
+
+    } 
 
 
     public override IEnumerator Init()
     {
+        Debug.Log(IslandVizData.Instance.OsgiProject.getServices().Count + " SERVICES!");
+
         ServiceSliceContainer = new GameObject("ServiceSliceContainer");
         ServiceSliceContainer.transform.SetParent(IslandVizVisualization.Instance.VisualizationRoot, false);
 

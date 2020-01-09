@@ -53,8 +53,10 @@ namespace OsgiViz
 
             // Subscribe to events
             IslandVizInteraction.Instance.OnDockSelect += OnDockSelected;
+            IslandVizVisualization.Instance.OnVisualizationScaleChanged += ZoomChanged;
         }
 
+        
 
         public void AddDockConnection(DependencyDock dock, float weight)
         {
@@ -146,20 +148,31 @@ namespace OsgiViz
         {
             expanded = false;
             foreach (GameObject arrow in connectionArrows)
-                arrow.SetActive(false);
-
-            foreach (var item in connectedDocks)
-            {
-                IslandVizInteraction.Instance.OnIslandSelect(item.transform.parent.GetComponent<IslandGO>(), IslandVizInteraction.SelectionType.Highlight, false);
-            }
+                arrow.SetActive(false);            
         }
 
         public void ShowAllDependencies()
         {
             expanded = true;
             foreach (GameObject arrow in connectionArrows)
-                arrow.SetActive(true);
+                arrow.SetActive(true);            
+        }
 
+        private void ZoomChanged()
+        {
+            int cc = 0;
+
+            foreach (GameObject arrow in connectionArrows)
+            {
+                float newZ = Mathf.Clamp(GlobalVar.depArrowWidth * (GlobalVar.MinZoom / GlobalVar.CurrentZoom), 0.1f, 1.5f) * dockWeights[cc];
+                arrow.transform.GetChild(0).localScale = new Vector3(arrow.transform.GetChild(0).localScale.x, arrow.transform.GetChild(0).localScale.y, newZ * 2f); // Arrow Head
+                arrow.transform.GetChild(1).localScale = new Vector3(arrow.transform.GetChild(1).localScale.x, arrow.transform.GetChild(1).localScale.y, newZ); // Arrow Body
+                cc++;
+            }
+        }
+
+        private void UpdateViewToDependencies ()
+        {
             List<Transform> connectedDockTransforms = new List<Transform>();
             foreach (var item in connectedDocks)
             {
@@ -167,41 +180,54 @@ namespace OsgiViz
                 IslandVizInteraction.Instance.OnIslandSelect(item.transform.parent.GetComponent<IslandGO>(), IslandVizInteraction.SelectionType.Highlight, true);
             }
             connectedDockTransforms.Add(this.transform.parent);
-            IslandVizInteraction.Instance.OnIslandSelect(this.transform.parent.GetComponent<IslandGO>(), IslandVizInteraction.SelectionType.Select, true);
-
             IslandVizVisualization.Instance.FlyTo(connectedDockTransforms.ToArray());
         }
         
 
         private void OnDockSelected (DependencyDock dock, IslandVizInteraction.SelectionType selectionType, bool selected)
         {
-            if (Selected && dock != this && selectionType == IslandVizInteraction.SelectionType.Select && selected)
+            if (selectionType == IslandVizInteraction.SelectionType.Highlight && dock == this)
             {
-                HideAllDependencies();
-                Selected = false;
-                IslandVizInteraction.Instance.OnDockSelect(this, IslandVizInteraction.SelectionType.Select, false);
+                IslandVizInteraction.Instance.OnIslandSelect(this.transform.parent.GetComponent<IslandGO>(), IslandVizInteraction.SelectionType.Highlight, selected);
             }
-            else if (dock == this && selectionType == IslandVizInteraction.SelectionType.Select && selected)
+            else if (selectionType == IslandVizInteraction.SelectionType.Select && dock == this)
             {
                 if (selected)
                 {
                     ShowAllDependencies();
+                    IslandVizInteraction.Instance.OnIslandSelect(this.transform.parent.GetComponent<IslandGO>(), IslandVizInteraction.SelectionType.Select, true);
+                    UpdateViewToDependencies();                    
                     Selected = true;
                 }
                 else
                 {
                     HideAllDependencies();
+                    foreach (var item in connectedDocks)
+                    {
+                        IslandVizInteraction.Instance.OnIslandSelect(item.transform.parent.GetComponent<IslandGO>(), IslandVizInteraction.SelectionType.Highlight, false);
+                    }
                     Selected = false;
                     IslandVizInteraction.Instance.OnDockSelect(this, IslandVizInteraction.SelectionType.Select, false);
                 }
             }
-            else if (dock == this && selectionType == IslandVizInteraction.SelectionType.Highlight)
+            else if (selectionType == IslandVizInteraction.SelectionType.Select && dock == null)
             {
-                //if (!selected && Selected)
-                //    return;
-
-                IslandVizInteraction.Instance.OnIslandSelect(this.transform.parent.GetComponent<IslandGO>(), IslandVizInteraction.SelectionType.Highlight, selected);
+                if (selected)
+                {
+                    ShowAllDependencies();
+                }
+                else
+                {
+                    HideAllDependencies();
+                }
             }
+            else if (selectionType == IslandVizInteraction.SelectionType.Select && dock != this && Selected && selected)
+            {
+                HideAllDependencies();
+                Selected = false;
+                IslandVizInteraction.Instance.OnDockSelect(this, IslandVizInteraction.SelectionType.Select, false);
+            }
+            
         }
     }
 }

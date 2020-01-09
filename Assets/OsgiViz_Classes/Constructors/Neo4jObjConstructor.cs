@@ -180,12 +180,23 @@ public class Neo4jOsgiConstructor : MonoBehaviour {
         }
         else
         {
-            Debug.Log("Neo4jOsgiConstructor: Project contains " + bundleNameList.Count + " services.");
+            Debug.Log("Neo4jOsgiConstructor: Project contains " + serviceNameList.Count + " services.");
         }
 
         foreach (var serviceName in serviceNameList)
         {
-            Service service = new Service(serviceName, null); // TODO Service CU?
+            CompilationUnit serviceCU = FindCompilationUnit(serviceName); // = null;
+
+            result = neo4j.Transaction("MATCH (i:Interface{name: '" + serviceName + "'}) RETURN i.name as name");
+            List<string> interfaceList = result.Select(record => record["name"].As<string>()).ToList();
+
+            if (interfaceList != null && interfaceList.Count > 0 && serviceCU != null)
+            {
+                //serviceCU = FindCompilationUnit(serviceName);
+                serviceCU.setServiceDeclaration(true);
+            }
+
+            Service service = new Service(serviceName, serviceCU);
             osgiProject.addService(service);
         }
 
