@@ -83,7 +83,7 @@ public class BasicHighlight : AdditionalIslandVizComponent
 
     private void HighlightDock (DependencyDock dock, IslandVizInteraction.SelectionType selectionType, bool selected)
     {
-        if (selectionType == IslandVizInteraction.SelectionType.Highlight)
+        if (selectionType == IslandVizInteraction.SelectionType.Highlight && dock != null)
         {
             if (Dock == HighlightMode.Normal)
             {
@@ -91,10 +91,10 @@ public class BasicHighlight : AdditionalIslandVizComponent
             }
         }
 
-        if (!dock.Selected && selectionType == IslandVizInteraction.SelectionType.Select)
-        {
-
-        }
+        //if (selectionType == IslandVizInteraction.SelectionType.Select && !dock.Selected && dock != null)
+        //{
+        //    throw new System.NotImplementedException(); // TODO
+        //}
     }
 
 

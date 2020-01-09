@@ -216,8 +216,11 @@ public class IslandVizVisualization : MonoBehaviour
         //yield return hierarchyConstructor.Construct(islandGOConstructor.getIslandGOs());
 
         yield return AutoZoom(); // TODO solve this with FlyToIsland()
-        
-        StartCoroutine(ZoomLevelRoutine()); // Starts the ZoomLevelRoutine.
+
+        GlobalVar.CurrentZoom = VisualizationRoot.localScale.x;
+        GlobalVar.MinZoom = VisualizationRoot.localScale.x;
+
+        StartCoroutine(ZoomLevelRoutine()); // Start the ZoomLevelRoutine.
 
         // TODO reenable in a smarter way
         //GlobalVar.hologramTableHeight = IslandVizInteraction.Instance.GetPlayerEyeHeight() - 0.75f; 
@@ -459,22 +462,6 @@ public class IslandVizVisualization : MonoBehaviour
         {
             StartCoroutine(FlyToMultiple(new Transform[] { IslandGOs[0].transform, IslandGOs[1].transform}));
         }
-
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            //List<Transform> islands = new List<Transform>();
-            //foreach (var item in islandGameObjects)
-            //{
-            //    islands.Add(item.transform);
-            //}
-            //SelectAndFlyTo(islands.ToArray());
-            //IslandSelectionComponent.Instance.SelectIslands(islandGameObjects);
-
-            foreach (var item in IslandGOs)
-            {
-                IslandVizInteraction.Instance.OnIslandSelect(item, IslandVizInteraction.SelectionType.Highlight, true);
-            }
-        }
     }
 
 
@@ -483,6 +470,24 @@ public class IslandVizVisualization : MonoBehaviour
     // ################
 
     #region HelperFunctions
+
+    public void HighlightAllIslands (bool enable)
+    {
+        foreach (var item in IslandGOs)
+        {
+            IslandVizInteraction.Instance.OnIslandSelect(item, IslandVizInteraction.SelectionType.Highlight, enable);
+        }
+    }
+
+    public void HighlightAllDocks(bool enable)
+    {
+        IslandVizInteraction.Instance.OnDockSelect(null, IslandVizInteraction.SelectionType.Select, enable);
+    }
+
+    public void RecenterView ()
+    {
+        StartCoroutine(FlyToPosition(Vector3.up * GlobalVar.hologramTableHeight, Vector3.one * GlobalVar.MinZoom, 1f));
+    }
 
     /// <summary>
     /// Scales the VisualizationContainer, so all islands are visible on start. The CurrentZoomLevel is saved in the GlobalVar.
@@ -509,8 +514,7 @@ public class IslandVizVisualization : MonoBehaviour
         yield return null;
 
         VisualizationRoot.localScale *= maxDistance / furthestDistance;
-        GlobalVar.CurrentZoom = VisualizationRoot.localScale.x;
-        GlobalVar.MinZoom = VisualizationRoot.localScale.x;
+        
     }
 
     /// <summary>

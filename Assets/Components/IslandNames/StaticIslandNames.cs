@@ -192,9 +192,9 @@ namespace StaticIslandNamesComponent
                 currentNames.Remove(target);
             }
             else if (currentHiddenNames.ContainsKey(target))
-            {
-                Destroy(currentNames[target].gameObject);
-                currentNames.Remove(target);
+            {                
+                Destroy(currentHiddenNames[target].gameObject);
+                currentHiddenNames.Remove(target);
             }
         }
 
