@@ -126,18 +126,27 @@ namespace DatabasePreprocessing
             yield return null;
         }
 
-        public static IEnumerator PreprocessingMainRoutine(Text statusTextfield)
+        public static IEnumerator PreprocessingMainRoutine()
         {
             yield return ConnectSameNameBundles();
-            statusTextfield.text = "20%";
-            yield return ConnectRenamedBundles(statusTextfield);
-            statusTextfield.text = "40%";
+            //statusTextfield.text = "20%";
+            IslandVizUI.Instance.UpdateLoadingScreenUI("Creating History Connections", "20%"); // Update UI.
+
+            yield return ConnectRenamedBundles();
+            //statusTextfield.text = "40%";
+            IslandVizUI.Instance.UpdateLoadingScreenUI("Creating History Connections", "40%"); // Update UI.
+
             yield return ConnectSameNamePackages();
-            statusTextfield.text = "60%";
-            yield return ConnectRenamedPackages(statusTextfield);
-            statusTextfield.text = "80%";
+            //statusTextfield.text = "60%";
+            IslandVizUI.Instance.UpdateLoadingScreenUI("Creating History Connections", "60%"); // Update UI.
+
+            yield return ConnectRenamedPackages();
+            //statusTextfield.text = "80%";
+            IslandVizUI.Instance.UpdateLoadingScreenUI("Creating History Connections", "80%"); // Update UI.
+
             yield return ConnectSameNameCompUnits();
-            statusTextfield.text = "100%";
+            //statusTextfield.text = "100%";
+            IslandVizUI.Instance.UpdateLoadingScreenUI("Creating History Connections", "100%"); // Update UI.
 
             yield return null;
 
@@ -157,16 +166,20 @@ namespace DatabasePreprocessing
         #endregion
 
         #region Step2_RenamedBundles
-        public static IEnumerator ConnectRenamedBundles(Text statusTextfield)
+        public static IEnumerator ConnectRenamedBundles()
         {
             yield return ConnectSameNamePackagesUnconnectedBundles();
-            statusTextfield.text = "24%";
+            //statusTextfield.text = "24%";
+            IslandVizUI.Instance.UpdateLoadingScreenUI("Creating History Connections", "24%"); // Update UI.
             yield return RemoveDoubleSourceAtPackage();
-            statusTextfield.text = "28%";
+            //statusTextfield.text = "28%";
+            IslandVizUI.Instance.UpdateLoadingScreenUI("Creating History Connections", "28%"); // Update UI.
             yield return RemoveDoubleTargetAtPackage();
-            statusTextfield.text = "32%";
+            //statusTextfield.text = "32%";
+            IslandVizUI.Instance.UpdateLoadingScreenUI("Creating History Connections", "32%"); // Update UI.
             yield return ConnectRenamedBundlesIfPossible();
-            statusTextfield.text = "36%";
+            //statusTextfield.text = "36%";
+            IslandVizUI.Instance.UpdateLoadingScreenUI("Creating History Connections", "36%"); // Update UI.
             yield return RemoveWrongConnectionsAtPackage();
         }
         public static IEnumerator ConnectSameNamePackagesUnconnectedBundles()
@@ -257,16 +270,20 @@ namespace DatabasePreprocessing
 
         #region Step4_RenamedPackages
 
-        public static IEnumerator ConnectRenamedPackages(Text statusTextfield)
+        public static IEnumerator ConnectRenamedPackages()
         {
             yield return ConnectSameNameCompUnitsUnconnectedPackages();
-            statusTextfield.text = "64%";
+            //statusTextfield.text = "64%";
+            IslandVizUI.Instance.UpdateLoadingScreenUI("Creating History Connections", "64%"); // Update UI.
             yield return RemoveDoubleSourceAtCompUnit();
-            statusTextfield.text = "68%";
+            //statusTextfield.text = "68%";
+            IslandVizUI.Instance.UpdateLoadingScreenUI("Creating History Connections", "68%"); // Update UI.
             yield return RemoveDoubleTargetAtCompUnit();
-            statusTextfield.text = "72%";
+            //statusTextfield.text = "72%";
+            IslandVizUI.Instance.UpdateLoadingScreenUI("Creating History Connections", "72%"); // Update UI.
             yield return ConnectRenamedPackagesIfPossible();
-            statusTextfield.text = "76%";
+            //statusTextfield.text = "76%";
+            IslandVizUI.Instance.UpdateLoadingScreenUI("Creating History Connections", "76%"); // Update UI.
             yield return RemoveWrongConnectionsAtCompUnit();
         }
 

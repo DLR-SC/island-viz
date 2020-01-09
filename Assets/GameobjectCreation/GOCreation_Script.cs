@@ -10,12 +10,12 @@ using OSGI_Datatypes.ArchitectureElements;
 public class GOCreation_Script : MonoBehaviour
 {
     //Fields of canvas for user information
-    [SerializeField]
-    private Text taskTextfield;
-    [SerializeField]
-    private Text statusTextfield;
-    [SerializeField]
-    private Text loadingDotsTextfield;
+    //[SerializeField]
+    //private Text taskTextfield;
+    //[SerializeField]
+    //private Text statusTextfield;
+    //[SerializeField]
+    //private Text loadingDotsTextfield;
 
     public GameObject islandPrefab;
 
@@ -46,14 +46,14 @@ public class GOCreation_Script : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        loadingDotsTextfield.color = new Color(loadingDotsTextfield.color.r, loadingDotsTextfield.color.g, loadingDotsTextfield.color.b, Mathf.PingPong(Time.time, 1));
+       // loadingDotsTextfield.color = new Color(loadingDotsTextfield.color.r, loadingDotsTextfield.color.g, loadingDotsTextfield.color.b, Mathf.PingPong(Time.time, 1));
     }
 
     private IEnumerator GOCreationMain()
     {
         int bundlesTotal = project.GetMasterBundles().Count;
-        taskTextfield.text = "Creating Gameobjects for " + bundlesTotal + " Islands";
-        statusTextfield.text = "Waiting for Islands to be completed";
+       // taskTextfield.text = "Creating Gameobjects for " + bundlesTotal + " Islands";
+       // statusTextfield.text = "Waiting for Islands to be completed";
         int i = 0;
 
         foreach(BundleMaster bundleM in project.GetMasterBundles())
@@ -68,7 +68,7 @@ public class GOCreation_Script : MonoBehaviour
             yield return island.GetComponent<IslandContainerController_Script>().Initialise(bundleM, i);
             //yield return island.GetComponent<IslandController_Script>().Initialise();
 
-            statusTextfield.text = "Finished " + (i+1) + " islands of " + bundlesTotal;
+          //  statusTextfield.text = "Finished " + (i+1) + " islands of " + bundlesTotal;
 
             i++;
 

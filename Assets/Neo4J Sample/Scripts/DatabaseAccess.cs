@@ -19,7 +19,7 @@ public class DatabaseAccess : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
-        DontDestroyOnLoad(gameObject);
+        //DontDestroyOnLoad(gameObject);
         dataBase = new Neo4J(databaseAdress, databaseUserName, databasePasswort);
     }
 

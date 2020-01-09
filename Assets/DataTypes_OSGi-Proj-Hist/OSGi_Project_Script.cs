@@ -13,7 +13,6 @@ public class OSGi_Project_Script : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
-        DontDestroyOnLoad(gameObject);
         project = new Project();
     }
 

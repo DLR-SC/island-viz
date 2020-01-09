@@ -12,36 +12,41 @@ using Neo4JDriver;
 
 public class LayoutCreation : MonoBehaviour
 {
-    [SerializeField]
+    public static LayoutCreation Instance { get { return instance; } }
+    private static LayoutCreation instance; // The instance of this class.
+
+    /*[SerializeField]
     private Text taskTextfield;
     [SerializeField]
     private Text statusTextfield;
     [SerializeField]
-    private Text loadingDotsTextfield;
+    private Text loadingDotsTextfield;*/
 
 
     private Project project;
 
     void Start()
     {
+        instance = this;
         Neo4J database = GameObject.Find("DatabaseObject").GetComponent<DatabaseAccess>().GetDatabase();
         Neo4JWriterLayout.SetDatabase(database);
 
         project = GameObject.Find("DataObject").GetComponent<OSGi_Project_Script>().GetProject();
-        StartCoroutine(AllBundlesGridCreation()); 
+        //StartCoroutine(AllBundlesGridCreation()); 
     }
 
     // Update is called once per frame
     void Update()
     {
-       loadingDotsTextfield.color = new Color(loadingDotsTextfield.color.r, loadingDotsTextfield.color.g, loadingDotsTextfield.color.b, Mathf.PingPong(Time.time, 1));
+       //loadingDotsTextfield.color = new Color(loadingDotsTextfield.color.r, loadingDotsTextfield.color.g, loadingDotsTextfield.color.b, Mathf.PingPong(Time.time, 1));
     }
 
-    private IEnumerator AllBundlesGridCreation()
+    public IEnumerator AllBundlesGridCreation()
     {
         int bundlesTotal = project.GetMasterBundles().Count;
-        taskTextfield.text = "Creating Hexagon Layout for " + bundlesTotal + " Islands";
-        statusTextfield.text = "Waiting for Islands to be completed";
+        IslandVizUI.Instance.UpdateLoadingScreenUI("Creating Island Layout", ""); // Update UI.
+        //taskTextfield.text = "Creating Hexagon Layout for " + bundlesTotal + " Islands";
+        //statusTextfield.text = "Waiting for Islands to be completed";
         List<ProcessingStatus> coList = new List<ProcessingStatus>();
 
         //StartCoroutines for each Bundle
@@ -63,15 +68,17 @@ public class LayoutCreation : MonoBehaviour
                 if (!coList[i].working)
                 {
                     finished++;
-                    statusTextfield.text = "Finished " + finished + " islands of " + bundlesTotal;
+                    //statusTextfield.text = "Finished " + finished + " islands of " + bundlesTotal;
+                    IslandVizUI.Instance.UpdateLoadingScreenUI("Creating Island Layout", (finished*100/(float)bundlesTotal).ToString("0,00")+"%"); // Update UI.
                     coList.RemoveAt(i);
                 }
                 else
                 {
                     i++;
                 }
-                yield return new WaitForSeconds(1);
             }
+            yield return new WaitForSeconds(1);
+
         }
 
         if (Constants.writeNewValuesToDB)
@@ -81,7 +88,7 @@ public class LayoutCreation : MonoBehaviour
 
         Debug.Log("All finished");
         yield return null;
-        SceneManager.LoadScene(3);
+        //SceneManager.LoadScene(3);
 
     }
 
