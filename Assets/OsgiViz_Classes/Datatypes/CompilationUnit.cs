@@ -70,10 +70,16 @@ namespace OsgiViz.SoftwareArtifact
         {
             isServiceComponent = value;
         }
+        public modifier GetModifier ()
+        {
+            return modif;
+        }
+        public type GetType ()
+        {
+            return type;
+        }
 
-        
 
-        
 
     }
 }

@@ -22,6 +22,9 @@ namespace OsgiViz.Unity.Island
         public bool Selected;
         public bool Visible;
 
+        // Performance Settings
+        private float BuildingsPerFrame = 50;
+
         void Awake()
         {
             Regions = new List<Region>();
@@ -113,13 +116,18 @@ namespace OsgiViz.Unity.Island
 
         #region Zoom Level
 
+        public void ApplyZoomLevel (ZoomLevel newZoomLevel)
+        {
+            StartCoroutine(ApplyZoomLevelRoutine(newZoomLevel));
+        }
+
         /// <summary>
         /// Apply the rules of all ZoomLevels to an island. 
         /// Call this to change the Zoomlevel of an island.
         /// </summary>
         /// <param name="newZoomLevel">The ZoomLevel that you want to apply to the island.</param>
         /// <returns></returns>
-        public IEnumerator ApplyZoomLevel(ZoomLevel newZoomLevel)
+        public IEnumerator ApplyZoomLevelRoutine (ZoomLevel newZoomLevel)
         {
             if (CurrentZoomLevel == newZoomLevel)
             {
@@ -142,6 +150,8 @@ namespace OsgiViz.Unity.Island
         
         public IEnumerator ApplyNearZoomLevel()
         {
+            int counter = 0;
+
             // Disable region colliders & enable buildings.
             foreach (var region in Regions)
             {
@@ -151,18 +161,28 @@ namespace OsgiViz.Unity.Island
                 foreach (var building in region.getBuildings())
                 {
                     if (!building.gameObject.activeSelf)
+                    {
                         building.gameObject.SetActive(true);
+
+                        counter++;
+                        if (counter >= BuildingsPerFrame)
+                        {
+                            counter = 0;
+                            yield return null;
+                        }
+                    }
                 }
-                yield return null;
             }
 
-            // Disable island collider.
-            if (GetComponent<CapsuleCollider>().enabled)
-                GetComponent<CapsuleCollider>().enabled = false;
+            //// Disable island collider.
+            //if (GetComponent<MeshCollider>().enabled)
+            //    GetComponent<MeshCollider>().enabled = false;
         }
         
         public IEnumerator ApplyMediumZoomLevel()
         {
+            int counter = 0;
+
             // NEAR -> MEDIUM 
             if (CurrentZoomLevel == ZoomLevel.Near)
             {
@@ -171,12 +191,20 @@ namespace OsgiViz.Unity.Island
                     foreach (var building in region.getBuildings())
                     {
                         if (building.gameObject.activeSelf)
+                        {
                             building.gameObject.SetActive(false);
+
+                            counter++;
+                            if (counter >= BuildingsPerFrame)
+                            {
+                                counter = 0;
+                                yield return null;
+                            }
+                        }
                     }
-                    yield return null;
                 }
-                if (GetComponent<CapsuleCollider>().enabled)
-                    GetComponent<CapsuleCollider>().enabled = true;                
+                //if (!GetComponent<MeshCollider>().enabled)
+                //    GetComponent<MeshCollider>().enabled = true;                
             }
             // FAR -> MEDIUM
             else
@@ -193,17 +221,17 @@ namespace OsgiViz.Unity.Island
                 {
                     if (!region.GetComponent<MeshCollider>().enabled)
                         region.GetComponent<MeshCollider>().enabled = true;
-                    GetComponent<CapsuleCollider>().radius /= 2f;
                 }
 
-                // Disable island collider.
-                if (GetComponent<CapsuleCollider>().enabled)
-                    GetComponent<CapsuleCollider>().enabled = true;
+                //if (!GetComponent<MeshCollider>().enabled)
+                //    GetComponent<MeshCollider>().enabled = true;
             }
         }
         
         public IEnumerator ApplyFarZoomLevel ()
         {
+            int counter = 0;
+
             // Hide Docks.
             if (ImportDock.activeSelf)
             {
@@ -216,20 +244,25 @@ namespace OsgiViz.Unity.Island
             {
                 if (region.GetComponent<MeshCollider>().enabled)
                     region.GetComponent<MeshCollider>().enabled = false;
-
-                if (CurrentZoomLevel == ZoomLevel.Medium)
-                    GetComponent<CapsuleCollider>().radius *= 2f;
-
+                
                 foreach (var building in region.getBuildings())
                 {
                     if (building.gameObject.activeSelf)
+                    {
                         building.gameObject.SetActive(false);
+
+                        counter++;
+                        if (counter >= BuildingsPerFrame)
+                        {
+                            counter = 0;
+                            yield return null;
+                        }
+                    }
                 }
-                yield return null;
             }
 
             // Enable island collider.
-            GetComponent<CapsuleCollider>().enabled = true;
+            //GetComponent<MeshCollider>().enabled = true;
         }
 
         #endregion

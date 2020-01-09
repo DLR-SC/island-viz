@@ -72,7 +72,8 @@ public class IslandVizVisualization : MonoBehaviour
     private bool zoomDirty; // This is set to TRUE when the current Zoom was changed (called by a IslandVizInteraction Component).
     private bool islandsDirty; // This is set to TRUE when ZoomLevel changed or when appearing island displays the wrong ZoomLevel.
 
-
+    // Performance
+    private int IslandsPerFrame = 50;
 
 
     // ################
@@ -348,6 +349,8 @@ public class IslandVizVisualization : MonoBehaviour
             {
                 islandsDirty = false; // This has to be done first, because dirty islands can appear at any point.
 
+                int counter = 0;
+
                 // Check every island and apply current ZoomLevel if needed.
                 for (int i = 0; i < VisibleIslandGOs.Count; i++)
                 {
@@ -355,7 +358,14 @@ public class IslandVizVisualization : MonoBehaviour
                                                                                                                 // appear or disappear at any point.
                     {
                         IslandVizUI.Instance.ZoomLevelValue.text = "<color=yellow>" + (i / VisibleIslandGOs.Count) * 100 + " %</color>"; // Give simple feedback on progress // TODO
-                        yield return VisibleIslandGOs[i].ApplyZoomLevel(CurrentZoomLevel);
+                        VisibleIslandGOs[i].ApplyZoomLevel(CurrentZoomLevel);
+                        counter++;
+                    }
+
+                    if (counter >= IslandsPerFrame)
+                    {
+                        counter = 0;
+                        yield return null;
                     }
                 }
 
