@@ -25,9 +25,9 @@ namespace StaticIslandNamesComponent
 
         [Header("Settings")]
         [Tooltip("The minimal distance (in meter) between two StaticIslandNames before they are moved vertically for better readability.")]
-        public float MinTextDistance = 0.4f; // Change this, e.g. when you changed the size of the IslandNamePrefab.
+        public float MinTextDistance = 0.15f; // Change this, e.g. when you changed the size of the IslandNamePrefab.
         [Tooltip("The vectical distance (in meter) between two StaticIslandNames when they are moved for better readability.")]
-        public float VerticalTextOffset = 0.12f; // Change this, e.g. when you changed the size of the IslandNamePrefab.
+        public float VerticalTextOffset = 0.05f; // Change this, e.g. when you changed the size of the IslandNamePrefab.
 
         // ################
         // Private

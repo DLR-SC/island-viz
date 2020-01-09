@@ -28,7 +28,7 @@ namespace StaticIslandNamesComponent
 
         private Transform target; // The island target this island name is following.
         private IslandGO targetIsland;
-        private float heightIndex = 1f; // The current height index of this island name.
+        public float heightIndex = 1f; // The current height index of this island name.
 
         private float yPosition; // The current y-position of this island name.
 
@@ -76,24 +76,24 @@ namespace StaticIslandNamesComponent
             {
                 if (IslandVizVisualization.Instance.CurrentZoomLevel != ZoomLevel.Near)
                 {
-                    yPosition = GlobalVar.hologramTableHeight + 0.075f + heightIndex * StaticIslandNames.Instance.VerticalTextOffset;
+                    yPosition = GlobalVar.hologramTableHeight + 0.075f + heightIndex * StaticIslandNames.Instance.VerticalTextOffset; // GlobalVar.hologramTableHeight + Mathf.Clamp(Vector3.Distance(transform.position, Camera.main.transform.position) / 8f, 0.1f, 3f) + GlobalVar.CurrentZoom * 2f;
                     transform.position = new Vector3(target.position.x, yPosition, target.position.z);
                 }
                 else // ZoomLevel.Near
                 {
                     if (target.GetComponent<IslandGO>())
                     {
-                        yPosition = GlobalVar.hologramTableHeight + 0.2f + GlobalVar.CurrentZoom * 2f;
+                        yPosition = GlobalVar.hologramTableHeight + 0.1f + GlobalVar.CurrentZoom * 2f;
                         transform.position = new Vector3(target.position.x, yPosition, target.position.z);
                     }
                     else if (target.GetComponent<Region>())
                     {
-                        yPosition = GlobalVar.hologramTableHeight + 0.2f + GlobalVar.CurrentZoom + heightIndex * StaticIslandNames.Instance.VerticalTextOffset;
+                        yPosition = GlobalVar.hologramTableHeight + 0.1f + GlobalVar.CurrentZoom + heightIndex * StaticIslandNames.Instance.VerticalTextOffset;
                         transform.position = new Vector3(target.GetComponent<MeshCollider>().bounds.center.x, yPosition, target.GetComponent<MeshCollider>().bounds.center.z);
                     }
                     else
                     {
-                        yPosition = GlobalVar.hologramTableHeight + 0.2f + GlobalVar.CurrentZoom + heightIndex * StaticIslandNames.Instance.VerticalTextOffset;
+                        yPosition = GlobalVar.hologramTableHeight + 0.1f + GlobalVar.CurrentZoom + heightIndex * StaticIslandNames.Instance.VerticalTextOffset;
                         transform.position = new Vector3(target.position.x, yPosition, target.position.z);
                     }
                 }
