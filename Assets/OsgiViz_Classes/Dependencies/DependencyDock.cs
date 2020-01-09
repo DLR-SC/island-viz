@@ -53,8 +53,10 @@ namespace OsgiViz
 
             // Subscribe to events
             IslandVizInteraction.Instance.OnDockSelect += OnDockSelected;
+            IslandVizVisualization.Instance.OnVisualizationScaleChanged += ZoomChanged;
         }
 
+        
 
         public void AddDockConnection(DependencyDock dock, float weight)
         {
@@ -154,6 +156,19 @@ namespace OsgiViz
             expanded = true;
             foreach (GameObject arrow in connectionArrows)
                 arrow.SetActive(true);            
+        }
+
+        private void ZoomChanged()
+        {
+            int cc = 0;
+
+            foreach (GameObject arrow in connectionArrows)
+            {
+                float newZ = Mathf.Clamp(GlobalVar.depArrowWidth * (GlobalVar.MinZoom / GlobalVar.CurrentZoom), 0.1f, 1.5f) * dockWeights[cc];
+                arrow.transform.GetChild(0).localScale = new Vector3(arrow.transform.GetChild(0).localScale.x, arrow.transform.GetChild(0).localScale.y, newZ * 2f); // Arrow Head
+                arrow.transform.GetChild(1).localScale = new Vector3(arrow.transform.GetChild(1).localScale.x, arrow.transform.GetChild(1).localScale.y, newZ); // Arrow Body
+                cc++;
+            }
         }
 
         private void UpdateViewToDependencies ()

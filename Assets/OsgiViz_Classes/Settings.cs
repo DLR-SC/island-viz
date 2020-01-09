@@ -39,7 +39,7 @@ namespace OsgiViz.Core
         //The island height profile. Each array entry results in one additional ring of claimed coast cells. The value in the entry is assigned to the island height. 0 is the height level of the regions.
         public static float[] islandHeightProfile = { -0.03f * voronoiCellScalefactor, -0.034f * voronoiCellScalefactor, -0.036f * voronoiCellScalefactor, -0.037f * voronoiCellScalefactor, -0.0375f * voronoiCellScalefactor };
 
-        public const float depArrowWidth = 0.015f * voronoiCellScalefactor;
+        public const float depArrowWidth = 0.15f * voronoiCellScalefactor;
 
         //Rendering Variables
         public const float hologramOutlineWidth = 0.02f;

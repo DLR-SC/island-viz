@@ -199,8 +199,10 @@ public class IslandVizVisualization : MonoBehaviour
         }
         else if (Graph_Layout == Graph_Layout.Random)
         {
-            Vector3 minBounds = new Vector3(-10.5f, 1.31f, -10.5f);
-            Vector3 maxBounds = new Vector3(10.5f, 1.31f, 10.5f);
+            //Vector3 minBounds = new Vector3(-10.5f, 1.31f, -10.5f);
+            //Vector3 maxBounds = new Vector3(10.5f, 1.31f, 10.5f);
+            Vector3 minBounds = new Vector3(-8.5f, 1.31f, -8.5f);
+            Vector3 maxBounds = new Vector3(8.5f, 1.31f, 8.5f);
             yield return bdConstructor.ConstructRndLayout(IslandVizData.Instance.OsgiProject.getDependencyGraph(), minBounds, maxBounds, 0.075f, 10000, RNG);
         }
 

@@ -8,6 +8,8 @@ public class SlideableTablet : AdditionalIslandVizComponent
 {
     public GameObject Tablet; // The GameObject which holds the collider.
 
+    public float Speed = 0.1f;
+
     public float minX;
     public float maxX;
 
@@ -157,7 +159,7 @@ public class SlideableTablet : AdditionalIslandVizComponent
         while (value <= 1)
         {
             content.localPosition = Vector3.Lerp(startPos, endPos, value);
-            value += 0.01f;
+            value += Speed;
             yield return new WaitForFixedUpdate();
         }
 
