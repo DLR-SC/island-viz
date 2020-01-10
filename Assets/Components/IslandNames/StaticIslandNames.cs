@@ -201,6 +201,8 @@ namespace StaticIslandNamesComponent
                 Destroy(currentHiddenNames[target].gameObject);
                 currentHiddenNames.Remove(target);
             }
+
+            RecalculateAllHeightIndexes();
         }
 
         private void HideStaticName (IslandGO island)
@@ -245,7 +247,7 @@ namespace StaticIslandNamesComponent
         /// </summary>
         private void RecalculateAllHeightIndexes() // TODO Performance wise this seems to be fine, but check again in the future.
         {
-            heightIndexesDirty = true;                      
+            heightIndexesDirty = true;
         }
 
         IEnumerator HightIndexRecalculation ()
@@ -258,7 +260,7 @@ namespace StaticIslandNamesComponent
 
                     for (int i = 0; i < currentNames.Count; i++)
                     {
-                        if (currentNames.Count <= i && currentNames.ElementAt(i).Value != null)
+                        if (i < currentNames.Count && currentNames.ElementAt(i).Value != null)
                         {
                             currentNames.ElementAt(i).Value.SetHeightIndex(GetHeightIndex(currentNames.ElementAt(i).Value));
                             if (i != 0 && i % 10 == 0)
@@ -270,7 +272,10 @@ namespace StaticIslandNamesComponent
                     yield return null;
                     yield return ReorderChildren();
                 }
-                yield return new WaitForFixedUpdate();
+                else
+                {
+                    yield return new WaitForFixedUpdate();
+                }
             }
         }
 
