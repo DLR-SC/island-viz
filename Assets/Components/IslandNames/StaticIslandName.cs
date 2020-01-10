@@ -76,7 +76,7 @@ namespace StaticIslandNamesComponent
             {
                 if (IslandVizVisualization.Instance.CurrentZoomLevel != ZoomLevel.Near)
                 {
-                    yPosition = GlobalVar.hologramTableHeight + 0.075f + heightIndex * StaticIslandNames.Instance.VerticalTextOffset; // GlobalVar.hologramTableHeight + Mathf.Clamp(Vector3.Distance(transform.position, Camera.main.transform.position) / 8f, 0.1f, 3f) + GlobalVar.CurrentZoom * 2f;
+                    yPosition = GlobalVar.hologramTableHeight + 0.05f + (heightIndex * StaticIslandNames.Instance.VerticalTextOffset); // GlobalVar.hologramTableHeight + Mathf.Clamp(Vector3.Distance(transform.position, Camera.main.transform.position) / 8f, 0.1f, 3f) + GlobalVar.CurrentZoom * 2f;
                     transform.position = new Vector3(target.position.x, yPosition, target.position.z);
                 }
                 else // ZoomLevel.Near

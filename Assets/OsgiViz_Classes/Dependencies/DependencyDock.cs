@@ -155,11 +155,17 @@ namespace OsgiViz
         {
             expanded = true;
             foreach (GameObject arrow in connectionArrows)
-                arrow.SetActive(true);            
+                arrow.SetActive(true);
+            ZoomChanged();
         }
 
         private void ZoomChanged()
         {
+            if (!expanded)
+            {
+                return;
+            }
+
             int cc = 0;
 
             foreach (GameObject arrow in connectionArrows)

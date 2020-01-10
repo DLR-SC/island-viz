@@ -122,6 +122,8 @@ public class Neo4jOsgiConstructor : MonoBehaviour {
                 {
                     Package package = new Package(bundle, packageFileName);
 
+                    // Classes
+
                     result = neo4j.Transaction("MATCH (p:Package{fileName: '" + packageFileName + "'})-[h:CONTAINS]->(c:Class) " +
                         "RETURN c.name as className");
                     List<string> classNameList = result.Select(record => record["className"].As<string>()).ToList();
@@ -131,8 +133,6 @@ public class Neo4jOsgiConstructor : MonoBehaviour {
                     result = neo4j.Transaction("MATCH (p:Package{fileName: '" + packageFileName + "'})-[h:CONTAINS]->(c:Class) " +
                         "RETURN c.linesOfCode as classLOC");
                     List<string> classLOC = result.Select(record => record["classLOC"].As<string>()).ToList();
-
-                    // TODO add Interfaces
 
                     if (classNameList != null && classNameList.Count > 0 && classModifier != null && classModifier.Count > 0 && classLOC != null && classLOC.Count > 0)
                     {
@@ -154,7 +154,50 @@ public class Neo4jOsgiConstructor : MonoBehaviour {
                             }
                             package.addCompilationUnit(compilationUnit);
                         }
-                    }                    
+                    }
+
+                    // Interfaces
+
+                    result = neo4j.Transaction("MATCH (p:Package{fileName: '" + packageFileName + "'})-[h:CONTAINS]->(i:Interface) " +
+                        "RETURN i.name as interfaceName");
+                    List<string> interfaceNameList = result.Select(record => record["interfaceName"].As<string>()).ToList();
+                    result = neo4j.Transaction("MATCH (p:Package{fileName: '" + packageFileName + "'})-[h:CONTAINS]->(i:Interface) " +
+                        "RETURN i.visibility as interfaceModifier");
+                    List<string> interfaceModifier = result.Select(record => record["interfaceModifier"].As<string>()).ToList();                    
+
+                    if (interfaceNameList != null && interfaceNameList.Count > 0 && interfaceModifier != null && interfaceModifier.Count > 0)
+                    {
+                        for (int classID = 0; classID < interfaceNameList.Count; classID++)
+                        {
+                            CompilationUnit compilationUnit = new CompilationUnit(interfaceNameList[classID], type.Interface, StringToModifier(interfaceModifier[classID]),
+                                0, package); 
+
+                            package.addCompilationUnit(compilationUnit);
+                        }
+                    }
+
+                    // Enums
+
+                    result = neo4j.Transaction("MATCH (p:Package{fileName: '" + packageFileName + "'})-[h:CONTAINS]->(e:Enumeration) " +
+                        "RETURN e.name as enumName");
+                    List<string> enumNameList = result.Select(record => record["enumName"].As<string>()).ToList();
+                    result = neo4j.Transaction("MATCH (p:Package{fileName: '" + packageFileName + "'})-[h:CONTAINS]->(e:Enumeration) " +
+                        "RETURN e.visibility as enumModifier");
+                    List<string> enumModifier = result.Select(record => record["enumModifier"].As<string>()).ToList();
+
+                    if (enumNameList != null && enumNameList.Count > 0 && enumModifier != null && enumModifier.Count > 0)
+                    {
+                        for (int classID = 0; classID < enumNameList.Count; classID++)
+                        {
+                            CompilationUnit compilationUnit = new CompilationUnit(enumNameList[classID], type.Enum, StringToModifier(enumModifier[classID]),
+                                0, package);
+
+                            package.addCompilationUnit(compilationUnit);
+                        }
+                    }
+
+                    // TODO Abstract Class
+
                     bundle.addPackage(package);
                 }
             }
@@ -356,10 +399,32 @@ public class Neo4jOsgiConstructor : MonoBehaviour {
     // Helper Functions
     // ################
 
-    private modifier StringToModifier (string input) // TODO
+    private modifier StringToModifier (string input) // Public, Private, Protected, Static, Final, Default 
     {
-        //return (modifier)Enum.Parse(typeof(modifier), input);
-        return modifier.Default;
+        if (input == "public")
+        {
+            return modifier.Public;
+        }
+        else if (input == "private")
+        {
+            return modifier.Private;
+        }
+        else if (input == "protected")
+        {
+            return modifier.Protected;
+        }
+        else if (input == "static")
+        {
+            return modifier.Static;
+        }
+        else if (input == "final")
+        {
+            return modifier.Final;
+        }
+        else
+        {
+            return modifier.Default;
+        }
     }
 
     /// <summary>

@@ -93,6 +93,10 @@ public class IslandVizVisualization : MonoBehaviour
     /// </summary>
     public ScaleChanged OnVisualizationScaleChanged;
     /// <summary>
+    /// Called when the position of the visualization root was changed.
+    /// </summary>
+    public ScaleChanged OnVisualizationPositionChanged; // TODO
+    /// <summary>
     /// Called when a island is set visible.
     /// </summary>
     public IslandEnabled OnIslandVisible;
@@ -120,6 +124,10 @@ public class IslandVizVisualization : MonoBehaviour
     /// Called when the position or rotation of the visualization root was changed.
     /// </summary>
     public delegate void ScaleChanged();
+    /// <summary>
+    /// Called when the position or rotation of the visualization root was changed.
+    /// </summary>
+    public delegate void PositionChanged();
     /// <summary>
     /// Called when the island GameObject is enabled.
     /// </summary>
@@ -590,7 +598,7 @@ public class IslandVizVisualization : MonoBehaviour
             return ZoomLevel.Near;
         }
 
-        Debug.LogError("PercentToZoomlevel percent value could not be assigend to a ZoomLevel!");
+        Debug.LogError("PercentToZoomlevel percent value " + zoomLevelPercent + " + could not be assigend to a ZoomLevel!");
         return ZoomLevel.Near;
     }
 
