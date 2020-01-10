@@ -181,6 +181,10 @@ public class IslandVizUI : MonoBehaviour
         {
             UpdateCurrentSelectedInfo("Bundle", island.name, "Packages", island.Regions.Count.ToString());
         }
+        else if (island == null)
+        {
+            UpdateCurrentSelectedInfo();
+        }
     }
 
     public void OnRegionSelected (Region region, IslandVizInteraction.SelectionType selectionType, bool selected)
@@ -203,5 +207,11 @@ public class IslandVizUI : MonoBehaviour
     {
         CurrentSelectedHeader.text = type;
         CurrentSelectedBody.text = "<b>Name:</b>\n" + name + "\n<b>" + detailName + "</b>:\n" + detail;
+    }
+
+    public void UpdateCurrentSelectedInfo()
+    {
+        CurrentSelectedHeader.text = "Nothing Selected ...";
+        CurrentSelectedBody.text = "";
     }
 }

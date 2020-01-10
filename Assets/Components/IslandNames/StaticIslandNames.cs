@@ -92,6 +92,10 @@ namespace StaticIslandNamesComponent
         /// <param name="selected">Wether the island was selected or deselected.</param>
         private void OnIslandSelection(IslandGO island, IslandVizInteraction.SelectionType selectionType, bool selected)
         {
+            if (island == null)
+            {
+                return;
+            }
             if (selectionType == IslandVizInteraction.SelectionType.Select)
             {
                 if (selected)

@@ -493,10 +493,15 @@ public class IslandVizVisualization : MonoBehaviour
 
     public void HighlightAllIslands (bool enable)
     {
-        foreach (var item in IslandGOs)
-        {
-            IslandVizInteraction.Instance.OnIslandSelect(item, IslandVizInteraction.SelectionType.Highlight, enable);
-        }
+        IslandVizInteraction.Instance.OnIslandSelect(null, IslandVizInteraction.SelectionType.Highlight, enable); // Highlight/Unhighlight all islands.
+
+        if (!enable)
+            IslandVizInteraction.Instance.OnIslandSelect(null, IslandVizInteraction.SelectionType.Select, false); // Deselect the current island.
+
+        //foreach (var item in IslandGOs)
+        //{
+        //    IslandVizInteraction.Instance.OnIslandSelect(item, IslandVizInteraction.SelectionType.Highlight, enable);
+        //}
     }
 
     public void HighlightAllDocks(bool enable)

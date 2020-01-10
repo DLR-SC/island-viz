@@ -20,6 +20,7 @@ namespace OsgiViz.Unity.Island
         public ZoomLevel CurrentZoomLevel;
 
         public bool Selected;
+        public bool Highlighted;
         public bool Visible;
 
         // Performance Settings
@@ -43,17 +44,36 @@ namespace OsgiViz.Unity.Island
 
         private void OnSelection (IslandGO island, IslandVizInteraction.SelectionType selectionType, bool selected)
         {
-            if (island != this && selectionType == IslandVizInteraction.SelectionType.Select && selected) // Another island was selected while this island was selected.
+            if (island != this && island != null && selectionType == IslandVizInteraction.SelectionType.Select) 
             {
-                if (Selected)
+                if (selected && Selected) // Another island was selected while this island was selected.
                 {
                     Selected = false;
                     IslandVizInteraction.Instance.OnIslandSelect(this, IslandVizInteraction.SelectionType.Select, false);
                 }
+                if (selected && Highlighted)
+                {
+                    Highlighted = false;
+                    IslandVizInteraction.Instance.OnIslandSelect(this, IslandVizInteraction.SelectionType.Highlight, false);
+                }
             }
-            else if (island == this && selectionType == IslandVizInteraction.SelectionType.Select) // This island was selected/deselected.
+            else if (island == this && selectionType == IslandVizInteraction.SelectionType.Select && Selected != selected) // This island was selected/deselected.
             {
                 Selected = selected;
+            }
+            else if (island == null && selectionType == IslandVizInteraction.SelectionType.Select && Selected != selected) // All islands wer deselected.
+            {
+                Selected = selected;
+                IslandVizInteraction.Instance.OnIslandSelect(this, IslandVizInteraction.SelectionType.Select, selected);
+            }
+            else if (island == this && selectionType == IslandVizInteraction.SelectionType.Highlight && selected != Highlighted)
+            {
+                Highlighted = selected;
+            }
+            else if (island == null && selectionType == IslandVizInteraction.SelectionType.Highlight && selected != Highlighted)
+            {
+                IslandVizInteraction.Instance.OnIslandSelect(this, IslandVizInteraction.SelectionType.Highlight, selected);
+                Highlighted = selected;
             }
         }
 

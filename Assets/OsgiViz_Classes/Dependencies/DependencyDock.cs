@@ -229,7 +229,7 @@ namespace OsgiViz
                     HideAllDependencies();
                 }
             }
-            // Other dock was selected.
+            // Other dock was selected while this dock is selected.
             else if (selectionType == IslandVizInteraction.SelectionType.Select && dock != this && dock != null && Selected && selected)
             {
                 HideAllDependencies();
