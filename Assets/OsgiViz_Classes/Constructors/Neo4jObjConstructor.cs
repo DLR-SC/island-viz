@@ -95,6 +95,9 @@ public class Neo4jOsgiConstructor : MonoBehaviour {
         IslandVizUI.Instance.UpdateLoadingScreenUI("OSGi-Project from Neo4J", "");
         yield return null;
 
+        List<string> interfaceNameList = new List<string>();
+
+
         result = neo4j.Transaction("MATCH (b:Bundle) RETURN b.name as name");
         List<string> bundleNameList = result.Select(record => record["name"].As<string>()).ToList();
 
@@ -160,7 +163,7 @@ public class Neo4jOsgiConstructor : MonoBehaviour {
 
                     result = neo4j.Transaction("MATCH (p:Package{fileName: '" + packageFileName + "'})-[h:CONTAINS]->(i:Interface) " +
                         "RETURN i.name as interfaceName");
-                    List<string> interfaceNameList = result.Select(record => record["interfaceName"].As<string>()).ToList();
+                    interfaceNameList = result.Select(record => record["interfaceName"].As<string>()).ToList();
                     result = neo4j.Transaction("MATCH (p:Package{fileName: '" + packageFileName + "'})-[h:CONTAINS]->(i:Interface) " +
                         "RETURN i.visibility as interfaceModifier");
                     List<string> interfaceModifier = result.Select(record => record["interfaceModifier"].As<string>()).ToList();                    
@@ -184,13 +187,21 @@ public class Neo4jOsgiConstructor : MonoBehaviour {
                     result = neo4j.Transaction("MATCH (p:Package{fileName: '" + packageFileName + "'})-[h:CONTAINS]->(e:Enumeration) " +
                         "RETURN e.visibility as enumModifier");
                     List<string> enumModifier = result.Select(record => record["enumModifier"].As<string>()).ToList();
+                    result = neo4j.Transaction("MATCH (p:Package{fileName: '" + packageFileName + "'})-[h:CONTAINS]->(e:Enumeration) " +
+                        "RETURN e.linesOfCode as classLOC");
+                    List<string> enumLOC = result.Select(record => record["classLOC"].As<string>()).ToList();
 
                     if (enumNameList != null && enumNameList.Count > 0 && enumModifier != null && enumModifier.Count > 0)
                     {
-                        for (int classID = 0; classID < enumNameList.Count; classID++)
+                        for (int enumID = 0; enumID < enumNameList.Count; enumID++)
                         {
-                            CompilationUnit compilationUnit = new CompilationUnit(enumNameList[classID], type.Enum, StringToModifier(enumModifier[classID]),
-                                0, package);
+                            if (enumLOC[enumID] == null || enumLOC[enumID] == "Null")
+                            {
+                                enumLOC[enumID] = "0";
+                            }
+
+                            CompilationUnit compilationUnit = new CompilationUnit(enumNameList[enumID], type.Enum, StringToModifier(enumModifier[enumID]),
+                                long.Parse(enumLOC[enumID]), package);
 
                             package.addCompilationUnit(compilationUnit);
                         }
@@ -228,15 +239,19 @@ public class Neo4jOsgiConstructor : MonoBehaviour {
 
         foreach (var serviceName in serviceNameList)
         {
-            CompilationUnit serviceCU = FindCompilationUnit(serviceName); // = null;
+            //CompilationUnit serviceCU = FindCompilationUnit(serviceName); // = null;
 
-            result = neo4j.Transaction("MATCH (i:Interface{name: '" + serviceName + "'}) RETURN i.name as name");
-            List<string> interfaceList = result.Select(record => record["name"].As<string>()).ToList();
+            CompilationUnit serviceCU = null;
 
-            if (interfaceList != null && interfaceList.Count > 0 && serviceCU != null)
+            //result = neo4j.Transaction("MATCH (i:Interface{name: '" + serviceName + "'}) RETURN i.name as name");
+            //List<string> interfaceList = result.Select(record => record["name"].As<string>()).ToList();
+
+            //if (interfaceList != null && interfaceList.Count > 0 && serviceCU != null)
+            if (interfaceNameList.Contains(serviceName))
             {
                 //serviceCU = FindCompilationUnit(serviceName);
-                serviceCU.setServiceDeclaration(true);
+                //serviceCU.setServiceDeclaration(true);
+                FindCompilationUnit(serviceName).setServiceDeclaration(true);
             }
 
             Service service = new Service(serviceName, serviceCU);
@@ -330,25 +345,25 @@ public class Neo4jOsgiConstructor : MonoBehaviour {
             //Construct and resolve ServiceComponents
             List<Service> serviceList = osgiProject.getServices();
 
-            result = neo4j.Transaction("MATCH (b:Bundle {bundleSymbolicName: '" + bundle.getSymbolicName() + "'})-[h:Contains]->(sc:ServiceComponent) RETURN sc.fileName as name"); // EXPORTS?
-            List<string> serviceComponentFileNames = result.Select(record => record["name"].As<string>()).ToList();
+            result = neo4j.Transaction("MATCH (b:Bundle {bundleSymbolicName: '" + bundle.getSymbolicName() + "'})-[h:Contains]->(sc:ServiceComponent) RETURN sc.name as name"); 
+            List<string> serviceComponentNames = result.Select(record => record["name"].As<string>()).ToList();
 
-            if (serviceComponentFileNames != null && serviceComponentFileNames.Count > 0)
+            if (serviceComponentNames != null && serviceComponentNames.Count > 0)
                 continue;
 
-            foreach (var serviceComponentFileName in serviceComponentFileNames)
+            foreach (var serviceComponentFileName in serviceComponentNames)
             {
-                result = neo4j.Transaction("MATCH (sc:ServiceComponent {fileName: '" + serviceComponentFileName + "'})-[h:PUBLISHES]->(c) RETURN c.fileName as name"); // EXPORTS?
-                string compilationUnitName = result.First()["name"].As<string>();
+                result = neo4j.Transaction("MATCH (sc:ServiceComponent {fileName: '" + serviceComponentFileName + "'})-[h:PUBLISHES]->(c) RETURN c.name as name"); 
+                string compilationUnitPublishedClassName = result.First()["name"].As<string>();
 
-                if (compilationUnitName != null && compilationUnitName != "")
+                if (compilationUnitPublishedClassName != null && compilationUnitPublishedClassName != "")
                 {
-                    FindCompilationUnit(compilationUnitName).setServiceComponentImpl(true);
+                    FindCompilationUnit(compilationUnitPublishedClassName).setServiceComponentImpl(true);
                 }
 
-                ServiceComponent sc = new ServiceComponent(serviceComponentFileName, FindCompilationUnit(compilationUnitName));
+                ServiceComponent sc = new ServiceComponent(serviceComponentFileName, FindCompilationUnit(compilationUnitPublishedClassName));
 
-                result = neo4j.Transaction("MATCH (sc:ServiceComponent {fileName: '" + serviceComponentFileName + "'})-[h:PROVIDES]->(s:Service) RETURN s.fileName as name"); // EXPORTS?
+                result = neo4j.Transaction("MATCH (sc:ServiceComponent {fileName: '" + serviceComponentFileName + "'})-[h:PROVIDES]->(s:Service) RETURN s.fileName as name"); 
                 List<string> serviceFileNames = result.Select(record => record["name"].As<string>()).ToList();
 
                 if (serviceFileNames != null && serviceFileNames.Count > 0)

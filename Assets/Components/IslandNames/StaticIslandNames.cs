@@ -291,10 +291,13 @@ namespace StaticIslandNamesComponent
             children.Sort(Compare);
             for (int i = 0; i < children.Count; i++)
             {
-                children[i].SetSiblingIndex(i);
-                if (i != 0 && i % 50 == 0)
+                if (i < children.Count && children[i] != null)
                 {
-                    yield return null;
+                    children[i].SetSiblingIndex(i);
+                    if (i != 0 && i % 50 == 0)
+                    {
+                        yield return null;
+                    }
                 }
             }
         }

@@ -29,10 +29,10 @@ public class IslandSelectionComponent : MonoBehaviour
         currentSelectedBuildings = new List<Building>();
 
         // Subscribe input methods
-        IslandVizInteraction.Instance.OnControllerEnter += OnControllerEnterEvent;
-        IslandVizInteraction.Instance.OnControllerExit += OnControllerExitEvent;
-        IslandVizInteraction.Instance.OnControllerTriggerDown += OnControllerTriggerPressed;
-        IslandVizInteraction.Instance.OnControllerTriggerUp += OnControllerTriggerReleased;
+        //IslandVizInteraction.Instance.OnControllerEnter += OnControllerEnterEvent;
+        //IslandVizInteraction.Instance.OnControllerExit += OnControllerExitEvent;
+        //IslandVizInteraction.Instance.OnControllerTriggerDown += OnControllerTriggerPressed;
+        //IslandVizInteraction.Instance.OnControllerTriggerUp += OnControllerTriggerReleased;
     }
 
 

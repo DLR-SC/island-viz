@@ -168,16 +168,31 @@ namespace OsgiViz.Unity.MainThreadConstructors
                     }
 
                     heightLevel = Helperfunctions.mapLOCtoLevel(cu.getLoc());
-                                        
-                    if (cu.implementsServiceComponent())
+
+                    //if (cu.implementsServiceComponent())
+                    //{
+                    //    building = GameObject.Instantiate(SIPrefabs[heightLevel], regionObject.transform);
+                    //    building.AddComponent<ServiceLayerGO>();
+                    //}
+                    //else if (cu.declaresService())
+                    //{
+                    //    building = GameObject.Instantiate(SDPrefabs[heightLevel], regionObject.transform);
+                    //    building.AddComponent<ServiceLayerGO>();
+                    //}
+                    //else
+                    //{
+                    //    building = GameObject.Instantiate(CUPrefabs[heightLevel], regionObject.transform);
+                    //}
+
+                    if (cu.GetType() == type.Interface)
                     {
                         building = GameObject.Instantiate(SIPrefabs[heightLevel], regionObject.transform);
-                        building.AddComponent<ServiceLayerGO>();
+                        //building.AddComponent<ServiceLayerGO>();
                     }
-                    else if (cu.declaresService())
+                    else if (cu.GetType() == type.Enum)
                     {
                         building = GameObject.Instantiate(SDPrefabs[heightLevel], regionObject.transform);
-                        building.AddComponent<ServiceLayerGO>();
+                        //building.AddComponent<ServiceLayerGO>();
                     }
                     else
                     {
@@ -285,7 +300,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
                 region.gameObject.layer = LayerMask.NameToLayer("Visualization");
                 MeshCollider cColliderCountry = region.gameObject.AddComponent<MeshCollider>();
                 cColliderCountry.sharedMesh = region.getRegionMesh().sharedMesh;
-                region.transform.localPosition += Vector3.up * 0.001f; // This prevent raycast issues with the island mesh collider that would be at the exact same height.
+                region.transform.localPosition += Vector3.up * 0.01f; // This prevent raycast issues with the island mesh collider that would be at the exact same height.
                 // TODO
                 //cColliderCountry.convex = true;
                 //cColliderCountry.isTrigger = true;

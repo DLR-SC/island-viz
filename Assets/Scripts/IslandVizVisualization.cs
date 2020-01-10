@@ -412,6 +412,12 @@ public class IslandVizVisualization : MonoBehaviour
             endScale *= GlobalVar.MinZoom * 4;
         }
 
+        // When the user is already zoomed in, we do not want to zoom out again.
+        if (endScale.x < GlobalVar.CurrentZoom)
+        {
+            endScale = Vector3.one * GlobalVar.CurrentZoom;
+        }
+
         Vector3 startPosition = VisualizationRoot.position;
         Vector3 endPosition = (startPosition / GlobalVar.CurrentZoom - target.position / GlobalVar.CurrentZoom) * endScale.x;
         endPosition.y = GlobalVar.hologramTableHeight;
@@ -470,17 +476,6 @@ public class IslandVizVisualization : MonoBehaviour
 
             value += 0.01f * speed;
             yield return new WaitForFixedUpdate();
-        }
-    }
-
-
-
-    // TODO remove in future! Only for Debug
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.KeypadEnter))
-        {
-            StartCoroutine(FlyToMultiple(new Transform[] { IslandGOs[0].transform, IslandGOs[1].transform}));
         }
     }
 

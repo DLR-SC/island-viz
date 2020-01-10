@@ -199,7 +199,7 @@ public class IslandVizUI : MonoBehaviour
     {
         if (selectionType == IslandVizInteraction.SelectionType.Select && selected && building != null)
         {
-            UpdateCurrentSelectedInfo(building.getCU().GetModifier().ToString() + " " + building.getCU().GetType().ToString(), building.getCU().getName(), "LOC", building.getCU().getLoc().ToString());
+            UpdateCurrentSelectedInfo(building.getCU().GetModifier().ToString() + " " + building.getCU().GetType().ToString(), building.getCU().getName(), "LOC", building.getCU().getLoc() == 0 ? "n.a." : building.getCU().getLoc().ToString());
         }
     }
            
