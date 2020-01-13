@@ -7,7 +7,7 @@ namespace Assets
     public class Constants
     {
         //Constants about using Database Layout or new, write to DB
-        public static bool useValuesFromDBWherePossible = false;
+        public static bool useValuesFromDBWherePossible = true;
         public static bool writeNewValuesToDB = true;
 
         //Radius for IslandLayout Hexagon Basic Cell

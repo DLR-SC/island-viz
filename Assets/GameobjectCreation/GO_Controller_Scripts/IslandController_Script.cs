@@ -76,8 +76,9 @@ public class IslandController_Script : MonoBehaviour
             region.transform.parent = gameObject.transform;
             region.transform.localPosition = new Vector3(0, 0, 0);
             region.GetComponent<RegionController_Script>().SetPackage(pm);
-            region.GetComponent<MeshRenderer>().material = (Material)Resources.Load("Materials/Combined HoloMaterial");
-            region.GetComponent<RegionController_Script>().InitColor(regionCount);
+            //region.GetComponent<MeshRenderer>().material = (Material)Resources.Load("Materials/Combined HoloMaterial");
+            //region.GetComponent<RegionController_Script>().InitColor(regionCount);
+            region.GetComponent<MeshRenderer>().sharedMaterial = IslandVizVisualization.Instance.CombinedHoloMaterial;
             //TODO timedephight global regeln
             yield return region.GetComponent<RegionController_Script>().CreateBuildingManagers();
             regionCount = (regionCount + 1) % Constants.colVals.Length;
