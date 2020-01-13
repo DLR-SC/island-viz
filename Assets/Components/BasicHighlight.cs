@@ -50,7 +50,7 @@ public class BasicHighlight : AdditionalIslandVizComponent
 
     private void HighlightIsland(IslandGO island, IslandVizInteraction.SelectionType selectionType, bool selected)
     {
-        if (selectionType == IslandVizInteraction.SelectionType.Highlight)
+        if (selectionType == IslandVizInteraction.SelectionType.Highlight && island != null)
         {
             if (Island == HighlightMode.Normal)
             {

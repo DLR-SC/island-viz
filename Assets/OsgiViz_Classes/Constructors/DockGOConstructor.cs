@@ -201,7 +201,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
                 
                  
                 #region extend Island collider based on new Docksizes
-                island.GetComponent<CapsuleCollider>().radius += Mathf.Max(importSize, exportSize) * Mathf.Sqrt(2f);
+                //island.GetComponent<CapsuleCollider>().radius += Mathf.Max(importSize, exportSize) * Mathf.Sqrt(2f);
                 #endregion
 
             }

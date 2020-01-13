@@ -72,7 +72,8 @@ public class IslandVizVisualization : MonoBehaviour
     private bool zoomDirty; // This is set to TRUE when the current Zoom was changed (called by a IslandVizInteraction Component).
     private bool islandsDirty; // This is set to TRUE when ZoomLevel changed or when appearing island displays the wrong ZoomLevel.
 
-
+    // Performance
+    private int IslandsPerFrame = 50;
 
 
     // ################
@@ -91,6 +92,10 @@ public class IslandVizVisualization : MonoBehaviour
     /// Called when the scale of the visualization root was changed.
     /// </summary>
     public ScaleChanged OnVisualizationScaleChanged;
+    /// <summary>
+    /// Called when the position of the visualization root was changed.
+    /// </summary>
+    public ScaleChanged OnVisualizationPositionChanged; // TODO
     /// <summary>
     /// Called when a island is set visible.
     /// </summary>
@@ -119,6 +124,10 @@ public class IslandVizVisualization : MonoBehaviour
     /// Called when the position or rotation of the visualization root was changed.
     /// </summary>
     public delegate void ScaleChanged();
+    /// <summary>
+    /// Called when the position or rotation of the visualization root was changed.
+    /// </summary>
+    public delegate void PositionChanged();
     /// <summary>
     /// Called when the island GameObject is enabled.
     /// </summary>
@@ -348,6 +357,8 @@ public class IslandVizVisualization : MonoBehaviour
             {
                 islandsDirty = false; // This has to be done first, because dirty islands can appear at any point.
 
+                int counter = 0;
+
                 // Check every island and apply current ZoomLevel if needed.
                 for (int i = 0; i < VisibleIslandGOs.Count; i++)
                 {
@@ -355,7 +366,14 @@ public class IslandVizVisualization : MonoBehaviour
                                                                                                                 // appear or disappear at any point.
                     {
                         IslandVizUI.Instance.ZoomLevelValue.text = "<color=yellow>" + (i / VisibleIslandGOs.Count) * 100 + " %</color>"; // Give simple feedback on progress // TODO
-                        yield return VisibleIslandGOs[i].ApplyZoomLevel(CurrentZoomLevel);
+                        VisibleIslandGOs[i].ApplyZoomLevel(CurrentZoomLevel);
+                        counter++;
+                    }
+
+                    if (counter >= IslandsPerFrame)
+                    {
+                        counter = 0;
+                        yield return null;
                     }
                 }
 
@@ -392,6 +410,12 @@ public class IslandVizVisualization : MonoBehaviour
         else
         {
             endScale *= GlobalVar.MinZoom * 4;
+        }
+
+        // When the user is already zoomed in, we do not want to zoom out again.
+        if (endScale.x < GlobalVar.CurrentZoom)
+        {
+            endScale = Vector3.one * GlobalVar.CurrentZoom;
         }
 
         Vector3 startPosition = VisualizationRoot.position;
@@ -456,17 +480,6 @@ public class IslandVizVisualization : MonoBehaviour
     }
 
 
-
-    // TODO remove in future! Only for Debug
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.KeypadEnter))
-        {
-            StartCoroutine(FlyToMultiple(new Transform[] { IslandGOs[0].transform, IslandGOs[1].transform}));
-        }
-    }
-
-
     // ################
     // Helper Functions
     // ################
@@ -475,10 +488,15 @@ public class IslandVizVisualization : MonoBehaviour
 
     public void HighlightAllIslands (bool enable)
     {
-        foreach (var item in IslandGOs)
-        {
-            IslandVizInteraction.Instance.OnIslandSelect(item, IslandVizInteraction.SelectionType.Highlight, enable);
-        }
+        IslandVizInteraction.Instance.OnIslandSelect(null, IslandVizInteraction.SelectionType.Highlight, enable); // Highlight/Unhighlight all islands.
+
+        if (!enable)
+            IslandVizInteraction.Instance.OnIslandSelect(null, IslandVizInteraction.SelectionType.Select, false); // Deselect the current island.
+
+        //foreach (var item in IslandGOs)
+        //{
+        //    IslandVizInteraction.Instance.OnIslandSelect(item, IslandVizInteraction.SelectionType.Highlight, enable);
+        //}
     }
 
     public void HighlightAllDocks(bool enable)
@@ -580,7 +598,7 @@ public class IslandVizVisualization : MonoBehaviour
             return ZoomLevel.Near;
         }
 
-        Debug.LogError("PercentToZoomlevel percent value could not be assigend to a ZoomLevel!");
+        Debug.LogError("PercentToZoomlevel percent value " + zoomLevelPercent + " + could not be assigend to a ZoomLevel!");
         return ZoomLevel.Near;
     }
 

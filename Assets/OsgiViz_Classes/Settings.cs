@@ -21,8 +21,8 @@ namespace OsgiViz.Core
     //Global
     public static class GlobalVar
     {
-        //public const string projectmodelPath = "Resources/rce_23_05_2017.model";
-        public const string projectmodelPath = "Resources/rce_lite.model";
+        public const string projectmodelPath = "Resources/rce_23_05_2017.model";
+        //public const string projectmodelPath = "Resources/rce_lite.model";
 
         //Scale multiplicator of the voronoi cells. Many other variables depend on this scale
         public const float voronoiCellScalefactor = 20f;

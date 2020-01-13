@@ -13,6 +13,8 @@ public class SlideableTablet : AdditionalIslandVizComponent
     public float minX;
     public float maxX;
 
+    public bool ShowTablet = false;
+
     private RectTransform content;
 
     public Collider[] ButtonColliders;
@@ -24,6 +26,7 @@ public class SlideableTablet : AdditionalIslandVizComponent
 
     private string tabletTag = "SlideableTablet";
 
+    private List<GameObject> currentHitSlideableTabletObject;
 
     private void Start()
     {
@@ -44,9 +47,11 @@ public class SlideableTablet : AdditionalIslandVizComponent
     {
         IslandVizUI.Instance.UpdateLoadingScreenUI("InverseMultiTouchInput Construction", "");
 
+        currentHitSlideableTabletObject = new List<GameObject>();
+
         // Init GameObject       
         // TODO
-        content = Tablet.transform.GetChild(0).GetChild(0).GetComponent<RectTransform>();
+        content = Tablet.transform.Find("Mask").Find("Content").GetComponent<RectTransform>();
 
         // Physics Settings
         //content.tag = tabletTag;
@@ -63,6 +68,10 @@ public class SlideableTablet : AdditionalIslandVizComponent
     }
 
     #endregion
+
+
+
+
 
 
     // ################
@@ -102,6 +111,44 @@ public class SlideableTablet : AdditionalIslandVizComponent
         {
             usingHand = null;
         }
+    }
+
+
+    int coroutineCounter = 0;
+
+    public void OnHighlight (GameObject element)
+    {
+        if (!currentHitSlideableTabletObject.Contains(element))
+        {            
+            currentHitSlideableTabletObject.Add(element);
+            StartCoroutine(DelayedToggle());
+        }
+        else if (currentHitSlideableTabletObject.Contains(element))
+        {            
+            currentHitSlideableTabletObject.Remove(element);
+            StartCoroutine(DelayedToggle());
+        }
+
+    }
+
+    IEnumerator DelayedToggle ()
+    {
+        coroutineCounter++;
+
+        yield return new WaitForSeconds(0.1f);
+
+        if (coroutineCounter == 1)
+        {
+            if (!tabletshowing && currentHitSlideableTabletObject.Count >= 1)
+            {
+                ToggleTablet(null);
+            }
+            else if (tabletshowing && currentHitSlideableTabletObject.Count == 0)
+            {
+                ToggleTablet(null);
+            }
+        }
+        coroutineCounter--;
     }
 
     #endregion
@@ -163,8 +210,12 @@ public class SlideableTablet : AdditionalIslandVizComponent
             yield return new WaitForFixedUpdate();
         }
 
+        content.localPosition = endPos;
+
         tabletshowing = !tabletshowing;
-        text.text = tabletshowing ? "<" : ">";
+
+        if (text != null)
+            text.text = tabletshowing ? "<" : ">";
 
         foreach (var item in ButtonColliders)
         {
