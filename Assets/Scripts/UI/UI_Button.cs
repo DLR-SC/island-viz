@@ -10,6 +10,7 @@ public class UI_Button : MonoBehaviour
     public Text Text;
     public Color HighlightColor;
     public UnityEvent OnClick;
+    public UnityEvent OnHighlight;
 
     private Color startColor;
     private bool selected;
@@ -19,7 +20,8 @@ public class UI_Button : MonoBehaviour
     {
         IslandVizInteraction.Instance.OnUIButtonSelected += OnButtonSelected;
 
-        startColor = Image.color;
+        if (Image != null)
+            startColor = Image.color;
     }
 
 
@@ -34,7 +36,6 @@ public class UI_Button : MonoBehaviour
 
         if (selectionType == IslandVizInteraction.SelectionType.Select && selected)
         {
-            Debug.Log(gameObject.name + " was pressed.");
             Click();
         }
         else if (selectionType == IslandVizInteraction.SelectionType.Highlight)
@@ -46,7 +47,10 @@ public class UI_Button : MonoBehaviour
 
     public void Highlight (bool enable)
     {
-        Image.color = enable ? HighlightColor : startColor;
+        if (Image != null)
+            Image.color = enable ? HighlightColor : startColor;
+
+        OnHighlight.Invoke();
     }
 
     public void Click ()

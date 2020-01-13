@@ -53,7 +53,8 @@ public class IslandContainerController_Script : MonoBehaviour
         {
             if (!transformationRunning && !movingRunning)
             {
-                newCommit = mainController.GetCurrentCommit();
+                //newCommit = mainController.GetCurrentCommit();
+                newCommit = HistoryNavigation.Instance.GetCurrentCommit();
                 if (newCommit != null && newCommit != currentCommit)
                 {
                     transformationRunning = true;

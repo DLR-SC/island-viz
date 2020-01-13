@@ -162,13 +162,22 @@ namespace OsgiViz
             /*
             expanded = true;
             foreach (GameObject arrow in connectionArrows)
-                arrow.SetActive(true);  
-         */          
+                arrow.SetActive(true); 
+                            ZoomChanged();
+
+         */
         }
 
         private void ZoomChanged()
         {
-            /*int cc = 0;
+            /*
+       
+            if (!expanded)
+            {
+                return;
+            }
+
+            int cc = 0;
 
             foreach (GameObject arrow in connectionArrows)
             {
@@ -197,20 +206,22 @@ namespace OsgiViz
         private void OnDockSelected(DependencyDock dock, IslandVizInteraction.SelectionType selectionType, bool selected)
         {
             /*
+            // This dock gets highlighted.
             if (selectionType == IslandVizInteraction.SelectionType.Highlight && dock == this)
             {
                 IslandVizInteraction.Instance.OnIslandSelect(this.transform.parent.GetComponent<IslandGO>(), IslandVizInteraction.SelectionType.Highlight, selected);
             }
+            // This dock gets selected.
             else if (selectionType == IslandVizInteraction.SelectionType.Select && dock == this)
             {
-                if (selected)
+                if (selected && !Selected)
                 {
                     ShowAllDependencies();
                     IslandVizInteraction.Instance.OnIslandSelect(this.transform.parent.GetComponent<IslandGO>(), IslandVizInteraction.SelectionType.Select, true);
                     UpdateViewToDependencies();
                     Selected = true;
                 }
-                else
+                else if (!selected && Selected)
                 {
                     HideAllDependencies();
                     foreach (var item in connectedDocks)
@@ -218,9 +229,9 @@ namespace OsgiViz
                         IslandVizInteraction.Instance.OnIslandSelect(item.transform.parent.GetComponent<IslandGO>(), IslandVizInteraction.SelectionType.Highlight, false);
                     }
                     Selected = false;
-                    IslandVizInteraction.Instance.OnDockSelect(this, IslandVizInteraction.SelectionType.Select, false);
                 }
             }
+            // All docks get enabled/disabled.
             else if (selectionType == IslandVizInteraction.SelectionType.Select && dock == null)
             {
                 if (selected)
@@ -232,7 +243,8 @@ namespace OsgiViz
                     HideAllDependencies();
                 }
             }
-            else if (selectionType == IslandVizInteraction.SelectionType.Select && dock != this && Selected && selected)
+            // Other dock was selected while this dock is selected.
+            else if (selectionType == IslandVizInteraction.SelectionType.Select && dock != this && dock != null && Selected && selected)
             {
                 HideAllDependencies();
                 Selected = false;

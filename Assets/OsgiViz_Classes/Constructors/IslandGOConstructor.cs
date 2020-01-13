@@ -168,16 +168,31 @@ namespace OsgiViz.Unity.MainThreadConstructors
                     }
 
                     heightLevel = Helperfunctions.mapLOCtoLevel(cu.getLoc());
-                                        
-                    if (cu.implementsServiceComponent())
+
+                    //if (cu.implementsServiceComponent())
+                    //{
+                    //    building = GameObject.Instantiate(SIPrefabs[heightLevel], regionObject.transform);
+                    //    building.AddComponent<ServiceLayerGO>();
+                    //}
+                    //else if (cu.declaresService())
+                    //{
+                    //    building = GameObject.Instantiate(SDPrefabs[heightLevel], regionObject.transform);
+                    //    building.AddComponent<ServiceLayerGO>();
+                    //}
+                    //else
+                    //{
+                    //    building = GameObject.Instantiate(CUPrefabs[heightLevel], regionObject.transform);
+                    //}
+
+                    if (cu.GetType() == type.Interface)
                     {
                         building = GameObject.Instantiate(SIPrefabs[heightLevel], regionObject.transform);
-                        building.AddComponent<ServiceLayerGO>();
+                        //building.AddComponent<ServiceLayerGO>();
                     }
-                    else if (cu.declaresService())
+                    else if (cu.GetType() == type.Enum)
                     {
                         building = GameObject.Instantiate(SDPrefabs[heightLevel], regionObject.transform);
-                        building.AddComponent<ServiceLayerGO>();
+                        //building.AddComponent<ServiceLayerGO>();
                     }
                     else
                     {
@@ -233,6 +248,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
             setUVsToSingularCoord(new Vector2(0f, 0.7f), coastMFilter);
             #endregion
 
+
             #region init docks            
             //get graph vertex associated with the island
             GraphVertex vert = islandStructure.getDependencyVertex();
@@ -284,23 +300,26 @@ namespace OsgiViz.Unity.MainThreadConstructors
                 region.gameObject.layer = LayerMask.NameToLayer("Visualization");
                 MeshCollider cColliderCountry = region.gameObject.AddComponent<MeshCollider>();
                 cColliderCountry.sharedMesh = region.getRegionMesh().sharedMesh;
+                region.transform.localPosition += Vector3.up * 0.01f; // This prevent raycast issues with the island mesh collider that would be at the exact same height.
                 // TODO
                 //cColliderCountry.convex = true;
                 //cColliderCountry.isTrigger = true;
-
                 //cColliderCountry.sharedMesh = region.getRegionArea().GetComponent<MeshFilter>().sharedMesh;
             }
             #endregion
 
             #region IslandCollider
             islandGO.layer = LayerMask.NameToLayer("Visualization");
-            CapsuleCollider cColliderIsland = islandGO.AddComponent<CapsuleCollider>();
-            cColliderIsland.radius = islandStructure.getRadius();
-            cColliderIsland.height = islandGOComponent.Coast.GetComponent<MeshFilter>().sharedMesh.bounds.size.y;
-            Vector3 newCenter = islandStructure.getWeightedCenter();
-            newCenter.y = -islandGOComponent.Coast.GetComponent<MeshFilter>().sharedMesh.bounds.size.y + (cColliderIsland.height * 0.5f);
-            cColliderIsland.center = newCenter;
+            //CapsuleCollider cColliderIsland = islandGO.AddComponent<CapsuleCollider>();
+            //cColliderIsland.radius = islandStructure.getRadius();
+            //cColliderIsland.height = islandGOComponent.Coast.GetComponent<MeshFilter>().sharedMesh.bounds.size.y;            
+            //Vector3 newCenter = islandStructure.getWeightedCenter();
+            //newCenter.y = -islandGOComponent.Coast.GetComponent<MeshFilter>().sharedMesh.bounds.size.y + (cColliderIsland.height * 0.5f);
+            //cColliderIsland.center = newCenter;
             //cColliderIsland.isTrigger = true;
+            MeshCollider meshCollider = islandGO.AddComponent<MeshCollider>();
+            meshCollider.sharedMesh = coastMFilter.mesh;
+            meshCollider.convex = true;
             #endregion
 
             islandGO.AddComponent<Interactable>();

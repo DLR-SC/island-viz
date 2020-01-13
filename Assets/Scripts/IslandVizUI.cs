@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using OsgiViz.Unity.Island;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -32,8 +33,12 @@ public class IslandVizUI : MonoBehaviour
     [Header("Current Visible Islands Components")]
     public Text CurrentVisivleIslandsValue; // Text element containing the current number of visible islands (in %). 
 
-    [Header("Current Visible Islands Components")]
+    [Header("Current Notification Components")]
     public Text NotificationValue;
+
+    [Header("Current Selected Components")]
+    public Text CurrentSelectedHeader; 
+    public Text CurrentSelectedBody;
 
     [Header("Bundle Name Selection Components")]
     public Transform BundleNameSelectionContent; // The "Content" child of the Scroll View containing the bundle names.
@@ -49,6 +54,10 @@ public class IslandVizUI : MonoBehaviour
         Notification.SetActive(false);
 
         IslandVizVisualization.Instance.OnTableHeightChanged += TableHeightChanged;
+
+        IslandVizInteraction.Instance.OnIslandSelect += OnIslandSelected;
+        IslandVizInteraction.Instance.OnRegionSelect += OnRegionSelected;
+        IslandVizInteraction.Instance.OnBuildingSelect += OnBuildingSelected;
     }
 
 
@@ -159,5 +168,50 @@ public class IslandVizUI : MonoBehaviour
         {
             ((GameObject)Instantiate(BundleNamePrefab, BundleNameSelectionContent)).GetComponent<IslandNameSelectionName>().Init(islandList[i]);
         }
+    }
+
+
+    // ################
+    // Current Selected
+    // ################
+
+    public void OnIslandSelected (IslandGO island, IslandVizInteraction.SelectionType selectionType, bool selected)
+    {
+        if (selectionType == IslandVizInteraction.SelectionType.Select && selected && island != null)
+        {
+            UpdateCurrentSelectedInfo("Bundle", island.name, "Packages", island.Regions.Count.ToString());
+        }
+        else if (island == null)
+        {
+            UpdateCurrentSelectedInfo();
+        }
+    }
+
+    public void OnRegionSelected (Region region, IslandVizInteraction.SelectionType selectionType, bool selected)
+    {
+        if (selectionType == IslandVizInteraction.SelectionType.Select && selected && region != null)
+        {
+            UpdateCurrentSelectedInfo("Package", region.name, "Classes", region.getBuildings().Count.ToString());
+        }
+    }
+
+    public void OnBuildingSelected (Building building, IslandVizInteraction.SelectionType selectionType, bool selected)
+    {
+        if (selectionType == IslandVizInteraction.SelectionType.Select && selected && building != null)
+        {
+            UpdateCurrentSelectedInfo(building.getCU().GetModifier().ToString() + " " + building.getCU().GetType().ToString(), building.getCU().getName(), "LOC", building.getCU().getLoc() == 0 ? "n.a." : building.getCU().getLoc().ToString());
+        }
+    }
+           
+    public void UpdateCurrentSelectedInfo(string type, string name, string detailName, string detail)
+    {
+        CurrentSelectedHeader.text = type;
+        CurrentSelectedBody.text = "<b>Name:</b>\n" + name + "\n<b>" + detailName + "</b>:\n" + detail;
+    }
+
+    public void UpdateCurrentSelectedInfo()
+    {
+        CurrentSelectedHeader.text = "Nothing Selected ...";
+        CurrentSelectedBody.text = "";
     }
 }

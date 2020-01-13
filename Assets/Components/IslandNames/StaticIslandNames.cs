@@ -3,6 +3,7 @@ using OsgiViz.Core;
 using OsgiViz.Unity.Island;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -25,13 +26,15 @@ namespace StaticIslandNamesComponent
 
         [Header("Settings")]
         [Tooltip("The minimal distance (in meter) between two StaticIslandNames before they are moved vertically for better readability.")]
-        public float MinTextDistance = 0.4f; // Change this, e.g. when you changed the size of the IslandNamePrefab.
+        public float MinTextDistance = 0.25f; // Change this, e.g. when you changed the size of the IslandNamePrefab.
         [Tooltip("The vectical distance (in meter) between two StaticIslandNames when they are moved for better readability.")]
-        public float VerticalTextOffset = 0.12f; // Change this, e.g. when you changed the size of the IslandNamePrefab.
+        public float VerticalTextOffset = 0.08f; // Change this, e.g. when you changed the size of the IslandNamePrefab.
 
         // ################
         // Private
         // ################
+
+        private bool heightIndexesDirty = false;
 
         private Transform StaticNameParent; // The transform of the initiated IslandNameParentPrefab. This will be the parent of every island name.
 
@@ -68,6 +71,8 @@ namespace StaticIslandNamesComponent
             IslandVizVisualization.Instance.OnIslandVisible += UnhideStaticName;
             IslandVizVisualization.Instance.OnIslandInvisible += HideStaticName;
 
+            StartCoroutine(HightIndexRecalculation());
+
             yield return null;
         }
         #endregion
@@ -87,6 +92,10 @@ namespace StaticIslandNamesComponent
         /// <param name="selected">Wether the island was selected or deselected.</param>
         private void OnIslandSelection(IslandGO island, IslandVizInteraction.SelectionType selectionType, bool selected)
         {
+            if (island == null)
+            {
+                return;
+            }
             if (selectionType == IslandVizInteraction.SelectionType.Select)
             {
                 if (selected)
@@ -196,6 +205,8 @@ namespace StaticIslandNamesComponent
                 Destroy(currentHiddenNames[target].gameObject);
                 currentHiddenNames.Remove(target);
             }
+
+            RecalculateAllHeightIndexes();
         }
 
         private void HideStaticName (IslandGO island)
@@ -240,9 +251,54 @@ namespace StaticIslandNamesComponent
         /// </summary>
         private void RecalculateAllHeightIndexes() // TODO Performance wise this seems to be fine, but check again in the future.
         {
-            foreach (var item in currentNames)
+            heightIndexesDirty = true;
+        }
+
+        IEnumerator HightIndexRecalculation ()
+        {
+            while (true)
             {
-                item.Value.SetHeightIndex(GetHeightIndex(item.Value));
+                if (heightIndexesDirty)
+                {
+                    heightIndexesDirty = false;
+
+                    for (int i = 0; i < currentNames.Count; i++)
+                    {
+                        if (i < currentNames.Count && currentNames.ElementAt(i).Value != null)
+                        {
+                            currentNames.ElementAt(i).Value.SetHeightIndex(GetHeightIndex(currentNames.ElementAt(i).Value));
+                            if (i != 0 && i % 10 == 0)
+                            {
+                                yield return null;
+                            }
+                        }
+                    }
+                    yield return null;
+                    yield return ReorderChildren();
+                }
+                else
+                {
+                    yield return new WaitForFixedUpdate();
+                }
+            }
+        }
+
+        IEnumerator ReorderChildren ()
+        {
+            // Realligne the children so the ui elements are culled in the right order.
+            var children = StaticNameParent.GetComponentsInChildren<Transform>(true).ToList();
+            children.Remove(StaticNameParent.transform);
+            children.Sort(Compare);
+            for (int i = 0; i < children.Count; i++)
+            {
+                if (i < children.Count && children[i] != null)
+                {
+                    children[i].SetSiblingIndex(i);
+                    if (i != 0 && i % 50 == 0)
+                    {
+                        yield return null;
+                    }
+                }
             }
         }
 
@@ -320,6 +376,16 @@ namespace StaticIslandNamesComponent
             return false;
         }
 
+
+        private static int Compare(Transform lhs, Transform rhs)
+        {
+            if (lhs == rhs) return 0;
+            var test = rhs.gameObject.activeInHierarchy.CompareTo(lhs.gameObject.activeInHierarchy);
+            if (test != 0) return test;
+            if (Vector3.Distance(lhs.position, Camera.main.transform.position) < Vector3.Distance(rhs.position, Camera.main.transform.position)) return 1;
+            if (Vector3.Distance(lhs.position, Camera.main.transform.position) > Vector3.Distance(rhs.position, Camera.main.transform.position)) return -1;
+            return 0;
+        }
         #endregion
     }
 }
