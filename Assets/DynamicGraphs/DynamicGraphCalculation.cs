@@ -15,12 +15,15 @@ using Neo4JDriver;
 public class DynamicGraphCalculation : MonoBehaviour
 {
 
-    [SerializeField]
+    public static DynamicGraphCalculation Instance { get { return instance; } }
+    private static DynamicGraphCalculation instance; // The instance of this class.
+
+   /* [SerializeField]
     private Text taskTextfield;
     [SerializeField]
     private Text statusTextfield;
     [SerializeField]
-    private Text loadingDotsTextfield;
+    private Text loadingDotsTextfield;*/
 
     private Project project;
 
@@ -31,6 +34,7 @@ public class DynamicGraphCalculation : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        instance = this;
         Neo4J database = GameObject.Find("DatabaseObject").GetComponent<DatabaseAccess>().GetDatabase();
         Neo4JWriterGraph.SetDatabase(database);
 
@@ -40,8 +44,8 @@ public class DynamicGraphCalculation : MonoBehaviour
         elementDict = new Dictionary<BundleElement, HistoryGraphVertex>();
         masterEdgeDict = new Dictionary<MasterVertex, Dictionary<MasterVertex, MasterEdge>>();
 
-        taskTextfield.text = "";
-        statusTextfield.text = "";
+        //taskTextfield.text = "";
+        //statusTextfield.text = "";
         StartCoroutine(GraphMain());
 
     }
@@ -49,36 +53,36 @@ public class DynamicGraphCalculation : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        loadingDotsTextfield.color = new Color(loadingDotsTextfield.color.r, loadingDotsTextfield.color.g, loadingDotsTextfield.color.b, Mathf.PingPong(Time.time, 1));
+        //loadingDotsTextfield.color = new Color(loadingDotsTextfield.color.r, loadingDotsTextfield.color.g, loadingDotsTextfield.color.b, Mathf.PingPong(Time.time, 1));
     }
 
-    private IEnumerator GraphMain()
+    public IEnumerator GraphMain()
     {
         List<Branch> branchList = project.GetBranches().Values.ToList<Branch>();
         branchList.Sort();
         foreach (Branch branch in branchList)
         {
-            taskTextfield.text = "For branch " + branch.GetName() + " (" + branch.GetCommits(false).Count + " Commits)\n" 
-                + "Create Graph from Project Datastructure";
+            /*taskTextfield.text = "For branch " + branch.GetName() + " (" + branch.GetCommits(false).Count + " Commits)\n" 
+                + "Create Graph from Project Datastructure";*/
             HistoryGraph historyGraph = new HistoryGraph(null);
 
             yield return FillHistoryGraphForBranch(historyGraph, branch);
 
             if (historyGraph.getFrameCount() == 0)
             {
-                statusTextfield.text = "Branch needs no layout";
+               // statusTextfield.text = "Branch needs no layout";
                 continue;
             }
 
-            taskTextfield.text = "For branch " + branch.GetName() + " (" + branch.GetCommits(false).Count + " Commits)\n"
-                + "Layout Commits";
+           /* taskTextfield.text = "For branch " + branch.GetName() + " (" + branch.GetCommits(false).Count + " Commits)\n"
+                + "Layout Commits";*/
             yield return Layout(historyGraph);
 
             yield return SetPositionsToBundleAndWriteDB(branch);
         }
 
         yield return null;
-        SceneManager.LoadScene(4);
+        //SceneManager.LoadScene(4);
 
     }
 
@@ -257,7 +261,7 @@ public class DynamicGraphCalculation : MonoBehaviour
                 //only add graph if it has to be layouted
                 hG.addNextFrame(currentGraph);
 
-                if ((index + 1) / (float)totalCommitsToLoad >= 1f)
+               /* if ((index + 1) / (float)totalCommitsToLoad >= 1f)
                 {
                     statusTextfield.text = "100% completed";
                 }
@@ -276,7 +280,7 @@ public class DynamicGraphCalculation : MonoBehaviour
                 else if ((index + 1) / (float)totalCommitsToLoad > 0.2f)
                 {
                     statusTextfield.text = "20% completed";
-                }
+                }*/
 
             }
             yield return null;
@@ -355,7 +359,7 @@ public class DynamicGraphCalculation : MonoBehaviour
 
         for(int i = 0; i<hG.getFrameCount(); i++)
         {
-            statusTextfield.text = ((i/(float)hG.getFrameCount())*100).ToString("0.00")+"% completed";
+            //statusTextfield.text = ((i/(float)hG.getFrameCount())*100).ToString("0.00")+"% completed";
             yield return historyGraphManager.LayoutFrame(i);
         }
 

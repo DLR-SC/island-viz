@@ -264,7 +264,7 @@ public class DataLoading : MonoBehaviour
         int cCount;
 
         //TODO hier zweite Beschränkung entfernen
-        for (int i = 0; (i < branchLengt)&&(i<8); i++)
+        for (int i = 0; (i < branchLengt)&&(i<3); i++)
         {
             IslandVizUI.Instance.UpdateLoadingScreenUI("Loading Commit Details", (currentCommitNr*100/(float)project.GetCommits().Count).ToString("0.00")+"%"); // Update UI.
 

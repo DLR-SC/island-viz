@@ -259,8 +259,8 @@ namespace DatabasePreprocessing
         {
             string statement = "MATCH (b1:BundleImpl)-[:NEXT]->(b2:BundleImpl), (b1)-[:USE]->(pf1:PackageFragmentImpl)-[:BELONGS_TO]->(p1:PackageImpl), " +
                 "(b2)-[:USE]->(pf2:PackageFragmentImpl)-[:BELONGS_TO]->(p2:PackageImpl) " +
-                "WHERE p1.qualifiedName = p2.qualifiedName " +
-                "MERGE(pf1) -[:NEXT]->(pf2)";
+                "WHERE p1.qualifiedName = p2.qualifiedName OR p1.name=p2.name " +
+                "MERGE(pf1)-[:NEXT]->(pf2)";
 
             IStatementResult result = database.ReadTransaktion(statement);
 

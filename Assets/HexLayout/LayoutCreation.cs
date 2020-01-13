@@ -67,7 +67,7 @@ public class LayoutCreation : MonoBehaviour
         }
         yield return null;
 
-        /*int finished = 0;
+        int finished = 0;
         //Wait Until all Coroutines are finished
         while (coList.Count > 0)
         {
@@ -96,7 +96,7 @@ public class LayoutCreation : MonoBehaviour
         }
 
         Debug.Log("All finished");
-        yield return null;*/
+        yield return null;
         //SceneManager.LoadScene(3);
 
     }
@@ -126,7 +126,7 @@ public class LayoutCreation : MonoBehaviour
         }
         yield return null;
         flag.working = false;
-        CallBack();
+        //CallBack();
 
     }
 

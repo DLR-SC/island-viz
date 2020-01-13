@@ -108,17 +108,25 @@ public class IslandVizBehaviour : MonoBehaviour
     IEnumerator IslandVizInitiationRoutine_History()
     {
         yield return new WaitForSeconds(1f);
+        //Database Preprocessing for History-Information
         yield return DatabasePreprocessingScript.Instance.PreprocessingMain();
+        //Loading History Data
         yield return DataLoading.Instance.LoadingProject();
+        //Island Layout
         yield return LayoutCreation.Instance.AllBundlesGridCreation();
+        //Dynamic Graph Layout
+        IslandVizUI.Instance.UpdateLoadingScreenUI("Start DynGraph", "");
+        yield return DynamicGraphCalculation.Instance.GraphMain();
+        //Gameobject Creation
+        IslandVizUI.Instance.UpdateLoadingScreenUI("Start GoCreation", "");
+        yield return GOCreation_Script.Instance.GOCreationMain();
+
         IslandVizUI.Instance.UpdateLoadingScreenUI("Finished", "100%"); // Update UI.
 
-        //IslandLayout
-        //GraphLayout
 
         yield return null;
 
-       /* yield return IslandVizData.Instance.InitInputComponents(); // Load additional data components.
+        yield return IslandVizData.Instance.InitInputComponents(); // Load additional data components.
         yield return IslandVizVisualization.Instance.InitVisualizationComponents(); // Load additional visualization components.
         yield return IslandVizInteraction.Instance.InitInputComponents(); // Load additional interaction components.
 
@@ -133,7 +141,6 @@ public class IslandVizBehaviour : MonoBehaviour
         vis.transform.position = new Vector3(0f, 1f, 0f);
         vis.transform.localScale = new Vector3(0.00145f, 0.00145f, 0.00145f);
 
-    */
         OnConstructionDone?.Invoke(); // Call the OnConstructionDone event.
     }
 
