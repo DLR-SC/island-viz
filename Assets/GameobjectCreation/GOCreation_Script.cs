@@ -12,17 +12,7 @@ public class GOCreation_Script : MonoBehaviour
     public static GOCreation_Script Instance { get { return instance; } }
     private static GOCreation_Script instance; // The instance of this class.
 
-    //Fields of canvas for user information
-    //[SerializeField]
-    //private Text taskTextfield;
-    //[SerializeField]
-    //private Text statusTextfield;
-    //[SerializeField]
-    //private Text loadingDotsTextfield;
-
     public GameObject islandPrefab;
-
-
 
     Project project;
     GameObject goContainer;
@@ -32,39 +22,21 @@ public class GOCreation_Script : MonoBehaviour
     {
         instance = this;
 
-        //At this point no database conection is needed anymore
-        //DisposeDatabase will also destroy gameobject;
-        /*GameObject database = GameObject.Find("DatabaseObject");
-        database.GetComponent<DatabaseAccess>().DisposeDatabase();*/
-
-        
-
-        /*project = GameObject.Find("DataObject").GetComponent<OSGi_Project_Script>().GetProject();
+        //Find global project data structure
+        project = GameObject.Find("DataObject").GetComponent<OSGi_Project_Script>().GetProject();
+        //Find Container for IslandGameObjects
         goContainer = GameObject.Find("IslandObjectContainer");
-
-        //initialse building hight provider
-        goContainer.GetComponent<BuildingProvider_Script>().Initialise(project.GetMaxLocInProject());*/
-
-        //StartCoroutine(GOCreationMain());
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-       // loadingDotsTextfield.color = new Color(loadingDotsTextfield.color.r, loadingDotsTextfield.color.g, loadingDotsTextfield.color.b, Mathf.PingPong(Time.time, 1));
-    }
 
     public IEnumerator GOCreationMain()
     {
-        project = GameObject.Find("DataObject").GetComponent<OSGi_Project_Script>().GetProject();
-        goContainer = GameObject.Find("IslandObjectContainer");
-
         //initialse building hight provider
         goContainer.GetComponent<BuildingProvider_Script>().Initialise(project.GetMaxLocInProject());
 
         int bundlesTotal = project.GetMasterBundles().Count;
-       // taskTextfield.text = "Creating Gameobjects for " + bundlesTotal + " Islands";
-       // statusTextfield.text = "Waiting for Islands to be completed";
+        IslandVizUI.Instance.UpdateLoadingScreenUI("Creating Island GameObjects", "");
+
         int i = 0;
 
         foreach(BundleMaster bundleM in project.GetMasterBundles())
@@ -77,9 +49,8 @@ public class GOCreation_Script : MonoBehaviour
 
 
             yield return island.GetComponent<IslandContainerController_Script>().Initialise(bundleM, i);
-            //yield return island.GetComponent<IslandController_Script>().Initialise();
 
-          //  statusTextfield.text = "Finished " + (i+1) + " islands of " + bundlesTotal;
+            IslandVizUI.Instance.UpdateLoadingScreenUI("Creating Island GameObjects", (i*100/(float)project.GetMasterBundles().Count).ToString("0.00")+"%");
 
             i++;
 
@@ -87,8 +58,7 @@ public class GOCreation_Script : MonoBehaviour
 
         }
 
-        Debug.Log("All finished");
+        Debug.Log("Finished Island GameObject Creation");
         yield return null;
-       // SceneManager.LoadScene(5);
     }
 }

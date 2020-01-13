@@ -16,14 +16,6 @@ public class DataLoading : MonoBehaviour
     private static DataLoading instance; // The instance of this class.
 
 
-    //Fields of canvas for user information
-    /* [SerializeField]
-     private Text taskTextfield;
-     [SerializeField]
-     private Text statusTextfield;
-     [SerializeField]
-     private Text loadingDotsTextfield;*/
-
     private Project project;
     private Neo4J database;
 
@@ -46,10 +38,6 @@ public class DataLoading : MonoBehaviour
 
         Neo4JReaderOrganisation.SetDatabase(database);
         Neo4JReaderContentDetails.SetDatabase(database);
-
-        //Debug.Log("Successful framestart");
-        //StartCoroutine(LoadingProject());
-        //StartCoroutine(Test());
     }
 
     private IEnumerator Test()
@@ -61,67 +49,39 @@ public class DataLoading : MonoBehaviour
 
     }
 
-    private void Update()
-    {
-       // loadingDotsTextfield.color = new Color(loadingDotsTextfield.color.r, loadingDotsTextfield.color.g, loadingDotsTextfield.color.b, Mathf.PingPong(Time.time, 1));
-    }
-
     public IEnumerator LoadingProject()
     {
         IslandVizUI.Instance.UpdateLoadingScreenUI("Loading Issues", ""); // Update UI.
-        //taskTextfield.text = "Loading all Issue-Elements";
-        //statusTextfield.text = "...";
         yield return Neo4JReaderOrganisation.ReadIssues(false, project.GetIssues());
-        //statusTextfield.text = "Found " + project.GetIssues().Count + " Issues in Software Project";
         IslandVizUI.Instance.UpdateLoadingScreenUI("Issues Found", project.GetIssues().Count.ToString()); // Update UI.
 
 
-        //taskTextfield.text = "Loading all Authors";
-        //statusTextfield.text = "...\n" + "Found " + project.GetIssues().Count + " Issues in Software Project";
-        //project.GetIssues().Count
+        
         IslandVizUI.Instance.UpdateLoadingScreenUI("Loading Authors", ""); // Update UI.
         yield return Neo4JReaderOrganisation.ReadAuthor(false, project.GetAuthors());
-        //statusTextfield.text = "Found " + project.GetAuthors().Count + " Authors in Software Project\n" +
-        //    "Found " + project.GetIssues().Count + " Issues in Software Project";
-        IslandVizUI.Instance.UpdateLoadingScreenUI("Authors Found", "0"); // Update UI.
+        IslandVizUI.Instance.UpdateLoadingScreenUI("Authors Found", project.GetAuthors().Count.ToString()); // Update UI.
 
         IslandVizUI.Instance.UpdateLoadingScreenUI("Loading Branches", ""); // Update UI.
-        //taskTextfield.text = "Loading all Branches";
-        //statusTextfield.text = "...\n" + "Found " + project.GetAuthors().Count + " Authors in Software Project\n";
         yield return Neo4JReaderOrganisation.ReadBranches(project.GetAuthors(), project.GetBranches(), false);
-        //statusTextfield.text = "Found " + project.GetBranches().Count + " Branches in SoftwareProject\n" +
-        //    "Found " + project.GetAuthors().Count + " Authors in Software Project";
-        //taskTextfield.text = "Loading all Branches\n" + "Creating Branch Hierarchy";
-
         Branch master = Branch.getMasterBranch(project.GetBranches());
         master.SetHierarchy(0);
+        //TODO Durchnummerierung Commits für Höhenprofil
         IslandVizUI.Instance.UpdateLoadingScreenUI("Branches Found", project.GetBranches().Count.ToString()); // Update UI.
 
 
         IslandVizUI.Instance.UpdateLoadingScreenUI("Loading Commits", ""); // Update UI.
-        //taskTextfield.text = "Loading Commits per Branch";
-        //statusTextfield.text = "";
         yield return LoadCommitsOfBranch(master);
-        //statusTextfield.text = "Totally " + project.GetCommits().Count + " commits in " + project.GetBranches().Count + " Branches in Project";
         IslandVizUI.Instance.UpdateLoadingScreenUI("Found Commits", project.GetCommits().Count.ToString()); // Update UI.
 
 
-        //taskTextfield.text = "Loading detailed content of commits";
-        //statusTextfield.text = "";
-
-        //yield return LoadCommitsContents(master, true);
-          yield return LoadCommitsContents_New(master, true, 1);
+        yield return LoadCommitsContents_New(master, true, 1);
 
 
         Debug.Log("Total MasterBundles: " + project.GetMasterBundles().Count);
         Debug.Log("Total MasterPackages: " + project.GetMasterPackages().Count);
         Debug.Log("Total MasterCompUnits: " + project.GetMasterCompUnits().Count);
 
-        Debug.Log("ferig");
-
-
-        //Finisched Loading -> next Scene Creates HexLayout Of Islands
-        //SceneManager.LoadScene(2);
+        Debug.Log("Data Loading finished");
     }
 
     private IEnumerator LoadCommitsOfBranch(Branch branch)
@@ -241,9 +201,6 @@ public class DataLoading : MonoBehaviour
 
     public IEnumerator LoadCommitsContents_New(Branch branch, bool isMaster, int currentCommitNr)
     {
-       // taskTextfield.text = "Loading detailed content of commits \n" +
-       //     "Loading Commits of branch " + branch.GetName() + " (Total " + branch.GetCommits(false).Count + " Commits in Branch)";
-
         //Preparing Meta-Info
         List<Commit> commits = branch.GetCommits(true);
         int branchLengt = commits.Count;
@@ -264,11 +221,10 @@ public class DataLoading : MonoBehaviour
         int cCount;
 
         //TODO hier zweite Beschränkung entfernen
-        for (int i = 0; (i < branchLengt)&&(i<3); i++)
+        for (int i = 0; (i < branchLengt)&&(i<8); i++)
         {
             IslandVizUI.Instance.UpdateLoadingScreenUI("Loading Commit Details", (currentCommitNr*100/(float)project.GetCommits().Count).ToString("0.00")+"%"); // Update UI.
 
-            //statusTextfield.text = "Loading Commit " + (i + 1) + " of Branch";
             Commit commit = commits[i];
             if (i == 0 && !isMaster)
             {
@@ -292,36 +248,21 @@ public class DataLoading : MonoBehaviour
             }
             yield return null;
 
-            //statusTextfield.text = "Loading Commit " + (i + 1) + "of Branch\n" +
-            //    "Loading Bundles of Commit";
             yield return Neo4JReaderContentDetails.ReadCommitsBundlesDetails(project, branch, commit, predBundleDict, nextBundleDict, thisBundleDict, Constants.useValuesFromDBWherePossible, false);
             bCount = commit.GetBundleCount();
 
-
-            //statusTextfield.text = "Loading Commit " + (i + 1) + "of Branch\n" +
-            //    "Loading Packages of Commit\n" +
-            //    "Found " + bCount + " Bundles in Commit";
             yield return Neo4JReaderContentDetails.ReadCommitsPackageDetails_New(branch, commit, predPackageDict, nextPackageDict, thisPackageDict, thisBundleDict, Constants.useValuesFromDBWherePossible, false);
             pCount = commit.GetPackageCount();
 
-            //statusTextfield.text = "Loading Commit " + (i + 1) + "of Branch\n" +
-            //    "Loading CompilationUnits of Commit\n" +
-            //    "Found " + pCount + " Packages in Commit\n" + "Found " + bCount + " Bundles in Commit";
             yield return Neo4JReaderContentDetails.ReadCommitsCompUnitDetails_New(branch, commit, predCompUnitDict, nextCompUnitDict, thisCompUnitDict, thisPackageDict, Constants.useValuesFromDBWherePossible, false);
             cCount = commit.GetPackageCount();
 
-            /*statusTextfield.text = "Loading Commit " + (i + 1) + "of Branch\n" +
-               "Loading Import & Export Relations in Commit \n" +
-               "Found " + cCount + " Compilation in Commit\n" +
-               "Found " + pCount + " Packages in Commit\n";*/
-            //TODO einkommentieren wenn richtiger Datensatz vorhanden
              yield return Neo4JReaderContentDetails.ReadCommitsImportRelations(commit, thisBundleDict, thisPackageDict, false);
 
-             /*statusTextfield.text = "Loading Commit " + (i + 1) + "of Branch\n" +
-                 "Loading Service Layer of Commit \n" +
-                 "Finished Loading Import Relations";
-            //TODO einkommentieren für Servicelayer 
-            yield return Neo4JReaderContentDetails.ReadCommitsServiceLayer(commit, thisCompUnitDict, false);*/
+            //TODO einkommentieren wenn richtiger Datensatz vorhanden
+            
+           //TODO einkommentieren & Reparieren für Servicelayer 
+           //yield return Neo4JReaderContentDetails.ReadCommitsServiceLayer(commit, thisCompUnitDict, false);
 
             //statusTextfield.text = "Finished Loading Commit " + (i + 1) + "of Branch";
 

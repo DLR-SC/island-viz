@@ -34,11 +34,11 @@ namespace DynamicGraphAlgoImplementation
         {
             if (float.IsNaN(newPos.x) || float.IsPositiveInfinity(newPos.x) || float.IsNegativeInfinity(newPos.x))
             {
-                Debug.Log("StopHere x");
+                Debug.Log("x Pos of Graph Vertex not valid");
             }
             if (float.IsNaN(newPos.z) || float.IsPositiveInfinity(newPos.z) || float.IsNegativeInfinity(newPos.z))
             {
-                Debug.Log("StopHere z");
+                Debug.Log("z Pos of Graph Vertex not valid");
             }
             position = newPos;
         }

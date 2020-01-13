@@ -15,12 +15,6 @@ public class LayoutCreation : MonoBehaviour
     public static LayoutCreation Instance { get { return instance; } }
     private static LayoutCreation instance; // The instance of this class.
 
-    /*[SerializeField]
-    private Text taskTextfield;
-    [SerializeField]
-    private Text statusTextfield;
-    [SerializeField]
-    private Text loadingDotsTextfield;*/
     private int workingThreads;
 
 
@@ -33,21 +27,12 @@ public class LayoutCreation : MonoBehaviour
         Neo4JWriterLayout.SetDatabase(database);
 
         project = GameObject.Find("DataObject").GetComponent<OSGi_Project_Script>().GetProject();
-        //StartCoroutine(AllBundlesGridCreation()); 
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-       //loadingDotsTextfield.color = new Color(loadingDotsTextfield.color.r, loadingDotsTextfield.color.g, loadingDotsTextfield.color.b, Mathf.PingPong(Time.time, 1));
     }
 
     public IEnumerator AllBundlesGridCreation()
     {
         int bundlesTotal = project.GetMasterBundles().Count;
         IslandVizUI.Instance.UpdateLoadingScreenUI("Creating Island Layout", ""); // Update UI.
-        //taskTextfield.text = "Creating Hexagon Layout for " + bundlesTotal + " Islands";
-        //statusTextfield.text = "Waiting for Islands to be completed";
         List<ProcessingStatus> coList = new List<ProcessingStatus>();
 
         workingThreads = 0;
@@ -77,8 +62,7 @@ public class LayoutCreation : MonoBehaviour
                 if (!coList[i].working)
                 {
                     finished++;
-                    //statusTextfield.text = "Finished " + finished + " islands of " + bundlesTotal;
-                    IslandVizUI.Instance.UpdateLoadingScreenUI("Creating Island Layout", (finished*100/(float)bundlesTotal).ToString("0,00")+"%"); // Update UI.
+                    IslandVizUI.Instance.UpdateLoadingScreenUI("Creating Island Layout", (finished*100/(float)bundlesTotal).ToString("0.00")+"%"); // Update UI.
                     coList.RemoveAt(i);
                 }
                 else
@@ -97,7 +81,6 @@ public class LayoutCreation : MonoBehaviour
 
         Debug.Log("All finished");
         yield return null;
-        //SceneManager.LoadScene(3);
 
     }
 
@@ -126,29 +109,10 @@ public class LayoutCreation : MonoBehaviour
         }
         yield return null;
         flag.working = false;
-        //CallBack();
 
     }
 
-    private IEnumerator CallBack()
-    {
-        if(workingThreads > 0)
-        {
-            workingThreads--;
-            IslandVizUI.Instance.UpdateLoadingScreenUI("Creating Island Layout", workingThreads + "%"); // Update UI.
-            yield return null;
-        }
-        if(workingThreads == 0)
-        {
-            if (Constants.writeNewValuesToDB)
-            {
-                yield return Neo4JWriterLayout.WriteCommitIslandsLayouted(project.GetCommits().Keys.ToList<int>());
-            }
-
-            Debug.Log("All finished");
-            yield return null;
-        }
-    }
+    
     /// <summary>
     /// If all layoutInformation for Island is available from database and no new layout is requested the grid can be created from data
     /// simply get through all compUnits of bundle and assign them to their specified cell

@@ -18,13 +18,6 @@ public class DynamicGraphCalculation : MonoBehaviour
     public static DynamicGraphCalculation Instance { get { return instance; } }
     private static DynamicGraphCalculation instance; // The instance of this class.
 
-   /* [SerializeField]
-    private Text taskTextfield;
-    [SerializeField]
-    private Text statusTextfield;
-    [SerializeField]
-    private Text loadingDotsTextfield;*/
-
     private Project project;
 
     private Dictionary<BundleMaster, MasterVertex> masterDict;
@@ -38,52 +31,37 @@ public class DynamicGraphCalculation : MonoBehaviour
         Neo4J database = GameObject.Find("DatabaseObject").GetComponent<DatabaseAccess>().GetDatabase();
         Neo4JWriterGraph.SetDatabase(database);
 
-        project = GameObject.Find("DataObject").GetComponent<OSGi_Project_Script>().GetProject();
-
         masterDict = new Dictionary<BundleMaster, MasterVertex>();
         elementDict = new Dictionary<BundleElement, HistoryGraphVertex>();
         masterEdgeDict = new Dictionary<MasterVertex, Dictionary<MasterVertex, MasterEdge>>();
 
-        //taskTextfield.text = "";
-        //statusTextfield.text = "";
-        StartCoroutine(GraphMain());
 
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        //loadingDotsTextfield.color = new Color(loadingDotsTextfield.color.r, loadingDotsTextfield.color.g, loadingDotsTextfield.color.b, Mathf.PingPong(Time.time, 1));
     }
 
     public IEnumerator GraphMain()
     {
+        IslandVizUI.Instance.UpdateLoadingScreenUI("Calculating Island Positions", ""); // Update UI.
+
+        project = GameObject.Find("DataObject").GetComponent<OSGi_Project_Script>().GetProject();
+
         List<Branch> branchList = project.GetBranches().Values.ToList<Branch>();
         branchList.Sort();
         foreach (Branch branch in branchList)
         {
-            /*taskTextfield.text = "For branch " + branch.GetName() + " (" + branch.GetCommits(false).Count + " Commits)\n" 
-                + "Create Graph from Project Datastructure";*/
             HistoryGraph historyGraph = new HistoryGraph(null);
 
             yield return FillHistoryGraphForBranch(historyGraph, branch);
 
             if (historyGraph.getFrameCount() == 0)
             {
-               // statusTextfield.text = "Branch needs no layout";
                 continue;
             }
-
-           /* taskTextfield.text = "For branch " + branch.GetName() + " (" + branch.GetCommits(false).Count + " Commits)\n"
-                + "Layout Commits";*/
             yield return Layout(historyGraph);
 
             yield return SetPositionsToBundleAndWriteDB(branch);
         }
 
         yield return null;
-        //SceneManager.LoadScene(4);
-
     }
 
     #region Create_dynamic-graph_datastructure_of_project_datastructure
@@ -261,27 +239,6 @@ public class DynamicGraphCalculation : MonoBehaviour
                 //only add graph if it has to be layouted
                 hG.addNextFrame(currentGraph);
 
-               /* if ((index + 1) / (float)totalCommitsToLoad >= 1f)
-                {
-                    statusTextfield.text = "100% completed";
-                }
-                else if ((index + 1) / (float)totalCommitsToLoad > 0.8f)
-                {
-                    statusTextfield.text = "80% completed";
-                }
-                else if ((index + 1) / (float)totalCommitsToLoad > 0.6f)
-                {
-                    statusTextfield.text = "60% completed";
-                }
-                else if ((index + 1) / (float)totalCommitsToLoad > 0.4f)
-                {
-                    statusTextfield.text = "40% completed";
-                }
-                else if ((index + 1) / (float)totalCommitsToLoad > 0.2f)
-                {
-                    statusTextfield.text = "20% completed";
-                }*/
-
             }
             yield return null;
         }
@@ -359,8 +316,9 @@ public class DynamicGraphCalculation : MonoBehaviour
 
         for(int i = 0; i<hG.getFrameCount(); i++)
         {
-            //statusTextfield.text = ((i/(float)hG.getFrameCount())*100).ToString("0.00")+"% completed";
             yield return historyGraphManager.LayoutFrame(i);
+            IslandVizUI.Instance.UpdateLoadingScreenUI("Calculating Island Positions", (100*i/hG.getFrameCount()).ToString("0.00")+"%"); // Update UI.
+
         }
 
         //TODO hier rausschreiben der Layouts
