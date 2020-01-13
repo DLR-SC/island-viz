@@ -21,6 +21,7 @@ public class LayoutCreation : MonoBehaviour
     private Text statusTextfield;
     [SerializeField]
     private Text loadingDotsTextfield;*/
+    private int workingThreads;
 
 
     private Project project;
@@ -49,16 +50,24 @@ public class LayoutCreation : MonoBehaviour
         //statusTextfield.text = "Waiting for Islands to be completed";
         List<ProcessingStatus> coList = new List<ProcessingStatus>();
 
+        workingThreads = 0;
+
         //StartCoroutines for each Bundle
         foreach(BundleMaster masterB in project.GetMasterBundles())
         {
             ProcessingStatus stat = new ProcessingStatus();
             stat.working = true;
             coList.Add(stat);
+            workingThreads++;
             StartCoroutine(CreateGridForBundle(masterB, stat, true, Constants.useValuesFromDBWherePossible, Constants.writeNewValuesToDB));
+            if (workingThreads % 10 == 0)
+            {
+                yield return null;
+            }
         }
+        yield return null;
 
-        int finished = 0;
+        /*int finished = 0;
         //Wait Until all Coroutines are finished
         while (coList.Count > 0)
         {
@@ -87,7 +96,7 @@ public class LayoutCreation : MonoBehaviour
         }
 
         Debug.Log("All finished");
-        yield return null;
+        yield return null;*/
         //SceneManager.LoadScene(3);
 
     }
@@ -117,6 +126,28 @@ public class LayoutCreation : MonoBehaviour
         }
         yield return null;
         flag.working = false;
+        CallBack();
+
+    }
+
+    private IEnumerator CallBack()
+    {
+        if(workingThreads > 0)
+        {
+            workingThreads--;
+            IslandVizUI.Instance.UpdateLoadingScreenUI("Creating Island Layout", workingThreads + "%"); // Update UI.
+            yield return null;
+        }
+        if(workingThreads == 0)
+        {
+            if (Constants.writeNewValuesToDB)
+            {
+                yield return Neo4JWriterLayout.WriteCommitIslandsLayouted(project.GetCommits().Keys.ToList<int>());
+            }
+
+            Debug.Log("All finished");
+            yield return null;
+        }
     }
     /// <summary>
     /// If all layoutInformation for Island is available from database and no new layout is requested the grid can be created from data
