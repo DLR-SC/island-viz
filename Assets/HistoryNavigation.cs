@@ -25,7 +25,7 @@ public class HistoryNavigation : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.RightArrow))
         {
-            Next();
+            StepNext();
         }
         if (Input.GetKeyDown("1"))
         {
@@ -116,9 +116,10 @@ public class HistoryNavigation : MonoBehaviour
         return currentCommitToShow;
     }
 
-    public void Next()
+    public void StepNext()
     {
-        if (currentCommitToShow == null)
+        Debug.Log("StepNextFired");
+        /*if (currentCommitToShow == null)
         {
             Commit newC = project.GetOrderedCommitList()[0];
             if (newC != null)
@@ -159,7 +160,31 @@ public class HistoryNavigation : MonoBehaviour
                 }
                 forwards = true;
             }
-        }
+        }*/
+    }
+
+    public void StepBack()
+    {
+        Debug.Log("StepBackFired");
+
+    }
+
+    public void TimelapsForwards()
+    {
+        Debug.Log("TLNextFired");
+
+    }
+
+    public void TimelapsBackwards()
+    {
+        Debug.Log("TLBackFired");
+
+    }
+
+    public void TimelapsStop()
+    {
+        Debug.Log("TLStopFired");
+
     }
 
 }
