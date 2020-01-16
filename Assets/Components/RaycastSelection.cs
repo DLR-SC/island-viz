@@ -278,8 +278,6 @@ public class RaycastSelection : AdditionalIslandVizComponent
     /// <param name="select">Wether it should be selected (true) or unselected (false).</param>
     public void ToggleSelection(Collider collider, bool select, bool addToUndo = true)
     {
-        Debug.Log(collider.name + " " + select + " " + addToUndo);
-
         if (collider.GetComponent<IslandGO>())
         {
             IslandVizInteraction.Instance.OnIslandSelect(collider.GetComponent<IslandGO>(), IslandVizInteraction.SelectionType.Select, select);
