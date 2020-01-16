@@ -63,7 +63,6 @@ public class IslandVizBehaviour : MonoBehaviour
         Shader.SetGlobalFloat("hologramScale", 0.8f);
 
         undoList = new List<Action>();
-        IslandVizInteraction.Instance.OnControllerMenuDown += Undo;
 
         StartCoroutine(IslandVizInitiationRoutine()); // Start the islandviz construction coroutine.
     }
@@ -107,6 +106,8 @@ public class IslandVizBehaviour : MonoBehaviour
     /// <param name="action">A action that will be executed when user presses undo.</param>
     public void AddUndoAction (Action action)
     {
+        Debug.Log("Added to Undo list!");
+
         undoList.Add(action);
     }
 
@@ -119,7 +120,7 @@ public class IslandVizBehaviour : MonoBehaviour
     {
         if (undoList.Count >= 2) // [Last Action|Current Action] --> We want the last action, so we take the second last item.
         {
-            IslandVizUI.Instance.MakeNotification(0.5f, "Undo");
+            IslandVizUI.Instance.MakeNotification(1f, "Undo");
 
             undoList[undoList.Count-2]?.Invoke();
             undoList.RemoveAt(undoList.Count - 2);

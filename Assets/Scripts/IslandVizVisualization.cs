@@ -393,7 +393,9 @@ public class IslandVizVisualization : MonoBehaviour
     // ################
 
     public void FlyTo (Transform target)
-    {        
+    {
+        Debug.Log("FLYTO");
+
         Vector3 endScale = Vector3.one;
         if (target.GetComponent<IslandGO>() != null)
         {
