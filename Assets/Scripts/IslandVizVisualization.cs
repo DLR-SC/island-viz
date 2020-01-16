@@ -465,11 +465,20 @@ public class IslandVizVisualization : MonoBehaviour
         Vector3 startPosition = VisualizationRoot.localPosition;
         startPosition.y = GlobalVar.hologramTableHeight;
 
+        if (endScale.x < GlobalVar.MinZoom)
+        {
+            endScale = Vector3.one * GlobalVar.MinZoom;
+        }
+        else if (endScale.x > GlobalVar.MaxZoom)
+        {
+            endScale = Vector3.one * GlobalVar.MaxZoom;
+        }
+
         float value = 0;
         while (value <= 1)
         {
-            VisualizationRoot.localScale = Vector3.Lerp(startScale, endScale, value); // TODO throwing exceptions sometimes
-            VisualizationRoot.position = Vector3.Lerp(startPosition, endPosition, value); // TODO throwing exceptions sometimes 
+            VisualizationRoot.localScale = Vector3.Lerp(startScale, endScale, value); 
+            VisualizationRoot.position = Vector3.Lerp(startPosition, endPosition, value); 
             GlobalVar.CurrentZoom = VisualizationRoot.localScale.x;
 
             OnVisualizationScaleChanged();
