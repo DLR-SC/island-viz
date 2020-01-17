@@ -25,7 +25,7 @@ public class RaycastSelection : AdditionalIslandVizComponent
     // Private
     // ################
 
-    private int laserLayerMask = 1 << 8; // Bit shift the index of the layer (8) to get a bit mask.
+    private int laserLayerMask = 1 << 8; // Bit shift the index of the layer (8) to get a bit mask. -> Only use 8th layer.
     private float laserLength = 3f; // The length of the SphereCast and the laser beam.
     private float laserThickness = 0.01f; // The thickness of the SphereCast and the laser beam.
 
@@ -155,8 +155,8 @@ public class RaycastSelection : AdditionalIslandVizComponent
 
         if (handID >= 0 && touchpadTouch[handID] && currentlyHitting[handID])
         {
-            //Collider collider = hit[handID].collider; // This local variable is very important for the undo to work!
-            ToggleSelection(hit[handID].collider, true);
+            Collider collider = hit[handID].collider; // This local variable is very important for the undo to work!
+            ToggleSelection(collider, true);
         }
     }
 
@@ -200,14 +200,11 @@ public class RaycastSelection : AdditionalIslandVizComponent
                     Hands[handID].controller.TriggerHapticPulse(250); // Vibrate
                 }
 
+                currentlyHitting[handID] = true;
+
                 // Make laser visuals look like it stops at hit.
                 lineRenderers[handID].SetPosition(0, Hands[handID].transform.position);
                 lineRenderers[handID].SetPosition(1, hit[handID].point);
-
-                if (!currentlyHitting[handID])
-                {
-                    currentlyHitting[handID] = true;
-                }
             }
             else if (currentlyHitting[handID] || hittingCollider[handID] != null) // We hit something last update, but we do not now.
             {
@@ -223,6 +220,7 @@ public class RaycastSelection : AdditionalIslandVizComponent
 
             if (hittingCollider[handID] == null)
             {
+                // Make laser visuals look like it hits nothing.
                 lineRenderers[handID].SetPosition(0, Hands[handID].transform.position);
                 lineRenderers[handID].SetPosition(1, Hands[handID].transform.position + forward[handID] * 5f);
             }
@@ -267,6 +265,10 @@ public class RaycastSelection : AdditionalIslandVizComponent
         {
             IslandVizInteraction.Instance.OnUIButtonSelected(collider.GetComponent<UI_Button>(), IslandVizInteraction.SelectionType.Highlight, select);
         }
+        else
+        {
+            IslandVizInteraction.Instance.OnOtherSelected?.Invoke(collider.gameObject, IslandVizInteraction.SelectionType.Highlight, select);
+        }
     }
 
     /// <summary>
@@ -274,55 +276,39 @@ public class RaycastSelection : AdditionalIslandVizComponent
     /// </summary>
     /// <param name="collider">The collider whose selection status is to be changed.</param>
     /// <param name="select">Wether it should be selected (true) or unselected (false).</param>
-    public void ToggleSelection(Collider collider, bool select)
+    public void ToggleSelection(Collider collider, bool select, bool addToUndo = true)
     {
         if (collider.GetComponent<IslandGO>())
         {
             IslandVizInteraction.Instance.OnIslandSelect(collider.GetComponent<IslandGO>(), IslandVizInteraction.SelectionType.Select, select);
-
-            IslandVizVisualization.Instance.FlyTo(collider.transform);
-
-            IslandVizBehaviour.Instance.AddUndoAction(delegate () {
-                ToggleSelection(collider, true);
-                IslandVizVisualization.Instance.FlyTo(collider.transform);
-            });
+            IslandVizVisualization.Instance.FlyTo(collider.transform);           
         }
         else if (collider.GetComponent<Region>())
         {
-            IslandVizInteraction.Instance.OnRegionSelect(collider.GetComponent<Region>(), IslandVizInteraction.SelectionType.Select, select);
-
-            //IslandVizVisualization.Instance.FlyTo(collider.transform);
-
-            IslandVizBehaviour.Instance.AddUndoAction(delegate () {
-                ToggleSelection(collider, true);
-                //IslandVizVisualization.Instance.FlyTo(collider.transform);
-            });
+            IslandVizInteraction.Instance.OnRegionSelect(collider.GetComponent<Region>(), IslandVizInteraction.SelectionType.Select, select);            
         }
         else if (collider.GetComponent<Building>())
         {
-            IslandVizInteraction.Instance.OnBuildingSelect(collider.GetComponent<Building>(), IslandVizInteraction.SelectionType.Select, select);
-
-            //IslandVizVisualization.Instance.FlyTo(collider.transform);
-
-            IslandVizBehaviour.Instance.AddUndoAction(delegate () {
-                ToggleSelection(collider, true);
-                //IslandVizVisualization.Instance.FlyTo(collider.transform);
-            });
+            IslandVizInteraction.Instance.OnBuildingSelect(collider.GetComponent<Building>(), IslandVizInteraction.SelectionType.Select, select);          
         }
         else if (collider.GetComponent<DependencyDock>())
         {
-            IslandVizInteraction.Instance.OnDockSelect(collider.GetComponent<DependencyDock>(), IslandVizInteraction.SelectionType.Select, select);
-
-            IslandVizBehaviour.Instance.AddUndoAction(delegate () {
-                ToggleSelection(collider, true);
-            });
+            IslandVizInteraction.Instance.OnDockSelect(collider.GetComponent<DependencyDock>(), IslandVizInteraction.SelectionType.Select, select);           
         }
         else if (collider.GetComponent<UI_Button>())
         {
             IslandVizInteraction.Instance.OnUIButtonSelected(collider.GetComponent<UI_Button>(), IslandVizInteraction.SelectionType.Select, select);
+            addToUndo = false;
+        }
+        else
+        {
+            IslandVizInteraction.Instance.OnOtherSelected?.Invoke(collider.gameObject, IslandVizInteraction.SelectionType.Select, select);
+        }
 
+        if (select && addToUndo)
+        {
             IslandVizBehaviour.Instance.AddUndoAction(delegate () {
-                ToggleSelection(collider, true);
+                ToggleSelection(collider, true, false);
             });
         }
     }

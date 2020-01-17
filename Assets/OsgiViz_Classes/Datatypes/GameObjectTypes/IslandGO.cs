@@ -34,6 +34,8 @@ namespace OsgiViz.Unity.Island
             Coast = null;
 
             IslandVizInteraction.Instance.OnIslandSelect += OnSelection;
+            IslandVizVisualization.Instance.OnIslandVisible += MakeIslandVisible;
+            IslandVizVisualization.Instance.OnIslandInvisible += MakeIslandInvisible;
         }
 
 
@@ -87,7 +89,6 @@ namespace OsgiViz.Unity.Island
         {
             if (other.tag == "TableContent")
             {
-                MakeIslandVisible();
                 IslandVizVisualization.Instance.OnIslandVisible(this);
             }
         }
@@ -95,7 +96,6 @@ namespace OsgiViz.Unity.Island
         {
             if (other.tag == "TableContent")
             {
-                MakeIslandInvisible();
                 IslandVizVisualization.Instance.OnIslandInvisible(this);
             }
         }
@@ -108,24 +108,30 @@ namespace OsgiViz.Unity.Island
         // Visible & Invisible
         // ################
 
-        private void MakeIslandVisible ()
+        private void MakeIslandVisible (IslandGO island)
         {
-            // Enable all children, i.e. make island visible.
-            for (int i = 0; i < transform.childCount; i++)
+            if (island == this)
             {
-                transform.GetChild(i).gameObject.SetActive(true);
-            }
-            Visible = true;
+                // Enable all children, i.e. make island visible.
+                foreach (var region in Regions)
+                {
+                    region.gameObject.SetActive(true);
+                }
+                Visible = true;
+            }            
         }
 
-        private void MakeIslandInvisible()
+        private void MakeIslandInvisible(IslandGO island)
         {
-            // Disable all children, i.e. make island invisible.
-            for (int i = 0; i < transform.childCount; i++)
+            if (island == this)
             {
-                transform.GetChild(i).gameObject.SetActive(false);
-            }
-            Visible = false;
+                // Disable all children, i.e. make island invisible.
+                foreach (var region in Regions)
+                {
+                    region.gameObject.SetActive(false);
+                }
+                Visible = false;
+            }            
         }
 
         
@@ -149,7 +155,7 @@ namespace OsgiViz.Unity.Island
         /// <returns></returns>
         public IEnumerator ApplyZoomLevelRoutine (ZoomLevel newZoomLevel)
         {
-            if (CurrentZoomLevel == newZoomLevel)
+            if (CurrentZoomLevel == newZoomLevel || !Visible)
             {
                 // Do nothing.
             }
@@ -172,12 +178,13 @@ namespace OsgiViz.Unity.Island
         {
             int counter = 0;
 
-            // Disable region colliders & enable buildings.
             foreach (var region in Regions)
             {
+                // Disable region colliders.
                 if (region.GetComponent<MeshCollider>().enabled)
-                    region.GetComponent<MeshCollider>().enabled = true; // TODO?
+                    region.GetComponent<MeshCollider>().enabled = true;
 
+                // Enable buildings.
                 foreach (var building in region.getBuildings())
                 {
                     if (!building.gameObject.activeSelf)
@@ -193,10 +200,6 @@ namespace OsgiViz.Unity.Island
                     }
                 }
             }
-
-            //// Disable island collider.
-            //if (GetComponent<MeshCollider>().enabled)
-            //    GetComponent<MeshCollider>().enabled = false;
         }
         
         public IEnumerator ApplyMediumZoomLevel()

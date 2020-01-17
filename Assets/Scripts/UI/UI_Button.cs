@@ -55,9 +55,9 @@ public class UI_Button : MonoBehaviour
 
     public void Click ()
     {
-        Debug.Log(gameObject.name + " was pressed!");
+        //Debug.Log(gameObject.name + " was pressed!");
 
-        if (OnClick != null)
-            OnClick.Invoke();
+        //if (OnClick != null)
+        OnClick?.Invoke();
     }
 }
