@@ -9,6 +9,7 @@ using OSGI_Datatypes.OrganisationElements;
 using OSGI_Datatypes.ArchitectureElements;
 using System.Collections;
 using UnityEngine;
+using OsgiViz.SoftwareArtifact;
 
 namespace OSGI_Datatypes.DataStructureCreation
 {
@@ -24,7 +25,7 @@ namespace OSGI_Datatypes.DataStructureCreation
             database = neo;
         }
 
-        public static IEnumerator ReadCommitsBundlesDetails(Project project, Branch b, Commit c, Dictionary<int, BundleElement> prevBundleDict, Dictionary<int, BundleElement> nextBundleDict, Dictionary<int, BundleElement> thisBundleDict, bool readLayoutInfo, bool printInfo)
+        public static IEnumerator ReadCommitsBundlesDetails(Project project, Branch b, Commit c, Dictionary<int, Bundle> prevBundleDict, Dictionary<int, Bundle> nextBundleDict, Dictionary<int, Bundle> thisBundleDict, bool readLayoutInfo, bool printInfo)
         {
             if (readLayoutInfo)
             {
@@ -52,7 +53,7 @@ namespace OSGI_Datatypes.DataStructureCreation
                 string name = bundleInfo["bundleName"].As<string>();
                 string sName = bundleInfo["bundleSName"].As<string>();
 
-                BundleElement bundle = new BundleElement(id, name, sName, c);
+                Bundle bundle = new Bundle(id, name, sName, c);
                 if (thisBundleDict != null)
                 {
                     thisBundleDict.Add(id, bundle);
@@ -90,7 +91,7 @@ namespace OSGI_Datatypes.DataStructureCreation
                     }
                     if (prevId != -1)
                     {
-                        BundleElement prevBundle;
+                        Bundle prevBundle;
                         prevBundleDict.TryGetValue(prevId, out prevBundle);
                         if (prevBundle != null)
                         {
@@ -115,7 +116,7 @@ namespace OSGI_Datatypes.DataStructureCreation
                         }
                         if (nextId != -1)
                         {
-                            BundleElement nextBundle;
+                            Bundle nextBundle;
                             nextBundleDict.TryGetValue(nextId, out nextBundle);
                             if (nextBundle != null)
                             {
@@ -135,12 +136,12 @@ namespace OSGI_Datatypes.DataStructureCreation
 
                 if (printInfo)
                 {
-                    Debug.Log("Read Bundle" + bundle.GetName());
+                    Debug.Log("Read Bundle" + bundle.getName());
                 }
             }
         }
 
-        public static IEnumerator ReadBundlesPackageDetails(Branch b, Commit c, BundleElement bundle, Dictionary<int, PackageElement> prevPackDict, Dictionary<int, PackageElement> nextPackDict, bool readLayoutInfo, bool printInfo)
+        public static IEnumerator ReadBundlesPackageDetails(Branch b, Commit c, Bundle bundle, Dictionary<int, Package> prevPackDict, Dictionary<int, Package> nextPackDict, bool readLayoutInfo, bool printInfo)
         {
             if (readLayoutInfo)
             {
@@ -177,7 +178,7 @@ namespace OSGI_Datatypes.DataStructureCreation
                 {
                     isExported = true;
                 }
-                PackageElement package = new PackageElement(id, name, qName, bundle, isExported);
+                Package package = new Package(id, name, bundle, isExported);
 
                 yield return null;
 
@@ -211,7 +212,7 @@ namespace OSGI_Datatypes.DataStructureCreation
                     }
                     if (prevId != -1)
                     {
-                        PackageElement prevPackage;
+                        Package prevPackage;
                         prevPackDict.TryGetValue(prevId, out prevPackage);
                         if (prevPackage != null)
                         {
@@ -237,7 +238,7 @@ namespace OSGI_Datatypes.DataStructureCreation
                         }
                         if (nextId != -1)
                         {
-                            PackageElement nextPackage;
+                            Package nextPackage;
                             nextPackDict.TryGetValue(nextId, out nextPackage);
                             if (nextPackage != null)
                             {
@@ -254,14 +255,14 @@ namespace OSGI_Datatypes.DataStructureCreation
             }
             if (printInfo)
             {
-                Debug.Log("Found " + bundle.GetPackages().Count + " Packages in Bundle " + bundle.GetName());
+                Debug.Log("Found " + bundle.getPackages().Count + " Packages in Bundle " + bundle.getName());
             }
 
             yield return null;
         }
 
 
-        public static IEnumerator ReadPackagesCompUnitDetails(Branch b, Commit c, PackageElement package, Dictionary<int, CompUnitElement> prevCompUnitDict, Dictionary<int, CompUnitElement> nextCompUnitDict, bool readLayoutInfo, bool printInfo)
+        public static IEnumerator ReadPackagesCompUnitDetails(Branch b, Commit c, Package package, Dictionary<int, CompilationUnit> prevCompUnitDict, Dictionary<int, CompilationUnit> nextCompUnitDict, bool readLayoutInfo, bool printInfo)
         {
             //Remeber: No Correspond relation between compUnits possible (only equal) so no need to search for correspond
             string statement = "MATCH (p:PackageFragmentImpl)-[:HAS]->(cu:CompilationUnitImpl)-[:CLASS]->(c) " +
@@ -287,13 +288,18 @@ namespace OSGI_Datatypes.DataStructureCreation
                 string name = cuInfo["name"].As<string>();
                 string qName = cuInfo["qName"].As<string>();
                 bool isInterface = cuInfo["isInterface"].As<bool>();
+                OsgiViz.Core.type t = OsgiViz.Core.type.Class;
+                if (isInterface)
+                {
+                    t = OsgiViz.Core.type.Interface;
+                }
                 int loc = 0;
                 if (cuInfo["loc"] != null)
                 {
                     loc = cuInfo["loc"].As<int>();
                 }
 
-                CompUnitElement compUnit = new CompUnitElement(id, name, qName, loc, isInterface, package);
+                CompilationUnit compUnit = new CompilationUnit(id, name, t, OsgiViz.Core.modifier.Default, loc, package);
 
                 yield return null;
 
@@ -328,7 +334,7 @@ namespace OSGI_Datatypes.DataStructureCreation
                     
                     if (prevId != -1)
                     {
-                        CompUnitElement prevCompUnit;
+                        CompilationUnit prevCompUnit;
                         prevCompUnitDict.TryGetValue(prevId, out prevCompUnit);
                         if (prevCompUnit != null)
                         {
@@ -354,7 +360,7 @@ namespace OSGI_Datatypes.DataStructureCreation
                         }
                         if (nextId != -1)
                         {
-                            CompUnitElement nextCompUnit;
+                            CompilationUnit nextCompUnit;
                             nextCompUnitDict.TryGetValue(nextId, out nextCompUnit);
                             if (nextCompUnit != null)
                             {
@@ -372,21 +378,21 @@ namespace OSGI_Datatypes.DataStructureCreation
 
             if (printInfo)
             {
-                Debug.Log("Found " + package.GetCompUnits().Count + " CompUnits in Package " + package.GetName());
+                Debug.Log("Found " + package.getCompilationUnits().Count + " CompUnits in Package " + package.getName());
             }
             yield return null;
         }
         public static IEnumerator ReadCommitsImportRelations(Commit c, bool printInfo)
         {
-            Dictionary<int, BundleElement> bundleDict = c.GetBundleDictionary();
-            Dictionary<int, PackageElement> packageDict = c.GetPackageDictionary();
+            Dictionary<int, Bundle> bundleDict = c.GetBundleDictionary();
+            Dictionary<int, Package> packageDict = c.GetPackageDictionary();
             yield return null;
 
             yield return ReadCommitsImportRelations(c, bundleDict, packageDict, printInfo);
         }
 
 
-        public static IEnumerator ReadCommitsImportRelations(Commit c, Dictionary<int, BundleElement> bundleDict, Dictionary<int, PackageElement> packageDict, bool printInfo)
+        public static IEnumerator ReadCommitsImportRelations(Commit c, Dictionary<int, Bundle> bundleDict, Dictionary<int, Package> packageDict, bool printInfo)
         {
             string statement = "MATCH (c:CommitImpl)-[:HAS]->(b:BundleImpl) WHERE id(c)=$cid " +
                 "OPTIONAL MATCH (b)-[:REQUIRED_BUNDLES]->(bReq:BundleImpl) with b, collect(distinct id(bReq)) AS breqlist " +
@@ -415,7 +421,7 @@ namespace OSGI_Datatypes.DataStructureCreation
                     impPack = bInfo["importPacks"].As<List<int>>();
                 }
                 //Get Relevant Bundle
-                BundleElement currentBundle;
+                Bundle currentBundle;
                 bundleDict.TryGetValue(bId, out currentBundle);
                 if (currentBundle == null)
                 {
@@ -427,7 +433,7 @@ namespace OSGI_Datatypes.DataStructureCreation
                 {
                     for (int j = 0; j < reqBundleIds.Count; j++)
                     {
-                        BundleElement reqBundle;
+                        Bundle reqBundle;
                         bundleDict.TryGetValue(reqBundleIds[j], out reqBundle);
                         if (reqBundle == null)
                         {
@@ -443,14 +449,14 @@ namespace OSGI_Datatypes.DataStructureCreation
                 {
                     for (int j = 0; j < impPack.Count; j++)
                     {
-                        PackageElement importedPack;
+                        Package importedPack;
                         packageDict.TryGetValue(impPack[j], out importedPack);
                         if (importedPack == null)
                         {
                             Debug.LogWarning("When Adding import relations to commit " + c.GetNeoId() + " found Bundle " + bId + " that imports Package " + impPack[j] + " that wasn't found previously when reading commits artefacts");
                             continue;
                         }
-                        currentBundle.AddImportedPackage(importedPack);
+                        currentBundle.addImportedPackage(importedPack);
                     }
                 }
                 if (i % 10 == 0)
@@ -464,12 +470,12 @@ namespace OSGI_Datatypes.DataStructureCreation
 
         public static IEnumerator ReadCommitsServiceLayer(Commit c, bool printInfo)
         {
-            Dictionary<int, CompUnitElement> cuDict = c.GetCompUnitDictionary();
+            Dictionary<int, CompilationUnit> cuDict = c.GetCompUnitDictionary();
             yield return null;
             yield return ReadCommitsServiceLayer(c, cuDict, printInfo);
         }
 
-        public static IEnumerator ReadCommitsServiceLayer(Commit c, Dictionary<int, CompUnitElement> cuDict, bool printInfo)
+        public static IEnumerator ReadCommitsServiceLayer(Commit c, Dictionary<int, CompilationUnit> cuDict, bool printInfo)
         {
             Dictionary<int, Service> serviceDict = new Dictionary<int, Service>();
             yield return ReadCommitsServices(c, cuDict, serviceDict, printInfo);
@@ -482,7 +488,7 @@ namespace OSGI_Datatypes.DataStructureCreation
             yield return null;
         }
 
-        private static IEnumerator ReadCommitsServices(Commit c, Dictionary<int, CompUnitElement> compUnitDict, Dictionary<int, Service> serviceDict, bool printInfo)
+        private static IEnumerator ReadCommitsServices(Commit c, Dictionary<int, CompilationUnit> compUnitDict, Dictionary<int, Service> serviceDict, bool printInfo)
         {
             string statement = "MATCH (c:CommitImpl)-[:HAS]->(:BundleImpl)-[:HAS]->(:ServiceComponentImpl)-->(s:ServiceImpl)-[:IMPLEMENT]->(i:InterfaceImpl), " +
                 "(cu)-[:CLASS]->(i) " +
@@ -503,7 +509,7 @@ namespace OSGI_Datatypes.DataStructureCreation
                 int cuId = sInfo["cuId"].As<int>();
 
                 //Find CompilationUnit that is Interface
-                CompUnitElement cuE;
+                CompilationUnit cuE;
                 compUnitDict.TryGetValue(cuId, out cuE);
                 if (cuE == null)
                 {
@@ -517,7 +523,7 @@ namespace OSGI_Datatypes.DataStructureCreation
             }
         }
 
-        private static IEnumerator ReadCommitsServiceComponents(Commit c, Dictionary<int, CompUnitElement> compUnitDict, Dictionary<int, Service> serviceDict, bool printInfo)
+        private static IEnumerator ReadCommitsServiceComponents(Commit c, Dictionary<int, CompilationUnit> compUnitDict, Dictionary<int, Service> serviceDict, bool printInfo)
         {
             string statement = "MATCH (c:CommitImpl)-[:HAS]->(:BundleImpl)-[:HAS]->(sc:ServiceComponentImpl)-[:HAS]->(cl:ClassImpl), " +
                 "(cu: CompilationUnitImpl) -[:CLASS]->(cl) " +
@@ -542,7 +548,7 @@ namespace OSGI_Datatypes.DataStructureCreation
                 {
                     name = scInfo["sc.name"].As<string>();
                 }
-                CompUnitElement cu = null;
+                CompilationUnit cu = null;
                 if (scInfo["culist"] != null)
                 {
                     List<int> ids = scInfo["culist"].As<List<int>>();
@@ -578,7 +584,7 @@ namespace OSGI_Datatypes.DataStructureCreation
                             Debug.LogWarning("When reading ServicesComponent " + id + " found provided Service " + psIds[j] + " that wasn't found previously when reading commits services");
                             continue;
                         }
-                        sc.AddProvidedService(pS, true);
+                        sc.addProvidedService(pS);
                     }
                 }
                 //referenced Services
@@ -594,7 +600,7 @@ namespace OSGI_Datatypes.DataStructureCreation
                             Debug.LogWarning("When reading ServicesComponent " + id + " found referenced Service " + rsIds[j] + " that wasn't found previously when reading commits services");
                             continue;
                         }
-                        sc.AddReferencedService(rS, true);
+                        sc.addReferencedService(rS);
                     }
                 }
                 yield return null;
@@ -605,7 +611,7 @@ namespace OSGI_Datatypes.DataStructureCreation
 
         #region AlternativeReading
 
-        public static IEnumerator ReadCommitsPackageDetails_New(Branch b, Commit c, Dictionary<int, PackageElement> prevPackDict, Dictionary<int, PackageElement> nextPackDict, Dictionary<int, PackageElement> thisPackDict, Dictionary<int, BundleElement> thisBundleDict, bool readLayoutInfo, bool printInfo)
+        public static IEnumerator ReadCommitsPackageDetails_New(Branch b, Commit c, Dictionary<int, Package> prevPackDict, Dictionary<int, Package> nextPackDict, Dictionary<int, Package> thisPackDict, Dictionary<int, Bundle> thisBundleDict, bool readLayoutInfo, bool printInfo)
         {
             if (readLayoutInfo)
             {
@@ -629,7 +635,7 @@ namespace OSGI_Datatypes.DataStructureCreation
 
             yield return null;
 
-            BundleElement bundle = null;
+            Bundle bundle = null;
 
             for (int i = 0; i < resList.Count; i++)
             {
@@ -655,7 +661,7 @@ namespace OSGI_Datatypes.DataStructureCreation
                 {
                     isExported = true;
                 }
-                PackageElement package = new PackageElement(id, name, qName, bundle, isExported);
+                Package package = new Package(id, name, bundle, isExported);
                 thisPackDict.Add(id, package);
 
                 yield return null;
@@ -690,7 +696,7 @@ namespace OSGI_Datatypes.DataStructureCreation
                     }
                     if (prevId != -1)
                     {
-                        PackageElement prevPackage;
+                        Package prevPackage;
                         prevPackDict.TryGetValue(prevId, out prevPackage);
                         if (prevPackage != null)
                         {
@@ -716,7 +722,7 @@ namespace OSGI_Datatypes.DataStructureCreation
                         }
                         if (nextId != -1)
                         {
-                            PackageElement nextPackage;
+                            Package nextPackage;
                             nextPackDict.TryGetValue(nextId, out nextPackage);
                             if (nextPackage != null)
                             {
@@ -736,13 +742,13 @@ namespace OSGI_Datatypes.DataStructureCreation
             }
             if (printInfo)
             {
-                Debug.Log("Found " + bundle.GetPackages().Count + " Packages in Bundle " + bundle.GetName());
+                Debug.Log("Found " + bundle.getPackages().Count + " Packages in Bundle " + bundle.getName());
             }
 
             yield return null;
         }
 
-        public static IEnumerator ReadCommitsCompUnitDetails_New(Branch b, Commit c, Dictionary<int, CompUnitElement> prevCompUnitDict, Dictionary<int, CompUnitElement> nextCompUnitDict, Dictionary<int, CompUnitElement> thisCompUnitDict, Dictionary<int, PackageElement> thisPackageDict, bool readLayoutInfo, bool printInfo)
+        public static IEnumerator ReadCommitsCompUnitDetails_New(Branch b, Commit c, Dictionary<int, CompilationUnit> prevCompUnitDict, Dictionary<int, CompilationUnit> nextCompUnitDict, Dictionary<int, CompilationUnit> thisCompUnitDict, Dictionary<int, Package> thisPackageDict, bool readLayoutInfo, bool printInfo)
         {
             //Remeber: No Correspond relation between compUnits possible (only equal) so no need to search for correspond
             string statement = "MATCH (com:CommitImpl)-[:HAS]->(b:BundleImpl)-[:USE]->(p:PackageFragmentImpl)-[:HAS]->(cu:CompilationUnitImpl)-[:CLASS]->(c) WHERE id(com)= $cid " +
@@ -760,7 +766,7 @@ namespace OSGI_Datatypes.DataStructureCreation
 
             yield return null;
 
-            PackageElement package = null;
+            Package package = null;
 
             for (int i = 0; i < resList.Count; i++)
             {
@@ -783,13 +789,18 @@ namespace OSGI_Datatypes.DataStructureCreation
                 string name = cuInfo["name"].As<string>();
                 string qName = cuInfo["qName"].As<string>();
                 bool isInterface = cuInfo["isInterface"].As<bool>();
+                OsgiViz.Core.type t = OsgiViz.Core.type.Class;
+                if (isInterface)
+                {
+                    t = OsgiViz.Core.type.Interface;
+                }
                 int loc = 0;
                 if (cuInfo["loc"] != null)
                 {
                     loc = cuInfo["loc"].As<int>();
                 }
 
-                CompUnitElement compUnit = new CompUnitElement(id, name, qName, loc, isInterface, package);
+                CompilationUnit compUnit = new CompilationUnit(id, name, t, OsgiViz.Core.modifier.Default, loc, package);
                 thisCompUnitDict.Add(id, compUnit);
                 yield return null;
 
@@ -827,7 +838,7 @@ namespace OSGI_Datatypes.DataStructureCreation
                     }
                     if (prevId != -1)
                     {
-                        CompUnitElement prevCompUnit;
+                        CompilationUnit prevCompUnit;
                         prevCompUnitDict.TryGetValue(prevId, out prevCompUnit);
                         if (prevCompUnit != null)
                         {
@@ -853,7 +864,7 @@ namespace OSGI_Datatypes.DataStructureCreation
                         }
                         if (nextId != -1)
                         {
-                            CompUnitElement nextCompUnit;
+                            CompilationUnit nextCompUnit;
                             nextCompUnitDict.TryGetValue(nextId, out nextCompUnit);
                             if (nextCompUnit != null)
                             {
@@ -874,7 +885,7 @@ namespace OSGI_Datatypes.DataStructureCreation
 
             if (printInfo)
             {
-                Debug.Log("Found " + package.GetCompUnits().Count + " CompUnits in Package " + package.GetName());
+                Debug.Log("Found " + package.getCompilationUnits().Count + " CompUnits in Package " + package.getName());
             }
             yield return null;
         }

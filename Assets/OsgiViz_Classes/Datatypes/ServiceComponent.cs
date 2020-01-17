@@ -6,6 +6,7 @@ namespace OsgiViz.SoftwareArtifact
 {
     public class ServiceComponent {
 
+        private int neoId;
         private string name;
         private CompilationUnit implementationCU;
         private List<Service> providedServices;
@@ -13,6 +14,14 @@ namespace OsgiViz.SoftwareArtifact
 
         public ServiceComponent(string n, CompilationUnit cu)
         {
+            name = n;
+            providedServices = new List<Service>();
+            referencedServices = new List<Service>();
+            implementationCU = cu;
+        }
+        public ServiceComponent(int id, string n, CompilationUnit cu)
+        {
+            neoId = id;
             name = n;
             providedServices = new List<Service>();
             referencedServices = new List<Service>();

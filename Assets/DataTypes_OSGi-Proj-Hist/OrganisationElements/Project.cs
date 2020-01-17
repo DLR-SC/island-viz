@@ -121,12 +121,12 @@ namespace OSGI_Datatypes.OrganisationElements
             return mcList;
         }
 
-        public int GetMaxLocInProject()
+        public long GetMaxLocInProject()
         {
-            int maxLoc = 0;
+            long maxLoc = 0;
             foreach(BundleMaster bm in masterBundles)
             {
-                int l = bm.GetMaxLoc();
+                long l = bm.GetMaxLoc();
                 if(maxLoc < l)
                 {
                     maxLoc = l;

@@ -1,4 +1,7 @@
-﻿using System.Collections;
+﻿//heid_el, 17.01.2020 ArchitectureElements.ServiceCompontent obsolete
+//replaced by original SoftwareArtifacts.ServiceComponent Package Class
+
+/*using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using OSGI_Datatypes.OrganisationElements;
@@ -41,4 +44,4 @@ namespace OSGI_Datatypes.ArchitectureElements
         }
     
     }
-}
+}*/

@@ -25,12 +25,12 @@ public class BuildingProvider_Script : MonoBehaviour
     private float levelRange;
 
 
-    public void Initialise(int maxLoc)
+    public void Initialise(long maxLoc)
     {
         levelRange = Mathf.Sqrt(maxLoc) / nrOfLevels;
     }
 
-    public List<object> GetBuildingPrefabForLoc(int loc)
+    public List<object> GetBuildingPrefabForLoc(long loc)
     {
         int level = Mathf.Min(Mathf.FloorToInt(Mathf.Sqrt(loc) / levelRange), nrOfLevels - 1);
         return new List<object> { GetPrefabOf(level), level };

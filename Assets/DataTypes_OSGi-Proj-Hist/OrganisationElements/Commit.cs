@@ -20,8 +20,8 @@ namespace OSGI_Datatypes.OrganisationElements
 
         //Artefakts
         List<Bundle> bundles;
-        List<ArchitectureElements.Service> services;
-        List<ArchitectureElements.ServiceComponent> serviceComponents;
+        List<Service> services;
+        List<ServiceComponent> serviceComponents;
 
         //History
         Dictionary<Branch, Commit> next;
@@ -42,8 +42,8 @@ namespace OSGI_Datatypes.OrganisationElements
             issues = issueList;
 
             bundles = new List<Bundle>();
-            services = new List<ArchitectureElements.Service>();
-            serviceComponents = new List<ArchitectureElements.ServiceComponent>();
+            services = new List<Service>();
+            serviceComponents = new List<ServiceComponent>();
             next = new Dictionary<Branch, Commit>();
             previous = new Dictionary<Branch, Commit>();
         }
@@ -53,11 +53,11 @@ namespace OSGI_Datatypes.OrganisationElements
         {
             bundles.Add(b);
         }
-        public void AddService(ArchitectureElements.Service s)
+        public void AddService(Service s)
         {
             services.Add(s);
         }
-        public void AddServiceComponent(ArchitectureElements.ServiceComponent sc)
+        public void AddServiceComponent(ServiceComponent sc)
         {
             serviceComponents.Add(sc);
         }

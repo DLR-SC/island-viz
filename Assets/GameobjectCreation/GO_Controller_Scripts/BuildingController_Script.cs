@@ -6,6 +6,7 @@ using OSGI_Datatypes.OrganisationElements;
 using OSGI_Datatypes.ComposedTypes;
 using Assets;
 using OsgiViz.Unity.Island;
+using OsgiViz.SoftwareArtifact;
 
 public class BuildingController_Script : MonoBehaviour
 {
@@ -32,8 +33,8 @@ public class BuildingController_Script : MonoBehaviour
         }
         if (tls == TimelineStatus.present)
         {
-            CompUnitElement cuCurrent = compUnit.GetElement(c);
-            int loc = cuCurrent.GetLoc();
+            CompilationUnit cuCurrent = compUnit.GetElement(c);
+            long loc = cuCurrent.getLoc();
             List<object> prefabAndBucket = bpScript.GetBuildingPrefabForLoc(loc);
 
             int newBucket = (int)prefabAndBucket[1];
@@ -71,7 +72,7 @@ public class BuildingController_Script : MonoBehaviour
                 
 
             }
-            buildingGo.name = cuCurrent.GetName();
+            buildingGo.name = cuCurrent.getName();
             Building buildingComponent = buildingGo.GetComponent<Building>();
             /*buildingComponent.setCU(cuCurrent);
             cu.setGameObject(building);

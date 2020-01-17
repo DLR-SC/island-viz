@@ -11,6 +11,7 @@ using GraphBasics;
 using DynamicGraphAlgoImplementation.HistoryGraphManager;
 using UnityEngine.UI;
 using Neo4JDriver;
+using OsgiViz.SoftwareArtifact;
 
 public class DynamicGraphCalculation : MonoBehaviour
 {
@@ -21,7 +22,7 @@ public class DynamicGraphCalculation : MonoBehaviour
     private Project project;
 
     private Dictionary<BundleMaster, MasterVertex> masterDict;
-    private Dictionary<BundleElement, HistoryGraphVertex> elementDict;
+    private Dictionary<Bundle, HistoryGraphVertex> elementDict;
     private Dictionary<MasterVertex, Dictionary<MasterVertex, MasterEdge>> masterEdgeDict;
 
     // Start is called before the first frame update
@@ -32,7 +33,7 @@ public class DynamicGraphCalculation : MonoBehaviour
         Neo4JWriterGraph.SetDatabase(database);
 
         masterDict = new Dictionary<BundleMaster, MasterVertex>();
-        elementDict = new Dictionary<BundleElement, HistoryGraphVertex>();
+        elementDict = new Dictionary<Bundle, HistoryGraphVertex>();
         masterEdgeDict = new Dictionary<MasterVertex, Dictionary<MasterVertex, MasterEdge>>();
 
 
@@ -82,7 +83,7 @@ public class DynamicGraphCalculation : MonoBehaviour
         }
     }
 
-    private float VertexRadiusCaclulation(BundleElement b, Commit c)
+    private float VertexRadiusCaclulation(Bundle b, Commit c)
     {
         int maxRingTotal = b.GetMaster().GetGrid().GetOuterAssignedTotal(c);
         int maxRingSegment = b.GetMaster().GetGrid().GetOuterAssignedFirstTwoSixths(c);
@@ -122,7 +123,7 @@ public class DynamicGraphCalculation : MonoBehaviour
             int bundleCounter = 0;
 
             //Vertex Centered
-            foreach (BundleElement bundle in commitList[index].GetBundles())
+            foreach (Bundle bundle in commitList[index].GetBundles())
             {
                 //create new HistoryGraphVertex for Bundle and add position if possible
                 bundleCounter++;
@@ -153,7 +154,7 @@ public class DynamicGraphCalculation : MonoBehaviour
                 //if commit is not the first to be loaded, bundle might have a predecessor that is relevant
                 if (index == 0 || index > firstCommitToLoad)
                 {
-                    BundleElement predBundle = bundle.GetPrevious(b);
+                    Bundle predBundle = bundle.GetPrevious(b);
                     if (predBundle != null)
                     {
                         HistoryGraphVertex predVertex;
@@ -186,13 +187,13 @@ public class DynamicGraphCalculation : MonoBehaviour
             //if commit has to be layouted add Edges
             if (index >= firstCommitToLayout)
             {
-                foreach (BundleElement bundle in commitList[index].GetBundles())
+                foreach (Bundle bundle in commitList[index].GetBundles())
                 {
                     //Collect import betwenn Bundles based on bundles importing packages
-                    Dictionary<BundleElement, int> importCount = new Dictionary<BundleElement, int>();
-                    foreach (PackageElement importedPackage in bundle.GetImportedPackages())
+                    Dictionary<Bundle, int> importCount = new Dictionary<Bundle, int>();
+                    foreach (Package importedPackage in bundle.getImportedPackages())
                     {
-                        BundleElement parentBundle = importedPackage.GetParentBundle();
+                        Bundle parentBundle = importedPackage.getBundle();
                         if (importCount.ContainsKey(parentBundle))
                         {
                             importCount[parentBundle]++;
@@ -203,7 +204,7 @@ public class DynamicGraphCalculation : MonoBehaviour
                         }
                     }
                     //write Edges to Graphs
-                    foreach (KeyValuePair<BundleElement, int> kvp in importCount)
+                    foreach (KeyValuePair<Bundle, int> kvp in importCount)
                     {
                         HistoryGraphVertex source = elementDict[bundle];
                         HistoryGraphVertex target = elementDict[kvp.Key];
@@ -342,7 +343,7 @@ public class DynamicGraphCalculation : MonoBehaviour
     private IEnumerator SetPositionToBundleCollectData(List<Dictionary<string, object>> parameterList)
     {
         int counter = 0;
-        foreach (KeyValuePair<BundleElement, HistoryGraphVertex> kvp in elementDict)
+        foreach (KeyValuePair<Bundle, HistoryGraphVertex> kvp in elementDict)
         {
             counter++;
             Vector3 pos = kvp.Value.getPosition();

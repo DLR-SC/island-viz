@@ -9,6 +9,7 @@ using System;
 using UnityEngine.SceneManagement;
 using Assets;
 using Neo4JDriver;
+using OsgiViz.SoftwareArtifact;
 
 public class DataLoading : MonoBehaviour
 {
@@ -129,8 +130,8 @@ public class DataLoading : MonoBehaviour
         int branchLengt = b.GetCommits(false).Count;
         int commitIndex = b.GetIndexOfCommit(c);
 
-        Dictionary<int, BundleElement> predBundleDict = null;
-        Dictionary<int, BundleElement> nextBundleDict = null;
+        Dictionary<int, Bundle> predBundleDict = null;
+        Dictionary<int, Bundle> nextBundleDict = null;
 
         if (c.GetPrevious(b) != null)
         {
@@ -152,9 +153,9 @@ public class DataLoading : MonoBehaviour
         //ReadPackages of Bundle
         for (int i = 0; i < c.GetBundles().Count; i++)
         {
-            BundleElement bundle = c.GetBundles()[i];
-            Dictionary<int, PackageElement> prevPackDict = null;
-            Dictionary<int, PackageElement> nextPackDict = null;
+            Bundle bundle = c.GetBundles()[i];
+            Dictionary<int, Package> prevPackDict = null;
+            Dictionary<int, Package> nextPackDict = null;
             if (bundle.GetPrevious(b) != null)
             {
                 prevPackDict = bundle.GetPrevious(b).GetPackageDictionary();
@@ -172,11 +173,11 @@ public class DataLoading : MonoBehaviour
             //statusTextfield.text = textblocks[0] + "\n" + textblocks[1] + "\n" + "Found " + bundle.GetPackages().Count + " Packages in " + (i + 1) + "th Bundle";
 
             //Read CompilationUnits of Package
-            for (int j = 0; j < bundle.GetPackages().Count; j++)
+            for (int j = 0; j < bundle.getPackages().Count; j++)
             {
-                PackageElement package = bundle.GetPackages()[j];
-                Dictionary<int, CompUnitElement> prevCompUnitDict = null;
-                Dictionary<int, CompUnitElement> nextCompUnitDict = null;
+                Package package = bundle.getPackages()[j];
+                Dictionary<int, CompilationUnit> prevCompUnitDict = null;
+                Dictionary<int, CompilationUnit> nextCompUnitDict = null;
                 if (package.GetPrevious(b) != null)
                 {
                     prevCompUnitDict = package.GetPrevious(b).GetCompUnitDictionary();
@@ -206,15 +207,15 @@ public class DataLoading : MonoBehaviour
         int branchLengt = commits.Count;
 
         //Preparing Time-Connections & Result Dicts
-        Dictionary<int, BundleElement> predBundleDict = null;
-        Dictionary<int, BundleElement> thisBundleDict = new Dictionary<int, BundleElement>();
-        Dictionary<int, BundleElement> nextBundleDict = null;
-        Dictionary<int, PackageElement> predPackageDict = null;
-        Dictionary<int, PackageElement> thisPackageDict = new Dictionary<int, PackageElement>();
-        Dictionary<int, PackageElement> nextPackageDict = null;
-        Dictionary<int, CompUnitElement> predCompUnitDict = null;
-        Dictionary<int, CompUnitElement> thisCompUnitDict = new Dictionary<int, CompUnitElement>();
-        Dictionary<int, CompUnitElement> nextCompUnitDict = null;
+        Dictionary<int, Bundle> predBundleDict = null;
+        Dictionary<int, Bundle> thisBundleDict = new Dictionary<int, Bundle>();
+        Dictionary<int, Bundle> nextBundleDict = null;
+        Dictionary<int, Package> predPackageDict = null;
+        Dictionary<int, Package> thisPackageDict = new Dictionary<int, Package>();
+        Dictionary<int, Package> nextPackageDict = null;
+        Dictionary<int, CompilationUnit> predCompUnitDict = null;
+        Dictionary<int, CompilationUnit> thisCompUnitDict = new Dictionary<int, CompilationUnit>();
+        Dictionary<int, CompilationUnit> nextCompUnitDict = null;
 
         int bCount;
         int pCount;
@@ -269,9 +270,9 @@ public class DataLoading : MonoBehaviour
             predBundleDict = thisBundleDict;
             predPackageDict = thisPackageDict;
             predCompUnitDict = thisCompUnitDict;
-            thisBundleDict = new Dictionary<int, BundleElement>();
-            thisPackageDict = new Dictionary<int, PackageElement>();
-            thisCompUnitDict = new Dictionary<int, CompUnitElement>();
+            thisBundleDict = new Dictionary<int, Bundle>();
+            thisPackageDict = new Dictionary<int, Package>();
+            thisCompUnitDict = new Dictionary<int, CompilationUnit>();
             nextBundleDict = null;
             nextPackageDict = null;
             nextCompUnitDict = null;
