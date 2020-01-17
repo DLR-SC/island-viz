@@ -49,10 +49,10 @@ public class BuildingController_Script : MonoBehaviour
                 buildingGo = Instantiate(prefab, gameObject.transform, false);
                 buildingGo.transform.localPosition = Vector3.zero;
                 buildingGo.transform.localRotation = Quaternion.identity;
-                //buildingGo.transform.parent = gameObject.transform;
-                //buildingGo.transform.localPosition = Vector3.zero;
                 buildingGo.transform.localScale = new Vector3(1, 1, 1);
                 buildingGo.AddComponent<Building>();
+                buildingGo.layer = LayerMask.NameToLayer("Visualization");
+                CapsuleCollider capsuleCol = buildingGo.AddComponent<CapsuleCollider>();
 
                 //Adjust Position of this gameObject (BuildingManager so building is placed on of region)
                 float posY;
@@ -74,15 +74,9 @@ public class BuildingController_Script : MonoBehaviour
             }
             buildingGo.name = cuCurrent.getName();
             Building buildingComponent = buildingGo.GetComponent<Building>();
-            /*buildingComponent.setCU(cuCurrent);
-            cu.setGameObject(building);
-            building.transform.position = new Vector3((float)islandCells[counter][cc].generator.X, (float)islandCells[counter][cc].generator.Z, (float)islandCells[counter][cc].generator.Y);
-            building.transform.localScale = new Vector3(GlobalVar.cuScale, GlobalVar.cuScale, GlobalVar.cuScale);
-            regionComponent.addBuilding(buildingComponent);
-            //////////////////////////
-            #region BuildingCollider
-            building.layer = LayerMask.NameToLayer("Visualization");*/
-            CapsuleCollider capsuleCol = buildingGo.AddComponent<CapsuleCollider>();
+            buildingComponent.setCU(cuCurrent);
+            cuCurrent.setGameObject(buildingGo);
+            
         }
         
     }

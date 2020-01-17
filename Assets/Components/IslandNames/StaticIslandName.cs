@@ -117,6 +117,7 @@ namespace StaticIslandNamesComponent
             }
             else if (transform.GetComponent<Building>())
             {
+                //TODO hier Fehler
                 return transform.parent.GetComponent<Region>().getParentIsland();
             }
             else return null;

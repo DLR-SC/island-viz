@@ -205,6 +205,7 @@ public class IslandVizUI : MonoBehaviour
            
     public void UpdateCurrentSelectedInfo(string type, string name, string detailName, string detail)
     {
+        //TODO hier fehler
         CurrentSelectedHeader.text = type;
         CurrentSelectedBody.text = "<b>Name:</b>\n" + name + "\n<b>" + detailName + "</b>:\n" + detail;
     }
