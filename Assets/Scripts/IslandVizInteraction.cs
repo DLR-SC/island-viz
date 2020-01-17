@@ -1,4 +1,5 @@
-﻿using OsgiViz;
+﻿using OSGI_Datatypes.OrganisationElements;
+using OsgiViz;
 using OsgiViz.Unity.Island;
 using System.Collections;
 using System.Collections.Generic;
@@ -139,6 +140,10 @@ public class IslandVizInteraction : MonoBehaviour {
     /// Called when a ui button was selected or deselected.
     /// </summary>
     public UIButtonSelected OnUIButtonSelected;
+    /// <summary>
+    /// Called when commit changes to be displayed.
+    /// </summary>
+    public NewCommit OnNewCommit;
 
     #endregion
 
@@ -274,6 +279,12 @@ public class IslandVizInteraction : MonoBehaviour {
     /// <param name="selectionType">The type of the selection.</param>
     /// <param name="selected">True = select, false = deselect.</param>
     public delegate void OtherSelected(GameObject go, SelectionType selectionType, bool selected);
+    /// <summary>
+    /// Called when in HistoryComponent a change of commit is triggered 
+    /// </summary>
+    /// <param name="oldCommit">The commit that is currently displayed</param>
+    /// <param name="newCommit">The commit to be displayed next</param>
+    public delegate void NewCommit(Commit oldCommit, Commit newCommit);
     #endregion
 
 

@@ -16,6 +16,12 @@ public class CoastlineController_Script : MonoBehaviour
     {
         Vector3 coastLineColor = Constants.coastlineColor;
         gameObject.GetComponent<MeshRenderer>().material.color = new Color(coastLineColor.x / 255f, coastLineColor.y / 255f, coastLineColor.z / 255f, 1f);
+        IslandVizInteraction.Instance.OnNewCommit += OnNewCommit;
+    }
+
+    public void OnNewCommit(Commit oldCommit, Commit newCommit)
+    {
+        StartCoroutine(RenewCoastlineMesh(newCommit));
     }
 
     public void SetGrid(HexGrid g)

@@ -16,6 +16,10 @@ public class RegionController_Script : MonoBehaviour
     Region region;
     private List<GameObject> buildingMangagerGOs;
 
+    public void Start()
+    {
+        IslandVizInteraction.Instance.OnNewCommit += OnNewCommit;
+    }
 
     public void InitColor(int i)
     {
@@ -113,4 +117,8 @@ public class RegionController_Script : MonoBehaviour
         }
     }
 
+    public void OnNewCommit(Commit oldCommit, Commit newCommit)
+    {
+        StartCoroutine(RenewRegionMesh(newCommit));
+    }
 }

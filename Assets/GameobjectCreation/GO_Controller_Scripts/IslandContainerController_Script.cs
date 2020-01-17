@@ -38,7 +38,12 @@ public class IslandContainerController_Script : MonoBehaviour
         island.GetComponent<IslandController_Script>().SetBunldeMaster(bm);
         yield return island.GetComponent<IslandController_Script>().Initialise();
         island.SetActive(false);
-        StartCoroutine(Renew());
+
+        //Subscribe to Event
+        IslandVizInteraction.Instance.OnNewCommit += OnNewCommit;
+
+
+        //StartCoroutine(Renew());
     }
 
     // Update is called once per frame
@@ -103,6 +108,46 @@ public class IslandContainerController_Script : MonoBehaviour
     }
 
 
+    private void OnNewCommit(Commit oldCommit, Commit newCommit)
+    {
+        Debug.Log(gameObject.name + "Encounter newCommitCall");
+
+
+        if (bundleMaster.RelationOfCommitToTimeline(newCommit) != TimelineStatus.present)
+        {
+            //bundle not present in new Commit
+            if (island.activeSelf)
+            {
+                //if island still active set inactive
+                island.SetActive(false);
+            }
+            //nothin further to do
+            return;
+        }
+
+        bool justAktivated = false;
+        if (!island.activeSelf && bundleMaster.RelationOfCommitToTimeline(newCommit) == TimelineStatus.present)
+        {
+            justAktivated = true;
+            island.SetActive(true);
+        }
+        if (justAktivated)
+        {
+            Vector2 pos2D = bundleMaster.GetElement(newCommit).GetPosition();
+            island.transform.localPosition = new Vector3(pos2D.x, 0f, pos2D.y);
+        }
+        else
+        {
+            movingStartTime = Time.time;
+            movingRunning = true;
+            //island.GetComponent<Rigidbody>().isKinematic = false;
+            StartCoroutine(MoveIsland(newCommit));
+        }
+        //Island Appearance Transformation
+        StartCoroutine(island.GetComponent<IslandController_Script>().UpdateRoutine(newCommit, this));
+    }
+
+
     private IEnumerator MoveIsland_old(Commit newCommit)
     {
         Vector2 pos2D = bundleMaster.GetElement(newCommit).GetPosition();
@@ -160,7 +205,7 @@ public class IslandContainerController_Script : MonoBehaviour
             //yield return new WaitForSeconds(0.1f);
             direction = target - island.transform.localPosition;
         }
-        NotivyIslandMovementFinished();
+        //NotivyIslandMovementFinished();
 
     }
 

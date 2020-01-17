@@ -76,12 +76,17 @@ public class BuildingController_Script : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        IslandVizInteraction.Instance.OnNewCommit += OnNewCommit;
     }
 
     // Update is called once per frame
     void Update()
     {
         
+    }
+
+    private void OnNewCommit(Commit oldCommit, Commit newCommit)
+    {
+        UpdateBuilding(newCommit);
     }
 }

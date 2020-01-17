@@ -23,6 +23,8 @@ public class HistoryNavigation : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        Commit newC = null;
+        Commit oldCommit = currentCommitToShow;
         if (Input.GetKeyDown(KeyCode.RightArrow))
         {
             StepNext();
@@ -30,83 +32,52 @@ public class HistoryNavigation : MonoBehaviour
         if (Input.GetKeyDown("1"))
         {
             Debug.Log("Pressed 1");
-            Commit newC = project.GetOrderedCommitList()[0];
-            if (newC != null)
-            {
-                currentCommitToShow = newC;
-            }
+            newC = project.GetOrderedCommitList()[0];
         }
         else if (Input.GetKeyDown("2"))
         {
             Debug.Log("Pressed 2");
-            Commit newC = project.GetOrderedCommitList()[1];
-            if (newC != null)
-            {
-                currentCommitToShow = newC;
-            }
+            newC = project.GetOrderedCommitList()[1];
         }
         else if (Input.GetKeyDown("3"))
         {
             Debug.Log("Pressed 3");
-            Commit newC = project.GetOrderedCommitList()[2];
-            if (newC != null)
-            {
-                currentCommitToShow = newC;
-            }
+            newC = project.GetOrderedCommitList()[2];
         }
         else if (Input.GetKeyDown("4"))
         {
             Debug.Log("Pressed 4");
-            Commit newC = project.GetOrderedCommitList()[3];
-            if (newC != null)
-            {
-                currentCommitToShow = newC;
-            }
+            newC = project.GetOrderedCommitList()[3];
         }
         else if (Input.GetKeyDown("5"))
         {
             Debug.Log("Pressed 5");
-            Commit newC = project.GetOrderedCommitList()[4];
-            if (newC != null)
-            {
-                currentCommitToShow = newC;
-            }
+            newC = project.GetOrderedCommitList()[4];
         }
         else if (Input.GetKeyDown("6"))
         {
             Debug.Log("Pressed 6");
-            Commit newC = project.GetOrderedCommitList()[5];
-            if (newC != null)
-            {
-                currentCommitToShow = newC;
-            }
+            newC = project.GetOrderedCommitList()[5];
         }
         else if (Input.GetKeyDown("7"))
         {
             Debug.Log("Pressed 7");
-            Commit newC = project.GetOrderedCommitList()[6];
-            if (newC != null)
-            {
-                currentCommitToShow = newC;
-            }
+            newC = project.GetOrderedCommitList()[6];
         }
         else if (Input.GetKeyDown("8"))
         {
             Debug.Log("Pressed 8");
-            Commit newC = project.GetOrderedCommitList()[7];
-            if (newC != null)
-            {
-                currentCommitToShow = newC;
-            }
+            newC = project.GetOrderedCommitList()[7];
         }
         else if (Input.GetKeyDown("9"))
         {
             Debug.Log("Pressed 9");
-            Commit newC = project.GetOrderedCommitList()[8];
-            if (newC != null)
-            {
-                currentCommitToShow = newC;
-            }
+            newC = project.GetOrderedCommitList()[8];
+        }
+        if (newC != null&&newC !=oldCommit)
+        {
+            IslandVizInteraction.Instance.OnNewCommit(oldCommit, newC);
+            currentCommitToShow = newC;
         }
 
     }
@@ -118,54 +89,44 @@ public class HistoryNavigation : MonoBehaviour
 
     public void StepNext()
     {
-        Debug.Log("StepNextFired");
-        /*if (currentCommitToShow == null)
+        Commit oldCommit = currentCommitToShow;
+        Commit newCommit = null;
+
+        if (currentCommitToShow == null)
         {
-            Commit newC = project.GetOrderedCommitList()[0];
-            if (newC != null)
-            {
-                currentCommitToShow = newC;
-            }
-        }
-        else if (forwards)
-        {
-            Commit newC = currentCommitToShow.GetNext(currentCommitToShow.GetBranch());
-            if (newC != null)
-            {
-                currentCommitToShow = newC;
-            }
-            else
-            {
-                newC = currentCommitToShow.GetPrevious(currentCommitToShow.GetBranch());
-                if(newC != null)
-                {
-                    currentCommitToShow = newC;
-                }
-                forwards = false;
-            }
+            newCommit = project.GetOrderedCommitList()[0];
         }
         else
         {
-            Commit newC = currentCommitToShow.GetPrevious(currentCommitToShow.GetBranch());
-            if (newC != null)
-            {
-                currentCommitToShow = newC;
-            }
-            else
-            {
-                newC = currentCommitToShow.GetNext(currentCommitToShow.GetBranch());
-                if (newC != null)
-                {
-                    currentCommitToShow = newC;
-                }
-                forwards = true;
-            }
-        }*/
+            newCommit = currentCommitToShow.GetNext(currentCommitToShow.GetBranch());
+        }
+        if (newCommit != null&&newCommit!=oldCommit)
+        {
+            IslandVizInteraction.Instance.OnNewCommit(oldCommit, newCommit);
+            currentCommitToShow = newCommit;
+        }
+
+        
     }
 
     public void StepBack()
     {
-        Debug.Log("StepBackFired");
+        Commit oldCommit = currentCommitToShow;
+        Commit newCommit = null;
+
+        if (currentCommitToShow == null)
+        {
+            newCommit = project.GetOrderedCommitList()[0];
+        }
+        else
+        {
+            newCommit = currentCommitToShow.GetPrevious(currentCommitToShow.GetBranch());
+        }
+        if (newCommit != null && newCommit != oldCommit)
+        {
+            IslandVizInteraction.Instance.OnNewCommit(oldCommit, newCommit);
+            currentCommitToShow = newCommit;
+        }
 
     }
 

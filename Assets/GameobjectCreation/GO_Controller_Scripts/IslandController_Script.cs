@@ -26,6 +26,11 @@ public class IslandController_Script : MonoBehaviour
     //private bool transformationRunning;
 
 
+    public void Start()
+    {
+        IslandVizInteraction.Instance.OnNewCommit += OnNewCommit;
+    }
+
     public void SetBunldeMaster(BundleMaster bm)
     {
         bundleMaster = bm;
@@ -208,7 +213,61 @@ public class IslandController_Script : MonoBehaviour
         }
     }
 
+    public void OnNewCommit(Commit oldCommit, Commit newCommit)
+    {
+        StartCoroutine(UpdateRoutine2(newCommit));
+    }
 
+    public IEnumerator UpdateRoutine2(Commit newCommit)
+    {
+        //TODO Death Area Rausnehmen update regions als Coroutinen probieren
+       /* foreach (GameObject region in regions)
+        {
+            StartCoroutine(region.GetComponent<RegionController_Script>().RenewRegionMesh(newCommit));
+            StartCoroutine(region.GetComponent<RegionController_Script>().UpdateBuildings(newCommit));
+        }*/
+        //StartCoroutine(deathArea.GetComponent<DeathAreaController_Script>().RenewDeathAreaMesh(newCommit));
+        //StartCoroutine(coastLine.GetComponent<CoastlineController_Script>().RenewCoastlineMesh(newCommit));
+
+        int maxRingTotal = bundleMaster.GetGrid().GetOuterAssignedTotal(newCommit);
+        int maxRingSegment = bundleMaster.GetGrid().GetOuterAssignedFirstTwoSixths(newCommit);
+
+        if (maxRingTotal < 1)
+        {
+            maxRingTotal = 1;
+        }
+        if (maxRingSegment < 1)
+        {
+            maxRingSegment = 1;
+        }
+
+        float radiusTotal = Constants.GetRadiusFromRing(maxRingTotal);
+        float radiusSegment = Constants.GetRadiusFromRing(maxRingSegment);
+
+        importDock.transform.localPosition = new Vector3(0f, Constants.dockYPos, radiusSegment + 2);
+        exportDock.transform.localPosition = new Vector3(2f, Constants.dockYPos, radiusSegment + 1);
+
+        float colliderDim = 3f;
+
+        if (radiusSegment + 3 <= radiusTotal)
+        {
+            colliderDim = radiusTotal;
+        }
+        else
+        {
+            colliderDim = radiusSegment + 3;
+        }
+        colliderDim += 8;
+
+        float boxDim = Mathf.Floor(colliderDim / Mathf.Sqrt(2) * 10) / 10f;
+
+
+        gameObject.GetComponent<BoxCollider>().size = new Vector3(boxDim * 2, 6, boxDim * 2);
+        gameObject.GetComponent<SphereCollider>().radius = colliderDim;
+
+        //controllerScript.NotifyIslandTransformationFinished();
+        yield return null;
+    }
 }
 
 
