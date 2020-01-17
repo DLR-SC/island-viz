@@ -13,7 +13,7 @@ public class IslandVizBehaviour : MonoBehaviour
 {
     public static IslandVizBehaviour Instance { get; private set; }
 
-    private List<Action> undoList; // List of the last user actions.
+    private List<Action> undoList; // List containing the last user actions.
 
 
 
@@ -63,7 +63,6 @@ public class IslandVizBehaviour : MonoBehaviour
         Shader.SetGlobalFloat("hologramScale", 0.8f);
 
         undoList = new List<Action>();
-        IslandVizInteraction.Instance.OnControllerMenuDown += Undo;
 
         StartCoroutine(IslandVizInitiationRoutine()); // Start the islandviz construction coroutine.
     }
@@ -102,7 +101,7 @@ public class IslandVizBehaviour : MonoBehaviour
 
     /// <summary>
     /// Add the current action to the undo list, so that the user can return to this action in the future. 
-    /// Note that pressing undo will execute the second last action in the undo list. (Then pressing redo, the last action in the undo list will be executed)
+    /// Note that pressing undo will execute the second last action in the undo list.
     /// </summary>
     /// <param name="action">A action that will be executed when user presses undo.</param>
     public void AddUndoAction (Action action)
@@ -111,15 +110,15 @@ public class IslandVizBehaviour : MonoBehaviour
     }
 
     /// <summary>
-    /// Called by a OnButtonEvent. Pressing the undo button will execute the second last action in the undo list.
-    /// Note that the last action in the undo list is the current action. (Pressing redo after the first undo would execute the last action in the undo list)
+    /// Currently called by a UI_Button. Pressing the undo button will execute the second last action in the undo list.
+    /// Note that the last action in the undo list is the current action.
     /// </summary>
     /// <param name="hand">The hand where the undo button was pressed.</param>
     public void Undo (Hand hand)
     {
         if (undoList.Count >= 2) // [Last Action|Current Action] --> We want the last action, so we take the second last item.
         {
-            IslandVizUI.Instance.MakeNotification(0.5f, "Undo");
+            IslandVizUI.Instance.MakeNotification(1f, "Undo");
 
             undoList[undoList.Count-2]?.Invoke();
             undoList.RemoveAt(undoList.Count - 2);

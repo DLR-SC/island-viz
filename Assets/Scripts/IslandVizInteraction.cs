@@ -115,7 +115,12 @@ public class IslandVizInteraction : MonoBehaviour {
     /// </summary>
     public DockSelected OnDockSelect;
     /// <summary>
+    /// Called when any other object was selected or deselected.
+    /// </summary>
+    public OtherSelected OnOtherSelected;
+    /// <summary>
     /// Called when the grip button of a controller is pressed.
+    /// Use this event for custom additional components.
     /// </summary>
     public ControllerGripDown OnControllerGripDown;
     /// <summary>
@@ -261,6 +266,14 @@ public class IslandVizInteraction : MonoBehaviour {
     /// <param name="selectionType">The type of the selection.</param>
     /// <param name="selected">True = select, false = deselect.</param>
     public delegate void UIButtonSelected(UI_Button button, SelectionType selectionType, bool selected);
+    /// <summary>
+    /// Called when any other GameObject with a collider was selected or deselected.
+    /// Use this event for custom additional components.
+    /// </summary>
+    /// <param name="go">The object that was selected.</param>
+    /// <param name="selectionType">The type of the selection.</param>
+    /// <param name="selected">True = select, false = deselect.</param>
+    public delegate void OtherSelected(GameObject go, SelectionType selectionType, bool selected);
     #endregion
 
 

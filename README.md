@@ -65,6 +65,39 @@ The IslandViz application consists of three basic parts:
 - __IslandVizVisualization__ creates and stores the islands and ports based on the Osgi project. Also handles all visualization-based events.
 - __IslandVizInteraction__ handles all user input events.
 
+### Input-Events:
+
+| Name                               | Params | Description                                     |
+|------------------------------------|------|-------------------------------------------------|
+| __OnControllerTriggerDown__        | Hand | _Called when trigger button is pressed._        |
+| __OnControllerTriggerUp__          | Hand | _Called when trigger button is released._       |
+| __OnControllerTouchpadDown__       | Hand | _Called when touchpad button is pressed._       |
+| __OnControllerTouchpadUp__         | Hand | _Called when touchpad button is released._      |
+| __OnControllerTouchpadTouchDown__  | Hand | _Called when touchpad is touched._              |
+| __OnControllerTouchpadTouchUp__    | Hand | _Called when touchpad is not touched anymore._  |
+| __OnControllerGripDown__           | Hand | _Called when grip button is pressed._           |
+| __OnControllerGripUp__             | Hand | _Called when grip button is released._          |
+| __OnControllerMenuDown__           | Hand | _Called when menu button is pressed._           |
+| __OnControllerMenuUp__             | Hand | _Called when menu button is released._          |
+
+### Physics-Events:
+
+| Name                               | Params             | Description                                     |
+|------------------------------------|--------------------|-------------------------------------------------|
+| __OnControllerEnter__              | Collider, Hand     | _Called when a controller entered a trigger._   |
+| __OnControllerExit__               | Collider, Hand     | _Called when a controller exited a trigger._    |
+
+### Selection-Events:
+| Name                               | Params                          | Description                                                      |
+|------------------------------------|---------------------------------|------------------------------------------------------------------|
+| __OnIslandSelect__                 | Island, SelectionType, Bool     | _Called when an island GameObject was selected or deselected._   |
+| __OnRegionSelect__                 | Region, SelectionType, Bool     | _Called when a region GameObject was selected or deselected._    |
+| __OnBuildingSelect__               | Building, SelectionType, Bool   | _Called when a building GameObject was selected or deselected._  |
+| __OnDockSelect__                   | Dock, SelectionType, Bool       | _Called when a dock GameObject was selected or deselected._      |
+| __OnUIButtonSelected__             | Button, SelectionType, Bool     | _Called when a UI button was selected or deselected._            |
+| __OnOtherSelected__                | GameObject, SelectionType, Bool | _Called when any other object was selected or deselected._       |
+
+
 ![IslandViz Virtual Reality Screenshots](./Documentation/IslandVizGraph.PNG)
 
 New interactions or visualizations can easily be added by writing __Additional Components__. As seen in the sequence diagram, after the basic build routine is done, additional components are loaded. Current Additional components are e.g. TableHeightAdjuster.cs or Compass.cs. To enable a additional component you just have to add the script to the corresponding _component container_ GameObject in the Unity scene. 
