@@ -18,6 +18,8 @@ public class IslandContainerController_Script : MonoBehaviour
     private bool movingRunning;
     private float movingStartTime;
 
+    private float speed;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -192,6 +194,8 @@ public class IslandContainerController_Script : MonoBehaviour
 
     private IEnumerator MoveIsland(Commit newCommit)
     {
+        speed = HistoryNavigation.Instance.islandspeed;
+
         Vector2 pos2D = bundleMaster.GetElement(newCommit).GetPosition();
         Vector3 target = new Vector3(pos2D.x, 0f, pos2D.y);
 
@@ -199,10 +203,12 @@ public class IslandContainerController_Script : MonoBehaviour
 
         while (direction.magnitude >= 1.0 /*& Time.time - movingStartTime < 10*/)
         {
-            island.transform.Translate(direction.normalized * Time.deltaTime*0.3f);
-            yield return null;
+            Vector3 newPos = island.transform.localPosition + direction.normalized * 0.1f * speed;
+            island.transform.localPosition = newPos;
+            //island.transform.Translate(direction.normalized * 0.1f*speed);
+            //yield return null;
 
-            //yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSeconds(0.1f);
             direction = target - island.transform.localPosition;
         }
         //NotivyIslandMovementFinished();

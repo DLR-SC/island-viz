@@ -119,6 +119,9 @@ public class RegionController_Script : MonoBehaviour
 
     public void OnNewCommit(Commit oldCommit, Commit newCommit)
     {
-        StartCoroutine(RenewRegionMesh(newCommit));
+        if (gameObject.activeInHierarchy)
+        {
+            StartCoroutine(RenewRegionMesh(newCommit));
+        }
     }
 }

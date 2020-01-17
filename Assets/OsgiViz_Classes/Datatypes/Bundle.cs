@@ -2,13 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using OSGI_Datatypes.ArchitectureElements;
+using OSGI_Datatypes.OrganisationElements;
 using OsgiViz.Core;
+using UnityEngine;
 
 namespace OsgiViz.SoftwareArtifact
 {
     public class Bundle
     {
         //Variables
+        int neoId;
         private string bundleName;
         private string bundleSymbolicName;
         private List<Package> packages;
@@ -16,6 +20,15 @@ namespace OsgiViz.SoftwareArtifact
         private List<Package> importedPckgs;
         private List<ServiceComponent> serviceComponents;
         private OsgiProject project;
+
+        //history
+        Dictionary<Branch, Bundle> previous;
+        Dictionary<Branch, Bundle> next;
+        BundleMaster master;
+
+        //Visualization
+        Vector2 position;
+        float radius;
 
         public Bundle(string name, string symbName, OsgiProject p)
         {
@@ -26,6 +39,69 @@ namespace OsgiViz.SoftwareArtifact
             importedPckgs = new List<Package>();
             serviceComponents = new List<ServiceComponent>();
             project = p;
+        }
+
+        public Bundle(int id, string n, string sn, Commit c)
+        {
+            neoId = id;
+            bundleName = n;
+            bundleSymbolicName = sn;
+            position = Vector2.negativeInfinity;
+
+            c.AddBundle(this);
+
+            packages = new List<Package>();
+            exportedPckgs = new List<Package>();
+            importedPckgs = new List<Package>();
+            previous = new Dictionary<Branch, Bundle>();
+            next = new Dictionary<Branch, Bundle>();
+        }
+
+        #region HistoryElements
+
+        public void AddPrevious(Branch b, Bundle prev, bool forwadsConnection)
+        {
+            previous.Add(b, prev);
+            if (forwadsConnection)
+            {
+                prev.AddNext(b, this, false);
+            }
+        }
+        public void AddNext(Branch b, Bundle nextB, bool backwardsConnection)
+        {
+            next.Add(b, nextB);
+            if (backwardsConnection)
+            {
+                nextB.AddPrevious(b, this, false);
+            }
+        }
+        public void SetMaster(BundleMaster m, Commit c)
+        {
+            master = m;
+            master.AddElement(c, this);
+        }
+
+        public Bundle GetNext(Branch b)
+        {
+            Bundle bundle;
+            next.TryGetValue(b, out bundle);
+            return bundle;
+        }
+        public Bundle GetPrevious(Branch b)
+        {
+            Bundle bundle;
+            previous.TryGetValue(b, out bundle);
+            return bundle;
+        }
+        public BundleMaster GetMaster()
+        {
+            return master;
+        }
+        #endregion
+
+        public int GetNeoId()
+        {
+            return neoId;
         }
 
         public OsgiProject getParentProject()
@@ -82,7 +158,42 @@ namespace OsgiViz.SoftwareArtifact
         {
             serviceComponents.Add(sc);
         }
-       
+        public void AddRequiredBundle(Bundle other)
+        {
+            foreach (Package p in other.getPackages())
+            {
+                addImportedPackage(p);
+                p.IncreaseNrOfImports(1);
+            }
+        }
+
+        public Dictionary<int, Package> GetPackageDictionary()
+        {
+            Dictionary<int, Package> packDict = new Dictionary<int, Package>();
+            foreach (Package p in packages)
+            {
+                packDict.Add(p.GetNeoId(), p);
+            }
+            return packDict;
+        }
+
+        public void SetPosition(float p1, float p2)
+        {
+            position = new Vector2(p1, p2);
+        }
+        public Vector2 GetPosition()
+        {
+            return position;
+        }
+
+        public void SetRadius(float r)
+        {
+            radius = r;
+        }
+        public float GetRadius()
+        {
+            return radius;
+        }
 
     }
 }

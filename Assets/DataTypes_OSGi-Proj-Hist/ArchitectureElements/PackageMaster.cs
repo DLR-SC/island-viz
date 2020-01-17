@@ -4,12 +4,13 @@ using UnityEngine;
 using OSGI_Datatypes.OrganisationElements;
 using OSGI_Datatypes.ComposedTypes;
 using HexLayout.Basics;
+using OsgiViz.SoftwareArtifact;
 
 namespace OSGI_Datatypes.ArchitectureElements
 {
     public class PackageMaster:IComparable
     {
-        Timeline<PackageElement> realPackages;
+        Timeline<Package> realPackages;
         BundleMaster parent;
         List<CompUnitMaster> containedCompUnits;
 
@@ -20,9 +21,9 @@ namespace OSGI_Datatypes.ArchitectureElements
 
 
 
-        public PackageMaster(Commit c, PackageElement firstE, BundleMaster bm)
+        public PackageMaster(Commit c, Package firstE, BundleMaster bm)
         {
-            realPackages = new Timeline<PackageElement>();
+            realPackages = new Timeline<Package>();
             realPackages.Add(c, firstE);
             parent = bm;
             bm.AddContaindPackage(this);
@@ -30,11 +31,11 @@ namespace OSGI_Datatypes.ArchitectureElements
             growCorridorStart = new Vector2Int(-9999, -9999);
         }
 
-        public void AddElement(Commit c, PackageElement p)
+        public void AddElement(Commit c, Package p)
         {
             realPackages.Add(c, p);
         }
-        public PackageElement GetElement(Commit c)
+        public Package GetElement(Commit c)
         {
             return realPackages.Get(c);
         }
@@ -64,12 +65,12 @@ namespace OSGI_Datatypes.ArchitectureElements
             return realPackages.GetEnd(sortType);
         }
 
-        public PackageElement GetStartElement(SortTypes sortType)
+        public Package GetStartElement(SortTypes sortType)
         {
             return GetElement(GetStart(sortType));
         }
 
-        public PackageElement GetEndElement(SortTypes sortType)
+        public Package GetEndElement(SortTypes sortType)
         {
             return GetElement(GetEnd(sortType));
         }
@@ -160,9 +161,9 @@ namespace OSGI_Datatypes.ArchitectureElements
             return resDict;
         }
 
-        public int GetMaxLoc()
+        public long GetMaxLoc()
         {
-            int maxLoc = 0;
+            long maxLoc = 0;
             foreach(CompUnitMaster cum in containedCompUnits)
             {
                 if(maxLoc < cum.GetMaxLoc())

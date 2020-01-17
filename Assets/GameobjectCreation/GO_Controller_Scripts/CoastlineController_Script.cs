@@ -21,7 +21,10 @@ public class CoastlineController_Script : MonoBehaviour
 
     public void OnNewCommit(Commit oldCommit, Commit newCommit)
     {
-        StartCoroutine(RenewCoastlineMesh(newCommit));
+        if (gameObject.activeInHierarchy)
+        {
+            StartCoroutine(RenewCoastlineMesh(newCommit));
+        }
     }
 
     public void SetGrid(HexGrid g)

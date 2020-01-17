@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using OSGI_Datatypes.ArchitectureElements;
 using System;
+using OsgiViz.SoftwareArtifact;
 
 namespace OSGI_Datatypes.OrganisationElements
 {
@@ -18,9 +19,9 @@ namespace OSGI_Datatypes.OrganisationElements
         string commitMessage;
 
         //Artefakts
-        List<BundleElement> bundles;
-        List<Service> services;
-        List<ServiceComponent> serviceComponents;
+        List<Bundle> bundles;
+        List<ArchitectureElements.Service> services;
+        List<ArchitectureElements.ServiceComponent> serviceComponents;
 
         //History
         Dictionary<Branch, Commit> next;
@@ -40,23 +41,23 @@ namespace OSGI_Datatypes.OrganisationElements
             commitMessage = msg;
             issues = issueList;
 
-            bundles = new List<BundleElement>();
-            services = new List<Service>();
-            serviceComponents = new List<ServiceComponent>();
+            bundles = new List<Bundle>();
+            services = new List<ArchitectureElements.Service>();
+            serviceComponents = new List<ArchitectureElements.ServiceComponent>();
             next = new Dictionary<Branch, Commit>();
             previous = new Dictionary<Branch, Commit>();
         }
 
         #region Aditional_Creation_Mathods
-        public void AddBundle(BundleElement b)
+        public void AddBundle(Bundle b)
         {
             bundles.Add(b);
         }
-        public void AddService(Service s)
+        public void AddService(ArchitectureElements.Service s)
         {
             services.Add(s);
         }
-        public void AddServiceComponent(ServiceComponent sc)
+        public void AddServiceComponent(ArchitectureElements.ServiceComponent sc)
         {
             serviceComponents.Add(sc);
         }
@@ -135,24 +136,24 @@ namespace OSGI_Datatypes.OrganisationElements
             }
         }
 
-        public Dictionary<int, BundleElement> GetBundleDictionary()
+        public Dictionary<int, Bundle> GetBundleDictionary()
         {
-            Dictionary<int, BundleElement> bundleDict = new Dictionary<int, BundleElement>();
+            Dictionary<int, Bundle> bundleDict = new Dictionary<int, Bundle>();
 
-            foreach(BundleElement b in bundles){
+            foreach(Bundle b in bundles){
                 bundleDict.Add(b.GetNeoId(), b);
             }
             return bundleDict;
         }
 
-        public Dictionary<int, PackageElement> GetPackageDictionary()
+        public Dictionary<int, Package> GetPackageDictionary()
         {
-            Dictionary<int, PackageElement> packageDict = new Dictionary<int, PackageElement>();
+            Dictionary<int, Package> packageDict = new Dictionary<int, Package>();
 
-            foreach(BundleElement b in bundles)
+            foreach(Bundle b in bundles)
             {
-                Dictionary<int, PackageElement> partPackDict = b.GetPackageDictionary();
-                foreach(KeyValuePair<int, PackageElement> kvp in partPackDict)
+                Dictionary<int, Package> partPackDict = b.GetPackageDictionary();
+                foreach(KeyValuePair<int, Package> kvp in partPackDict)
                 {
                     packageDict.Add(kvp.Key, kvp.Value);
                 }
@@ -162,15 +163,15 @@ namespace OSGI_Datatypes.OrganisationElements
 
         }
 
-        public Dictionary<int, CompUnitElement> GetCompUnitDictionary()
+        public Dictionary<int, CompilationUnit> GetCompUnitDictionary()
         {
-            Dictionary<int, CompUnitElement> cuDict = new Dictionary<int, CompUnitElement>();
+            Dictionary<int, CompilationUnit> cuDict = new Dictionary<int, CompilationUnit>();
 
-            foreach(BundleElement bundle in bundles)
+            foreach(Bundle bundle in bundles)
             {
-                foreach(PackageElement package in bundle.GetPackages())
+                foreach(Package package in bundle.getPackages())
                 {
-                    foreach(CompUnitElement cu in package.GetCompUnits())
+                    foreach(CompilationUnit cu in package.getCompilationUnits())
                     {
                         cuDict.Add(cu.GetNeoId(), cu);
                     }
@@ -186,20 +187,20 @@ namespace OSGI_Datatypes.OrganisationElements
         public int GetPackageCount()
         {
             int result = 0;
-            foreach(BundleElement b in bundles)
+            foreach(Bundle b in bundles)
             {
-                result += b.GetPackages().Count;
+                result += b.getPackages().Count;
             }
             return result;
         }
         public int GetCompUnitCount()
         {
             int result = 0;
-            foreach(BundleElement b in bundles)
+            foreach(Bundle b in bundles)
             {
-                foreach(PackageElement p in b.GetPackages())
+                foreach(Package p in b.getPackages())
                 {
-                    result += p.GetCompUnits().Count;
+                    result += p.getCompilationUnits().Count;
                 }
             }
             return result;
@@ -257,7 +258,7 @@ namespace OSGI_Datatypes.OrganisationElements
         }
 
 
-        public List<BundleElement> GetBundles()
+        public List<Bundle> GetBundles()
         {
             return bundles;
         }

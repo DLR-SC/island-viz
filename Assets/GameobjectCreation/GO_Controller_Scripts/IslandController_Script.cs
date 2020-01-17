@@ -215,7 +215,10 @@ public class IslandController_Script : MonoBehaviour
 
     public void OnNewCommit(Commit oldCommit, Commit newCommit)
     {
-        StartCoroutine(UpdateRoutine2(newCommit));
+        if (gameObject.activeInHierarchy)
+        {
+            StartCoroutine(UpdateRoutine2(newCommit));
+        }
     }
 
     public IEnumerator UpdateRoutine2(Commit newCommit)

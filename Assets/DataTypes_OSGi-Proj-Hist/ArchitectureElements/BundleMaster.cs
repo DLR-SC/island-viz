@@ -2,31 +2,30 @@
 using HexLayout.Basics;
 using OSGI_Datatypes.ComposedTypes;
 using OSGI_Datatypes.OrganisationElements;
-
-
+using OsgiViz.SoftwareArtifact;
 
 namespace OSGI_Datatypes.ArchitectureElements
 {
     public class BundleMaster
     {
-        Timeline<BundleElement> realBundles;
+        Timeline<Bundle> realBundles;
         List<PackageMaster> containedPackages;
 
         HexGrid grid;
 
-        public BundleMaster(Commit c, BundleElement firstE)
+        public BundleMaster(Commit c, Bundle firstE)
         {
-            realBundles = new Timeline<BundleElement>();
+            realBundles = new Timeline<Bundle>();
             realBundles.Add(c, firstE);
             containedPackages = new List<PackageMaster>();
         }
 
-        public void AddElement(Commit c, BundleElement p)
+        public void AddElement(Commit c, Bundle p)
         {
             realBundles.Add(c, p);
         }
 
-        public BundleElement GetElement(Commit c)
+        public Bundle GetElement(Commit c)
         {
             return realBundles.Get(c);
         }
@@ -166,13 +165,13 @@ namespace OSGI_Datatypes.ArchitectureElements
             return resDict; 
         }
 
-        public int GetMaxLoc()
+        public long GetMaxLoc()
         {
-            int maxLoc = 0;
+            long maxLoc = 0;
 
             foreach(PackageMaster pm in containedPackages)
             {
-                int l = pm.GetMaxLoc();
+                long l = pm.GetMaxLoc();
                 if(maxLoc < l)
                 {
                     maxLoc = l;
@@ -188,7 +187,7 @@ namespace OSGI_Datatypes.ArchitectureElements
             {
                 return;
             }
-            foreach(KeyValuePair<Commit, BundleElement> kvp in realBundles.GetDict())
+            foreach(KeyValuePair<Commit, Bundle> kvp in realBundles.GetDict())
             {
                 int radius = grid.GetOuterAssignedTotal(kvp.Key);
                 float radiusF = 2f * radius + 2f;

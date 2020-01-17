@@ -8,6 +8,8 @@ public class HistoryNavigation : MonoBehaviour
     public static HistoryNavigation Instance { get { return instance; } }
     private static HistoryNavigation instance; // The instance of this class.
 
+    public float islandspeed;
+
     private Project project;
     private Commit currentCommitToShow;
     private bool forwards;

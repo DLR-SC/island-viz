@@ -4,36 +4,38 @@ using UnityEngine;
 using OSGI_Datatypes.ComposedTypes;
 using OSGI_Datatypes.OrganisationElements;
 using HexLayout.Basics;
+using OsgiViz.SoftwareArtifact;
 
 namespace OSGI_Datatypes.ArchitectureElements
 {
     public class CompUnitMaster: IComparable {
-        Timeline<CompUnitElement> realCompUnits;
+
+        Timeline<CompilationUnit> realCompUnits;
         PackageMaster parent;
 
         //visualization hexGrid Position
         Vector2Int gridPos;
         Cell cell;
 
-        private int maxLoc;
+        private long maxLoc;
 
 
-        public CompUnitMaster(Commit c, CompUnitElement firstE, PackageMaster p)
+        public CompUnitMaster(Commit c, CompilationUnit firstE, PackageMaster p)
         {
             parent = p;
             p.AddContaindCompUnit(this);
-            realCompUnits = new Timeline<CompUnitElement>();
+            realCompUnits = new Timeline<CompilationUnit>();
             realCompUnits.Add(c, firstE);
             gridPos = new Vector2Int(-9999, -9999);
-            maxLoc = firstE.GetLoc();
+            maxLoc = firstE.getLoc();
         }
 
-        public void AddElement(Commit c, CompUnitElement cu)
+        public void AddElement(Commit c, CompilationUnit cu)
         {
             realCompUnits.Add(c, cu);
-            if(maxLoc < cu.GetLoc())
+            if(maxLoc < cu.getLoc())
             {
-                maxLoc = cu.GetLoc();
+                maxLoc = cu.getLoc();
             }
         }
 
@@ -41,7 +43,7 @@ namespace OSGI_Datatypes.ArchitectureElements
         {
             return parent;
         }
-        public CompUnitElement GetElement(Commit c)
+        public CompilationUnit GetElement(Commit c)
         {
             return realCompUnits.Get(c);
         }
@@ -79,12 +81,12 @@ namespace OSGI_Datatypes.ArchitectureElements
             return realCompUnits.GetStart(sortType);
         }
 
-        public CompUnitElement GetStartElement(SortTypes sortType)
+        public CompilationUnit GetStartElement(SortTypes sortType)
         {
             return GetElement(GetStart(sortType));
         }
 
-        public CompUnitElement GetEndElement(SortTypes sortType)
+        public CompilationUnit GetEndElement(SortTypes sortType)
         {
             return GetElement(GetEnd(sortType));
         }
@@ -94,7 +96,7 @@ namespace OSGI_Datatypes.ArchitectureElements
             return realCompUnits.GetEnd(sortType);
         }
 
-        public int GetMaxLoc()
+        public long GetMaxLoc()
         {
             return maxLoc;
         }

@@ -27,7 +27,10 @@ public class DeathAreaController_Script : MonoBehaviour
 
     public void OnNewCommit(Commit oldCommit, Commit newCommit)
     {
-        StartCoroutine(RenewDeathAreaMesh(newCommit));
+        if (gameObject.activeInHierarchy)
+        {
+            StartCoroutine(RenewDeathAreaMesh(newCommit));
+        }
     }
 
     public IEnumerator RenewDeathAreaMesh(Commit c)
