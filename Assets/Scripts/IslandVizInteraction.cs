@@ -39,7 +39,7 @@ public class IslandVizInteraction : MonoBehaviour {
         Instance = this;
         inputComponents = InteractionComponentsGameObject.GetComponents<AdditionalIslandVizComponent>();
 
-        islandSelectionComponent = InteractionComponentsGameObject.AddComponent<IslandSelectionComponent>();
+        islandSelectionComponent = InteractionComponentsGameObject.AddComponent<IslandSelectionComponent>(); // TODO
         //OnControllerTriggerDown += DebugInput;
     }
 

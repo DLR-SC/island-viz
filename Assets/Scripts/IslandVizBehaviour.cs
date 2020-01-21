@@ -74,6 +74,11 @@ public class IslandVizBehaviour : MonoBehaviour
     {
         yield return null;
 
+        if (IslandVizConfig.Instance.UseConfig)
+        {
+            yield return IslandVizConfig.Instance.LoadAndApplyConfig();
+        }
+
         yield return IslandVizData.Instance.ConstructOsgiProject(); // Load the data we want to visualize.
         
         yield return IslandVizVisualization.Instance.ConstructVisualization(); // Construct the basic visualization, i.e. islands, ports, and dependencies.
