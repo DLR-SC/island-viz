@@ -1,0 +1,8 @@
+# DataLoading: Wether data is loaded from a Json file or from a Neo4J database (Json | Neo4J)
+DataLoading=Json
+# DataLocation: location of the data 
+DataLocation=Resources/rce_lite.model
+# Seed: integer used for procedural island generation
+Seed=0
+# GraphLayout: spatial island distribution method (ForceDirected | Random)
+GraphLayout=ForceDirected
