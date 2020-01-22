@@ -157,7 +157,10 @@ public class IslandVizVisualization : MonoBehaviour
 
         // Get all optimal additional visualization components.
         visualizationComponents = VisualizationComponentsGameObject.GetComponents<AdditionalIslandVizComponent>();
+    }
 
+    public IEnumerator Init ()
+    {
         // Since we stored all additional visualization components in "visualizationComponents", we can add the remaining mandatory visualization components.
         islandGOConstructor = VisualizationComponentsGameObject.AddComponent<IslandGOConstructor>();
         dockGOConstructor = VisualizationComponentsGameObject.AddComponent<DockGOConstructor>();
@@ -172,7 +175,7 @@ public class IslandVizVisualization : MonoBehaviour
         TransformContainer.IslandContainer.SetParent(VisualizationRoot);
         TransformContainer.DependencyContainer = new GameObject("DependencyContainer").transform;
         TransformContainer.DependencyContainer.SetParent(VisualizationRoot);
-        
+
         // Create water visual.
         GameObject water = (GameObject)Instantiate(Water_Plane_Prefab, TransformContainer.IslandContainer);
         water.name = Water_Plane_Prefab.name; // Just making sure since there are still a alot GameObject.Find... TODO: remove in future
@@ -188,6 +191,8 @@ public class IslandVizVisualization : MonoBehaviour
         OnVisualizationScaleChanged += SetZoomDirty;
         OnIslandVisible += AddVisibleIsland;
         OnIslandInvisible += RemoveInvisibleIsland;
+
+        yield return null;
     }
 
     /// <summary>
@@ -195,7 +200,7 @@ public class IslandVizVisualization : MonoBehaviour
     /// </summary>
     public IEnumerator ConstructVisualization()
     {
-        yield return null;
+        yield return Init();
 
         stopwatch.Start(); // Start the timer to measure total construction time.
         
