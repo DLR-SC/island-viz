@@ -124,6 +124,7 @@ public class IslandController_Script : MonoBehaviour
         islandGOScript.SetRegions(activeRegions);
         Bundle bundle = bundleMaster.GetElement(newCommit);
         islandGOScript.Bundle = bundle;
+        gameObject.name = bundle.getName();
 
         //Get Island Radius
         int maxRingTotal = bundleMaster.GetGrid().GetOuterAssignedTotal(newCommit);

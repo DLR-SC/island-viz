@@ -209,6 +209,7 @@ public class RegionController_Script : MonoBehaviour
         Package package = packageMaster.GetElement(newCommit);
         regionScript.setPackage(package);
         regionScript.setBuildings(activeBuildings);
+        gameObject.name = package.getName();
 
     }
 
