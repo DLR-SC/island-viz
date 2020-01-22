@@ -17,6 +17,7 @@ namespace OSGI_Datatypes.OrganisationElements
         List<Issue> issues;
         string commitIdString;
         string commitMessage;
+        int commitIndex;
 
         //Artefakts
         List<Bundle> bundles;
@@ -31,7 +32,7 @@ namespace OSGI_Datatypes.OrganisationElements
         bool isGraphLayouted;
         bool isIslandsLayouted;
 
-        public Commit(Author a, Branch b, long t, int id, string idSt, string msg, List<Issue> issueList)
+        public Commit(Author a, Branch b, long t, int id, string idSt, string msg, List<Issue> issueList, int i)
         {
             author = a;
             branch = b;
@@ -40,6 +41,7 @@ namespace OSGI_Datatypes.OrganisationElements
             commitIdString = idSt;
             commitMessage = msg;
             issues = issueList;
+            commitIndex = i;
 
             bundles = new List<Bundle>();
             services = new List<Service>();
@@ -243,6 +245,10 @@ namespace OSGI_Datatypes.OrganisationElements
             isIslandsLayouted = value;
         }
         
+        public int GetCommitIndex()
+        {
+            return commitIndex;
+        }
         
         public Commit GetPrevious(Branch b)
         {

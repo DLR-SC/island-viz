@@ -96,13 +96,13 @@ namespace HexLayout.Basics
         }
 
         #region Mesh_Generation_Support_Functions
-        public Vector3[] GetVerticeList(int currentTime)
+        public Vector3[] GetVerticeList(int heightDif)
         {
-            if (currentTime == 0)
-            {
-                return HexHelper.CreateHexagonVertices(gridKx, gridKz, Constants.standardHeight);
-            }
-            return HexHelper.CreateHexagonVertices(gridKx, gridKz, Constants.standardHeight + Constants.heightFactor * (currentTime - timeTag));
+            return HexHelper.CreateHexagonVertices(gridKx, gridKz, Constants.standardHeight + Constants.heightFactor * heightDif);
+        }
+        public float GetHeight(int heightDif)
+        {
+            return Constants.standardHeight + Constants.heightFactor * heightDif;
         }
         public int[] GetTrianglesList(int nrOfHexInGrid)
         {

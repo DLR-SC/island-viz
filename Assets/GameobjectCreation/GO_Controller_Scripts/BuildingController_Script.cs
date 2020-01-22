@@ -64,30 +64,35 @@ public class BuildingController_Script : MonoBehaviour
 
 
                 buildingGo.layer = LayerMask.NameToLayer("Visualization");
-                CapsuleCollider capsuleCol = buildingGo.AddComponent<CapsuleCollider>();
-
-                //Adjust Position of this gameObject (BuildingManager so building is placed on of region)
-                float posY;
-                if (Constants.timeDepHight)
-                {
-                    posY = Constants.standardHeight;
-                    //TODO fill this (Zeitabhängige Höhe gleich wie bei HexHelber.GetVertices
-                    //posY = Constants.standardHeight + 0.5f + Constants.heightFactor * (timedif);
-                }
-                else
-                {
-                    posY = Constants.standardHeight;
-                }
-                Vector3 pos = gameObject.transform.localPosition;
-                pos.y = posY;
-                gameObject.transform.localPosition = pos;
-                
+                CapsuleCollider capsuleCol = buildingGo.AddComponent<CapsuleCollider>();          
 
             }
-            buildingGo.name = cuCurrent.getName();
+
+            if (tls.Equals(TimelineStatus.notYetPresent))
+                buildingGo.name = "Future Building";
+            else if (tls.Equals(TimelineStatus.present))
+                buildingGo.name = cuCurrent.getName();
+            else if (tls.Equals(TimelineStatus.notPresentAnymore))
+                buildingGo.name = "Deleted Building";
+            else
+                buildingGo.name = "Unknown Building";
+
             Building buildingComponent = buildingGo.GetComponent<Building>();
             buildingComponent.setCU(cuCurrent);
             cuCurrent.setGameObject(buildingGo);
+
+            //Adjust Height if HeightDisplay
+            int heightDif = 0;
+            if (HistoryNavigation.Instance.showTimeDependentHight)
+            {
+                    heightDif = c.GetCommitIndex() - compUnit.GetStart(SortTypes.byTime).GetCommitIndex();
+            }
+            float heigth = Constants.standardHeight + Constants.heightFactor * heightDif;
+            Vector3 pos = gameObject.transform.localPosition;
+            pos.y = heigth;
+            gameObject.transform.localPosition = pos;
+
+
             return buildingComponent;
             
         }

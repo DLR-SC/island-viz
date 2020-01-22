@@ -248,7 +248,7 @@ namespace OSGI_Datatypes.DataStructureCreation
                 }
 
                 //New Commit
-                Commit newCommit = new Commit(author, branch, cTime, cId, cIdString, cMess, issues);
+                Commit newCommit = new Commit(author, branch, cTime, cId, cIdString, cMess, issues, i);
                 if (author != null)
                 {
                     author.AddCommit(newCommit);

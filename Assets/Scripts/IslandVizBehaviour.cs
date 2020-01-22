@@ -128,7 +128,6 @@ public class IslandVizBehaviour : MonoBehaviour
         yield return IslandVizVisualization.Instance.InitVisualizationComponents(); // Load additional visualization components.
         yield return IslandVizInteraction.Instance.InitInputComponents(); // Load additional interaction components.
 
-
         GameObject IV_Container = GameObject.Find("VisualizationContainer");
         GameObject objectContainer = GameObject.Find("IslandObjectContainer");
 
@@ -138,6 +137,8 @@ public class IslandVizBehaviour : MonoBehaviour
         //TODO Richtige Höhe für Visualisierung
         vis.transform.position = new Vector3(0f, 1f, 0f);
         vis.transform.localScale = new Vector3(0.00145f, 0.00145f, 0.00145f);
+
+        HistoryNavigation.Instance.StepNext();
 
         OnConstructionDone?.Invoke(); // Call the OnConstructionDone event.
     }

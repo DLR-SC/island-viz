@@ -305,7 +305,7 @@ public class DynamicGraphCalculation : MonoBehaviour
 
             case Constants.LayoutOption.HistoryForce:
                 historyGraphManager = new Island_HistoryGraphManager_History(hG);
-                yield return historyGraphManager.Init(planeRadius - 2.1f, 1.0f, 8.0f, 0.3f, 2000, 16, 4);
+                yield return historyGraphManager.Init(planeRadius - 2.1f, 1.0f, 8.0f, 10.3f, 2000, 16f, 4);
                 break;
             case Constants.LayoutOption.Master:
                 historyGraphManager = new Island_HistoryGraphManager_Master(hG);

@@ -81,18 +81,23 @@ public class RegionController_Script : MonoBehaviour
         foreach (Cell assignedCell in region.GetAssignedCells())
         {
             TimelineStatus tls = assignedCell.GetCompUnit().RelationOfCommitToTimeline(c);
-            if (tls.Equals(TimelineStatus.present))
+            if (tls.Equals(TimelineStatus.present) || tls.Equals(TimelineStatus.notPresentAnymore))
             {
+                int heightDif = 0;
+                if (HistoryNavigation.Instance.showTimeDependentHight)
+                {
+                    CompUnitMaster master = assignedCell.GetCompUnit();
+                    if (tls.Equals(TimelineStatus.present))
+                    {
+                        heightDif = c.GetCommitIndex() - master.GetStart(SortTypes.byTime).GetCommitIndex();
+                    }
+                    else
+                    {
+                        heightDif = master.GetEnd(SortTypes.byTime).GetCommitIndex() - master.GetStart(SortTypes.byTime).GetCommitIndex();
+                    }
+                }
                 //TODO verticeList unter beeinflussung von timeDepHight
-                Vertices.AddRange(assignedCell.GetVerticeList(0));
-                Triangles.AddRange(assignedCell.GetTrianglesList(cellsInMesh));
-                Normals.AddRange(assignedCell.GetNormals());
-                cellsInMesh++;
-            }
-            else if (tls.Equals(TimelineStatus.notPresentAnymore))
-            {
-                //TODO verticeList unter beeinflussung von timeDepHight & letztem vorhandenen Commit
-                Vertices.AddRange(assignedCell.GetVerticeList(0));
+                Vertices.AddRange(assignedCell.GetVerticeList(heightDif));
                 Triangles.AddRange(assignedCell.GetTrianglesList(cellsInMesh));
                 Normals.AddRange(assignedCell.GetNormals());
                 cellsInMesh++;
@@ -119,7 +124,6 @@ public class RegionController_Script : MonoBehaviour
         var newTriangles = Triangles.ToArray();
         var newNormals = Normals.ToArray();
 
-
         MeshCollider mc = gameObject.GetComponent<MeshCollider>();
 
         Mesh mesh = new Mesh();
@@ -127,18 +131,6 @@ public class RegionController_Script : MonoBehaviour
         mesh.triangles = newTriangles;
         mesh.normals = newNormals;
         mc.sharedMesh = mesh;
-        /*var mesh = mc.sharedMesh;
-        if (mesh == null)
-        {
-            mesh = new Mesh();
-        }
-        else
-        {
-            mesh.Clear();
-        }
-        mesh.vertices = newVertices;
-        mesh.triangles = newTriangles;
-        mesh.normals = newNormals;*/
     }
 
     public IEnumerator UpdateBuildings(Commit c, List<Building> activeBuildingsInRegion)
@@ -209,7 +201,21 @@ public class RegionController_Script : MonoBehaviour
         Package package = packageMaster.GetElement(newCommit);
         regionScript.setPackage(package);
         regionScript.setBuildings(activeBuildings);
-        gameObject.name = package.getName();
+        if (tls.Equals(TimelineStatus.notYetPresent))
+        {
+            gameObject.name = "Future Package";
+        }else if (tls.Equals(TimelineStatus.present))
+        {
+            gameObject.name = package.getName();
+        }
+        else if (tls.Equals(TimelineStatus.notPresentAnymore))
+        {
+            gameObject.name = "Deleted Package";
+        }
+        else
+        {
+            gameObject.name = "Unknown Package";
+        }
 
     }
 

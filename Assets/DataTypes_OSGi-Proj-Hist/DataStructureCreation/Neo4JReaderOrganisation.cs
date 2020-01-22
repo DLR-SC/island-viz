@@ -167,20 +167,20 @@ namespace OSGI_Datatypes.DataStructureCreation
 
         }
 
-        public static IEnumerator ReadCommits(Project project, Branch branch, Dictionary<int, Commit> commitDict, bool printInfo)
+        public static IEnumerator ReadCommits(Project project, Branch branch, Dictionary<int, Commit> commitDict, bool printInfo, int maxCommitNr)
         {
             if (branch.GetNeoId() == -1)
             {
                 //branch id = -1 indicates default Masterbranch
-                yield return ReadCommits(project, branch, commitDict, false, printInfo);
+                yield return ReadCommits(project, branch, commitDict, false, printInfo, maxCommitNr);
             }
             else
             {
-                yield return ReadCommits(project, branch, commitDict, true, printInfo);
+                yield return ReadCommits(project, branch, commitDict, true, printInfo, maxCommitNr);
             }
         }
         
-        public static IEnumerator ReadCommits(Project project, Branch branch, Dictionary<int, Commit> commitDict, bool considerbranching, bool printInfo)
+        public static IEnumerator ReadCommits(Project project, Branch branch, Dictionary<int, Commit> commitDict, bool considerbranching, bool printInfo, int maxCommitNr)
         {
             int oldListLength = commitDict.Count;
             if(commitDict == null)
@@ -239,7 +239,7 @@ namespace OSGI_Datatypes.DataStructureCreation
             var resList = result.ToList();
             yield return null;
 
-            for (int i = 0; i < resList.Count; i++)
+            for (int i = 0; (i < resList.Count)&&(i<maxCommitNr); i++)
             {
                 var commitInfos = resList[i];
                 int cId = commitInfos["cNeoId"].As<int>();
@@ -278,7 +278,7 @@ namespace OSGI_Datatypes.DataStructureCreation
                 }
 
                 //New Commit
-                Commit newCommit = new Commit(author, branch, cTime, cId, cIdString, cMess, issues);
+                Commit newCommit = new Commit(author, branch, cTime, cId, cIdString, cMess, issues, i);
                 if (author != null)
                 {
                     author.AddCommit(newCommit);

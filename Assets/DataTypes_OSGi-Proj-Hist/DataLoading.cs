@@ -16,6 +16,7 @@ public class DataLoading : MonoBehaviour
     public static DataLoading Instance { get { return instance; } }
     private static DataLoading instance; // The instance of this class.
 
+    public int commitNr=8;
 
     private Project project;
     private Neo4J database;
@@ -90,7 +91,7 @@ public class DataLoading : MonoBehaviour
         int commitsBefore = project.GetCommits().Count;
         //taskTextfield.text = "Loading Commits per Branch\n" + "Loading Commits of Branch " + branch.GetName();
         IslandVizUI.Instance.UpdateLoadingScreenUI("Loading Commits of Branch " + branch.GetName(), ""); // Update UI.
-        yield return Neo4JReaderOrganisation.ReadCommits(project, branch, project.GetCommits(), false);
+        yield return Neo4JReaderOrganisation.ReadCommits(project, branch, project.GetCommits(), false, commitNr);
         //statusTextfield.text = "Found " + (project.GetCommits().Count - commitsBefore) + " Commits in Branch " + branch.GetName();
         IslandVizUI.Instance.UpdateLoadingScreenUI("Found Commits in Branch + branch.GetName()", (project.GetCommits().Count - commitsBefore).ToString()); // Update UI.
 
@@ -222,7 +223,7 @@ public class DataLoading : MonoBehaviour
         int cCount;
 
         //TODO hier zweite Beschränkung entfernen
-        for (int i = 0; (i < branchLengt)&&(i<8); i++)
+        for (int i = 0; (i < branchLengt)&&(i<commitNr); i++)
         {
             IslandVizUI.Instance.UpdateLoadingScreenUI("Loading Commit Details", (currentCommitNr*100/(float)project.GetCommits().Count).ToString("0.00")+"%"); // Update UI.
 

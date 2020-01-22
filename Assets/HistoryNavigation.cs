@@ -5,22 +5,28 @@ using UnityEngine;
 
 public class HistoryNavigation : MonoBehaviour
 {
+    private enum TimeLapsStatus
+    {
+        forwards, backwards, stop
+    }
+
     public static HistoryNavigation Instance { get { return instance; } }
     private static HistoryNavigation instance; // The instance of this class.
 
     public float islandspeed;
-    public bool showTimeDependentHight { get; }
+    public float timelapsInterval = 3;
+    public bool showTimeDependentHight;
 
     private Project project;
     private Commit currentCommitToShow;
-    private bool forwards;
+    private TimeLapsStatus timeLapsStatus; 
 
     // Start is called before the first frame update
     void Start()
     {
         instance = this;
         project = GameObject.Find("DataObject").GetComponent<OSGi_Project_Script>().GetProject();
-        forwards = true;
+        timeLapsStatus = TimeLapsStatus.stop;
     }
 
     // Update is called once per frame
@@ -136,19 +142,55 @@ public class HistoryNavigation : MonoBehaviour
     public void TimelapsForwards()
     {
         Debug.Log("TLNextFired");
-
+        if (timeLapsStatus.Equals(TimeLapsStatus.stop))
+        {
+            timeLapsStatus = TimeLapsStatus.forwards;
+            StartCoroutine(TimelapsForwardsRoutine());
+        }
     }
 
     public void TimelapsBackwards()
     {
         Debug.Log("TLBackFired");
-
+        if (timeLapsStatus.Equals(TimeLapsStatus.stop))
+        {
+            timeLapsStatus = TimeLapsStatus.backwards;
+            StartCoroutine(TimelapsBackwardsRoutine());
+        }
     }
 
     public void TimelapsStop()
     {
         Debug.Log("TLStopFired");
+        if (!timeLapsStatus.Equals(TimeLapsStatus.stop))
+        {
+            timeLapsStatus = TimeLapsStatus.stop;
+        }
+    }
+    public IEnumerator TimelapsForwardsRoutine()
+    {
+        while(timeLapsStatus.Equals(TimeLapsStatus.forwards)&& currentCommitToShow.GetNext(currentCommitToShow.GetBranch()) != null)
+        {
+            StepNext();
+            yield return new WaitForSeconds(timelapsInterval);
+        }
+        if(currentCommitToShow.GetNext(currentCommitToShow.GetBranch()) == null)
+        {
+            timeLapsStatus = TimeLapsStatus.stop;
+        }
+    }
 
+    public IEnumerator TimelapsBackwardsRoutine()
+    {
+        while (timeLapsStatus.Equals(TimeLapsStatus.backwards) && currentCommitToShow.GetPrevious(currentCommitToShow.GetBranch()) != null)
+        {
+            StepBack();
+            yield return new WaitForSeconds(timelapsInterval);
+        }
+        if (currentCommitToShow.GetPrevious(currentCommitToShow.GetBranch()) == null)
+        {
+            timeLapsStatus = TimeLapsStatus.stop;
+        }
     }
 
 }
