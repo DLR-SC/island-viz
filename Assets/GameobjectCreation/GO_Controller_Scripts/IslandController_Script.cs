@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Assets;
 using OSGI_Datatypes.OrganisationElements;
+using OSGI_Datatypes.ComposedTypes;
+using OsgiViz.Unity.Island;
 
 public class IslandController_Script : MonoBehaviour
 {
@@ -18,13 +20,19 @@ public class IslandController_Script : MonoBehaviour
     private GameObject exportDock;
     private GameObject importDock;
     private List<GameObject> regions;
-    private Rigidbody rb;
 
     private BundleMaster bundleMaster;
+
+    private System.Random RNG;
     //private IslandObjectContainer_Script mainController;
     //private Commit currentCommit;
     //private bool transformationRunning;
 
+
+    public void Awake()
+    {
+        RNG = new System.Random(0);
+    }
 
     public void Start()
     {
@@ -42,11 +50,6 @@ public class IslandController_Script : MonoBehaviour
 
     public IEnumerator Initialise()
     {
-        rb = gameObject.GetComponent<Rigidbody>();
-        //rb.constraints = RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
-        rb.centerOfMass = Vector3.zero;
-        rb.inertiaTensorRotation = Quaternion.identity;
-
         regions = new List<GameObject>();
 
         coastLine = Instantiate(coastlinePrefab, new Vector3(0, 0, 0), Quaternion.identity);
@@ -80,9 +83,10 @@ public class IslandController_Script : MonoBehaviour
             region.name = "Region"; //TODO sinnnvoller Name für Region nach Packet
             region.transform.parent = gameObject.transform;
             region.transform.localPosition = new Vector3(0, 0, 0);
-            region.GetComponent<RegionController_Script>().SetPackage(pm);
+            //TODO set ParentIsland
+            region.GetComponent<RegionController_Script>().SetPackage(pm, null);
             //region.GetComponent<MeshRenderer>().material = (Material)Resources.Load("Materials/Combined HoloMaterial");
-            //region.GetComponent<RegionController_Script>().InitColor(regionCount);
+            region.GetComponent<RegionController_Script>().InitColor(new Vector2((float)RNG.NextDouble(), (float)RNG.NextDouble()*0.4f));
             region.GetComponent<MeshRenderer>().sharedMaterial = IslandVizVisualization.Instance.CombinedHoloMaterial;
             //TODO timedephight global regeln
             yield return region.GetComponent<RegionController_Script>().CreateBuildingManagers();
@@ -99,10 +103,12 @@ public class IslandController_Script : MonoBehaviour
         //TODO Death Area Rausnehmen update regions als Coroutinen probieren
         foreach (GameObject region in regions)
         {
-            StartCoroutine(region.GetComponent<RegionController_Script>().RenewRegionMesh(newCommit));
-            StartCoroutine(region.GetComponent<RegionController_Script>().UpdateBuildings(newCommit));
+            TimelineStatus tls = TimelineStatus.defValue;
+            Region regionScriptComp = null;
+            StartCoroutine(region.GetComponent<RegionController_Script>().RenewRegion(null, newCommit, tls, regionScriptComp ));
+            //StartCoroutine(region.GetComponent<RegionController_Script>().UpdateBuildings(newCommit));
         }
-        StartCoroutine(deathArea.GetComponent<DeathAreaController_Script>().RenewDeathAreaMesh(newCommit));
+        //StartCoroutine(deathArea.GetComponent<DeathAreaController_Script>().RenewDeathAreaMesh(newCommit));
         StartCoroutine(coastLine.GetComponent<CoastlineController_Script>().RenewCoastlineMesh(newCommit));
 
         int maxRingTotal = bundleMaster.GetGrid().GetOuterAssignedTotal(newCommit);
@@ -123,94 +129,8 @@ public class IslandController_Script : MonoBehaviour
         importDock.transform.localPosition = new Vector3(0f, Constants.dockYPos, radiusSegment + 2);
         exportDock.transform.localPosition = new Vector3(2f, Constants.dockYPos, radiusSegment + 1);
 
-        float colliderDim = 3f;
-        
-        if(radiusSegment + 3 <= radiusTotal)
-        {
-            colliderDim = radiusTotal;
-        }
-        else
-        {
-            colliderDim = radiusSegment + 3;
-        }
-        colliderDim += 8;
-
-        float boxDim = Mathf.Floor(colliderDim / Mathf.Sqrt(2) * 10) / 10f;
-
-
-        gameObject.GetComponent<BoxCollider>().size = new Vector3(boxDim * 2, 6, boxDim *2);
-        gameObject.GetComponent<SphereCollider>().radius = colliderDim;
-
         controllerScript.NotifyIslandTransformationFinished();
         yield return null;
-    }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-       if (collision.gameObject.tag.Equals("Island"))
-        {
-            Debug.Log("CollisionExit " + gameObject.name + ", " + collision.gameObject.name);
-        }
-    }
-
-    private void OnCollisionStay(Collision collision)
-    {
-        Vector3 dirToOther = collision.gameObject.transform.position;
-        Vector3 dirRight = Vector3.Cross(Vector3.up, dirToOther);
-        rb.AddForce(5 * (dirRight - dirToOther).normalized);
-    }
-
-
-    private void OnCollisionExit(Collision collision)
-    {
-        if (collision.gameObject.tag.Equals("Island"))
-        {
-            Debug.Log("CollisionExit " + gameObject.name + ", " + collision.gameObject.name);
-        }
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (rb == null)
-        {
-            return;
-        }
-        if (other.gameObject.tag.Equals("Island")&&gameObject!=other.gameObject)
-        {
-            Vector3 dir = other.gameObject.transform.position - gameObject.transform.position;
-
-            Vector3 velo = rb.velocity;
-            Vector3 repForceDir;
-            if (velo.magnitude != 0)
-            {
-                repForceDir = Vector3.Cross(Vector3.up, velo);
-            }
-            else
-            {
-                repForceDir = Vector3.Cross(Vector3.up, dir);
-            }
-            float factor = 20f;
-            if (dir.magnitude != 0)
-            {
-                factor *= Mathf.Log(1f / dir.magnitude);
-            }
-            gameObject.GetComponent<ConstantForce>().force = factor * repForceDir.normalized;
-            Debug.Log("Trigger Enter " + gameObject.name + ", " + other.gameObject.name);
-        }
-    }
-
-    private void OnTriggerStay(Collider other)
-    {
-        gameObject.GetComponent<Rigidbody>().velocity = Vector3.zero;
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.gameObject.tag.Equals("Island"))
-        {
-            gameObject.GetComponent<ConstantForce>().force = Vector3.zero;
-            Debug.Log("TriggerExit " + gameObject.name + ", " + other.gameObject.name);
-        }
     }
 
     public void OnNewCommit(Commit oldCommit, Commit newCommit)
@@ -250,23 +170,6 @@ public class IslandController_Script : MonoBehaviour
         importDock.transform.localPosition = new Vector3(0f, Constants.dockYPos, radiusSegment + 2);
         exportDock.transform.localPosition = new Vector3(2f, Constants.dockYPos, radiusSegment + 1);
 
-        float colliderDim = 3f;
-
-        if (radiusSegment + 3 <= radiusTotal)
-        {
-            colliderDim = radiusTotal;
-        }
-        else
-        {
-            colliderDim = radiusSegment + 3;
-        }
-        colliderDim += 8;
-
-        float boxDim = Mathf.Floor(colliderDim / Mathf.Sqrt(2) * 10) / 10f;
-
-
-        gameObject.GetComponent<BoxCollider>().size = new Vector3(boxDim * 2, 6, boxDim * 2);
-        gameObject.GetComponent<SphereCollider>().radius = colliderDim;
 
         //controllerScript.NotifyIslandTransformationFinished();
         yield return null;

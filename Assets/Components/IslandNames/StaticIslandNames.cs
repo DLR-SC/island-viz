@@ -179,7 +179,7 @@ namespace StaticIslandNamesComponent
             if (!currentNames.ContainsKey(target) && !currentNames.ContainsKey(target)) 
             {
                 GameObject islandName = (GameObject)Instantiate(IslandNamePrefab);
-                islandName.transform.parent = StaticNameParent;
+                islandName.transform.SetParent(StaticNameParent);
                 islandName.transform.position = new Vector3(target.position.x, 0f, target.position.z);
                 StaticIslandName staticIslandName = islandName.GetComponent<StaticIslandName>();
 

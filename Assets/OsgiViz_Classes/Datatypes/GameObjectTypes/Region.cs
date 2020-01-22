@@ -72,6 +72,10 @@ namespace OsgiViz.Unity.Island
         {
             buildings.Add(cuGO);
         }
+        public void setBuildings(List<Building> cuGOs)
+        {
+            buildings = cuGOs;
+        }
 
         public void setPackage(Package pckg)
         {

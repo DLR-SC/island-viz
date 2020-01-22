@@ -8,6 +8,6 @@ namespace OSGI_Datatypes.ComposedTypes
 {
     public enum TimelineStatus
     {
-        notYetPresent, present, notPresentAnymore
+        notYetPresent, present, notPresentAnymore, defValue
     }
 }

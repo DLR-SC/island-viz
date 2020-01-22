@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using HexLayout.Basics;
 using OSGI_Datatypes.ComposedTypes;
+using OsgiViz.SoftwareArtifact;
+using OsgiViz.Unity.Island;
 
 public class RegionController_Script : MonoBehaviour
 {
@@ -13,81 +15,34 @@ public class RegionController_Script : MonoBehaviour
     private GameObject buildingManager_Prefab;
     public float scaleFactor = 0.7f;
 
-    Region region;
+    HexLayout.Basics.Region region;
+    PackageMaster packageMaster;
     private List<GameObject> buildingMangagerGOs;
+    private  OsgiViz.Unity.Island.Region regionScript;
+    private Vector2 colorValue;
+
+
+    #region Initialisation
 
     public void Start()
     {
-        IslandVizInteraction.Instance.OnNewCommit += OnNewCommit;
+        regionScript = gameObject.GetComponent<OsgiViz.Unity.Island.Region>();
+        regionScript.setRegionArea(gameObject.GetComponent<MeshFilter>());
     }
 
-    public void InitColor(int i)
+    public void InitColor(Vector2 value)
     {
-        Vector3 color = Constants.colVals[i];
-        gameObject.GetComponent<MeshRenderer>().material.color = new Color(color.x / 255f, color.y / 255f, color.z / 255f, 1f);
+        colorValue = value;
+        //Vector3 color = Constants.colVals[i];
+        //gameObject.GetComponent<MeshRenderer>().material.color = new Color(color.x / 255f, color.y / 255f, color.z / 255f, 1f);
     }
-
-
-    public void SetPackage(PackageMaster pm)
+    
+    public void SetPackage(PackageMaster pm, IslandGO parentIsland)
     {
+        packageMaster = pm;
         region = pm.GetRegion();
-    }
-
-    public IEnumerator RenewRegionMesh(Commit c)
-    {
-        //Debug.Log("Entering Renew Region Mesh");
-        //Lists as Input for new Mesh
-        List<Vector3> Vertices = new List<Vector3>();
-        List<int> Triangles = new List<int>();
-        List<Vector3> Normals = new List<Vector3>();
-
-        int cellsInMesh = 0;
-
-        foreach(Cell assignedCell in region.GetAssignedCells())
-        {
-            TimelineStatus tls = assignedCell.GetCompUnit().RelationOfCommitToTimeline(c);
-            if (tls.Equals(TimelineStatus.present))
-            {
-                //TODO verticeList unter beeinflussung von timeDepHight
-                Vertices.AddRange(assignedCell.GetVerticeList(0));
-                Triangles.AddRange(assignedCell.GetTrianglesList(cellsInMesh));
-                Normals.AddRange(assignedCell.GetNormals());
-                cellsInMesh++;
-            }
-        }
-        yield return null;
-
-        if (cellsInMesh != 0)
-        {
-          //  Debug.Log("Cells in Mesh " + cellsInMesh);
-        }
-
-        //Set Data from Mesh-Lists to mesh
-        var newVertices = Vertices.ToArray();
-        var newTriangles = Triangles.ToArray();
-        var newNormals = Normals.ToArray();
-
-        var mesh = gameObject.GetComponent<MeshFilter>().mesh;
-        mesh.Clear();
-        mesh.vertices = newVertices;
-        mesh.triangles = newTriangles;
-        mesh.normals = newNormals;
-
-        yield return null;
-    }
-
-    public IEnumerator UpdateBuildings(Commit c)
-    {
-        int i = 0;
-        foreach(GameObject buildingManager in buildingMangagerGOs)
-        {
-            buildingManager.GetComponent<BuildingController_Script>().UpdateBuilding(c);
-            i++;
-            if (i % 10 == 0)
-            {
-                yield return null;
-            }
-        }
+        //TODO set Parent Island But not on this Place because regionScript is not yet known here
+        //regionScript.setParentIsland(parentIsland);
     }
 
     public IEnumerator CreateBuildingManagers()
@@ -96,7 +51,7 @@ public class RegionController_Script : MonoBehaviour
         PackageMaster package = region.GetPackageMaster();
 
         int i = 0;
-        foreach(CompUnitMaster cum in package.GetContainedMasterCompUnits())
+        foreach (CompUnitMaster cum in package.GetContainedMasterCompUnits())
         {
             GameObject buildingM = Instantiate(buildingManager_Prefab, Vector3.zero, Quaternion.identity);
             buildingM.transform.parent = gameObject.transform;
@@ -117,11 +72,143 @@ public class RegionController_Script : MonoBehaviour
         }
     }
 
-    public void OnNewCommit(Commit oldCommit, Commit newCommit)
+    #endregion
+
+    public void CreateMesh(Commit c, List<Vector3> Vertices, List<int> Triangles, List<Vector3> Normals, out int cellsInMesh)
     {
-        if (gameObject.activeInHierarchy)
+         cellsInMesh = 0;
+
+        foreach (Cell assignedCell in region.GetAssignedCells())
         {
-            StartCoroutine(RenewRegionMesh(newCommit));
+            TimelineStatus tls = assignedCell.GetCompUnit().RelationOfCommitToTimeline(c);
+            if (tls.Equals(TimelineStatus.present))
+            {
+                //TODO verticeList unter beeinflussung von timeDepHight
+                Vertices.AddRange(assignedCell.GetVerticeList(0));
+                Triangles.AddRange(assignedCell.GetTrianglesList(cellsInMesh));
+                Normals.AddRange(assignedCell.GetNormals());
+                cellsInMesh++;
+            }
+            else if (tls.Equals(TimelineStatus.notPresentAnymore))
+            {
+                //TODO verticeList unter beeinflussung von timeDepHight & letztem vorhandenen Commit
+                Vertices.AddRange(assignedCell.GetVerticeList(0));
+                Triangles.AddRange(assignedCell.GetTrianglesList(cellsInMesh));
+                Normals.AddRange(assignedCell.GetNormals());
+                cellsInMesh++;
+            }
         }
     }
+
+    public void RenewRegionMesh(List<Vector3> Vertices, List<int> Triangles, List<Vector3> Normals)
+    {
+        var newVertices = Vertices.ToArray();
+        var newTriangles = Triangles.ToArray();
+        var newNormals = Normals.ToArray();
+
+        var mesh = gameObject.GetComponent<MeshFilter>().mesh;
+        mesh.Clear();
+        mesh.vertices = newVertices;
+        mesh.triangles = newTriangles;
+        mesh.normals = newNormals;
+    }
+
+    public void RenewColliderMesh(List<Vector3> Vertices, List<int> Triangles, List<Vector3> Normals)
+    {
+        var newVertices = Vertices.ToArray();
+        var newTriangles = Triangles.ToArray();
+        var newNormals = Normals.ToArray();
+
+
+        MeshCollider mc = gameObject.GetComponent<MeshCollider>();
+        var mesh = mc.sharedMesh;
+        if (mesh == null)
+        {
+            mesh = new Mesh();
+        }
+        else
+        {
+            mesh.Clear();
+        }
+        mesh.vertices = newVertices;
+        mesh.triangles = newTriangles;
+        mesh.normals = newNormals;
+    }
+
+    public IEnumerator UpdateBuildings(Commit c, List<Building> activeBuildingsInRegion)
+    {
+        int i = 0;
+        foreach(GameObject buildingManager in buildingMangagerGOs)
+        {
+            Building result = buildingManager.GetComponent<BuildingController_Script>().UpdateBuilding(c);
+            if (result != null)
+            {
+                activeBuildingsInRegion.Add(result);
+            }
+            i++;
+            if (i % 10 == 0)
+            {
+                yield return null;
+            }
+        }
+    }
+
+  
+
+    /// <summary>
+    /// MainMethod called to Renew Region
+    /// </summary>
+    /// <param name="oldCommit"></param>
+    /// <param name="newCommit"></param>
+    /// <param name="tls"></param>
+    /// <param name="regionScript"></param>
+    /// <returns></returns>
+    public IEnumerator RenewRegion(Commit oldCommit, Commit newCommit, TimelineStatus tls, OsgiViz.Unity.Island.Region rS)
+    {
+        tls = packageMaster.RelationOfCommitToTimeline(newCommit);
+        rS = regionScript; 
+
+        //Variables
+        List<Vector3> Vertices = new List<Vector3>();
+        List<int> Triangles = new List<int>();
+        List<Vector3> Normals = new List<Vector3>();
+
+        int cellsInMesh = 0;
+        yield return null;
+
+        CreateMesh(newCommit, Vertices, Triangles, Normals, out cellsInMesh);
+        //yield return null;
+
+        //Set Mesh To Filter
+        RenewRegionMesh(Vertices, Triangles, Normals);
+        yield return null;
+        //Set Color?
+        MeshFilter regionMeshFilter = gameObject.GetComponent<MeshFilter>();
+        setUVsToSingularCoord(colorValue, regionMeshFilter);
+        yield return null;
+
+        //Set Mesh To MeshCollider
+        RenewColliderMesh(Vertices, Triangles, Normals);
+
+        //Renew Buildings
+        List<Building> activeBuildings = new List<Building>();
+        yield return UpdateBuildings(newCommit, activeBuildings);
+
+        //Renew Attributes in RegionScript
+        Package package = packageMaster.GetElement(newCommit);
+        regionScript.setPackage(package);
+        regionScript.setBuildings(activeBuildings);
+
+    }
+
+    private void setUVsToSingularCoord(Vector2 newUV, MeshFilter mesh)
+    {
+        Vector3[] uvs = mesh.mesh.vertices;
+        Vector2[] newUVs = new Vector2[uvs.Length];
+        for (int i = 0; i < uvs.Length; i++)
+            newUVs[i] = newUV;
+
+        mesh.sharedMesh.uv = newUVs;
+    }
 }
+

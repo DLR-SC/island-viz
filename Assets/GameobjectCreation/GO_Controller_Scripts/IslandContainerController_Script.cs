@@ -95,7 +95,7 @@ public class IslandContainerController_Script : MonoBehaviour
                     {
                         movingStartTime = Time.time;
                         movingRunning = true;
-                        island.GetComponent<Rigidbody>().isKinematic = false;
+                        //island.GetComponent<Rigidbody>().isKinematic = false;
                         StartCoroutine(MoveIsland(newCommit));
                         //TODO island position transformation
                         //Vector2 pos2D = bundleMaster.GetElement(newCommit).GetPosition();
@@ -170,7 +170,7 @@ public class IslandContainerController_Script : MonoBehaviour
                 island.transform.position = oldPos + 0.1f * direction.normalized;
             }*/
 
-             try
+           /*  try
              {
                  if (direction.magnitude >= 3.0)
                  {
@@ -184,7 +184,7 @@ public class IslandContainerController_Script : MonoBehaviour
              catch
              {
                  Debug.Log("Exception");
-             }
+             }*/
             yield return new WaitForSeconds(0.1f);
             direction = target - island.transform.position;
         }
@@ -225,11 +225,11 @@ public class IslandContainerController_Script : MonoBehaviour
 
     public void NotivyIslandMovementFinished()
     {
-        movingRunning = false;
+        /*movingRunning = false;
         island.GetComponent<Rigidbody>().velocity = Vector3.zero;
         island.GetComponent<ConstantForce>().force = Vector3.zero;
         island.GetComponent<Rigidbody>().isKinematic = true;
-        NotifyAllFinished();
+        NotifyAllFinished();*/
 
     }
 

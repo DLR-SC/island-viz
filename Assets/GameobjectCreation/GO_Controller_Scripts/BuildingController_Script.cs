@@ -22,16 +22,19 @@ public class BuildingController_Script : MonoBehaviour
         bpScript = GameObject.Find("IslandObjectContainer").GetComponent<BuildingProvider_Script>();
     }
 
-    public void UpdateBuilding (Commit c)
+    public Building UpdateBuilding (Commit c)
     {
         TimelineStatus tls = compUnit.RelationOfCommitToTimeline(c);
-        if(tls!=TimelineStatus.present && buildingGo != null)
+        if (tls != TimelineStatus.present)
         {
-            oldBucket = -1;
-            Destroy(buildingGo);
-            return;
+            if (buildingGo != null)
+            {
+                oldBucket = -1;
+                Destroy(buildingGo);
+            }
+            return null;
         }
-        if (tls == TimelineStatus.present)
+        else
         {
             CompilationUnit cuCurrent = compUnit.GetElement(c);
             long loc = cuCurrent.getLoc();
@@ -76,28 +79,9 @@ public class BuildingController_Script : MonoBehaviour
             Building buildingComponent = buildingGo.GetComponent<Building>();
             buildingComponent.setCU(cuCurrent);
             cuCurrent.setGameObject(buildingGo);
+            return buildingComponent;
             
         }
         
-    }
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        IslandVizInteraction.Instance.OnNewCommit += OnNewCommit;
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-    private void OnNewCommit(Commit oldCommit, Commit newCommit)
-    {
-        if (gameObject.activeInHierarchy)
-        {
-            UpdateBuilding(newCommit);
-        }
-    }
+    }  
 }

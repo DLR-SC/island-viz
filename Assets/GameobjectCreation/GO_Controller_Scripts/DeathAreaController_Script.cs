@@ -17,7 +17,7 @@ public class DeathAreaController_Script : MonoBehaviour
     {
         Vector3 deathAreaColor = Constants.deathAreaColor;
         gameObject.GetComponent<MeshRenderer>().material.color = new Color(deathAreaColor.x / 255f, deathAreaColor.y / 255f, deathAreaColor.z / 255f, 1f);
-        IslandVizInteraction.Instance.OnNewCommit += OnNewCommit;
+        //IslandVizInteraction.Instance.OnNewCommit += OnNewCommit;
     }
 
     public void SetGrid(HexGrid g)
