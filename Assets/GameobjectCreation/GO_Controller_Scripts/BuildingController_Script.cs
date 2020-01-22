@@ -11,6 +11,7 @@ using OsgiViz.SoftwareArtifact;
 public class BuildingController_Script : MonoBehaviour
 {
     private GameObject buildingGo;
+    private Region regionScript;
     private int oldBucket;
     private CompUnitMaster compUnit;
     private BuildingProvider_Script bpScript;
@@ -20,6 +21,11 @@ public class BuildingController_Script : MonoBehaviour
         compUnit = cum;
         oldBucket = -1;
         bpScript = GameObject.Find("IslandObjectContainer").GetComponent<BuildingProvider_Script>();
+    }
+
+    public void SetRegion(Region r)
+    {
+        regionScript = r;
     }
 
     public Building UpdateBuilding (Commit c)
@@ -54,6 +60,9 @@ public class BuildingController_Script : MonoBehaviour
                 buildingGo.transform.localRotation = Quaternion.identity;
                 buildingGo.transform.localScale = new Vector3(1, 1, 1);
                 buildingGo.AddComponent<Building>();
+                buildingGo.GetComponent<Building>().SetParentRegion(regionScript);
+
+
                 buildingGo.layer = LayerMask.NameToLayer("Visualization");
                 CapsuleCollider capsuleCol = buildingGo.AddComponent<CapsuleCollider>();
 

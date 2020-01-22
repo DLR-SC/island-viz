@@ -24,7 +24,7 @@ public class RegionController_Script : MonoBehaviour
 
     #region Initialisation
 
-    public void Start()
+    public void Awake()
     {
         regionScript = gameObject.GetComponent<OsgiViz.Unity.Island.Region>();
         regionScript.setRegionArea(gameObject.GetComponent<MeshFilter>());
@@ -37,12 +37,10 @@ public class RegionController_Script : MonoBehaviour
         //gameObject.GetComponent<MeshRenderer>().material.color = new Color(color.x / 255f, color.y / 255f, color.z / 255f, 1f);
     }
     
-    public void SetPackage(PackageMaster pm, IslandGO parentIsland)
+    public void SetPackage(PackageMaster pm)
     {
         packageMaster = pm;
         region = pm.GetRegion();
-        //TODO set Parent Island But not on this Place because regionScript is not yet known here
-        //regionScript.setParentIsland(parentIsland);
     }
 
     public IEnumerator CreateBuildingManagers()
@@ -63,6 +61,8 @@ public class RegionController_Script : MonoBehaviour
             buildingMangagerGOs.Add(buildingM);
 
             buildingM.GetComponent<BuildingController_Script>().SetCompUnit(cum);
+            buildingM.GetComponent<BuildingController_Script>().SetRegion(regionScript);
+
 
             i++;
             if (i % 10 == 0)
@@ -121,7 +121,13 @@ public class RegionController_Script : MonoBehaviour
 
 
         MeshCollider mc = gameObject.GetComponent<MeshCollider>();
-        var mesh = mc.sharedMesh;
+
+        Mesh mesh = new Mesh();
+        mesh.vertices = newVertices;
+        mesh.triangles = newTriangles;
+        mesh.normals = newNormals;
+        mc.sharedMesh = mesh;
+        /*var mesh = mc.sharedMesh;
         if (mesh == null)
         {
             mesh = new Mesh();
@@ -132,7 +138,7 @@ public class RegionController_Script : MonoBehaviour
         }
         mesh.vertices = newVertices;
         mesh.triangles = newTriangles;
-        mesh.normals = newNormals;
+        mesh.normals = newNormals;*/
     }
 
     public IEnumerator UpdateBuildings(Commit c, List<Building> activeBuildingsInRegion)
@@ -163,10 +169,12 @@ public class RegionController_Script : MonoBehaviour
     /// <param name="tls"></param>
     /// <param name="regionScript"></param>
     /// <returns></returns>
-    public IEnumerator RenewRegion(Commit oldCommit, Commit newCommit, TimelineStatus tls, OsgiViz.Unity.Island.Region rS)
+    public IEnumerator RenewRegion(Commit oldCommit, Commit newCommit, TimelineStatus tls, OsgiViz.Unity.Island.Region rS, Vector2 regionHeight)
     {
         tls = packageMaster.RelationOfCommitToTimeline(newCommit);
-        rS = regionScript; 
+        rS = regionScript;
+        //TODO Region Hight herausfinden und hier setzten
+        regionHeight.x = 2f;
 
         //Variables
         List<Vector3> Vertices = new List<Vector3>();
@@ -188,6 +196,9 @@ public class RegionController_Script : MonoBehaviour
         yield return null;
 
         //Set Mesh To MeshCollider
+        MeshFilter meshFilter = gameObject.GetComponent<MeshFilter>();
+        gameObject.GetComponent<MeshCollider>().sharedMesh = meshFilter.sharedMesh;
+
         RenewColliderMesh(Vertices, Triangles, Normals);
 
         //Renew Buildings

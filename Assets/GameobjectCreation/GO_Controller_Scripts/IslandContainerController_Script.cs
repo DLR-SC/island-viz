@@ -112,9 +112,6 @@ public class IslandContainerController_Script : MonoBehaviour
 
     private void OnNewCommit(Commit oldCommit, Commit newCommit)
     {
-        Debug.Log(gameObject.name + "Encounter newCommitCall");
-
-
         if (bundleMaster.RelationOfCommitToTimeline(newCommit) != TimelineStatus.present)
         {
             //bundle not present in new Commit

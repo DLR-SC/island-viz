@@ -11,6 +11,7 @@ namespace OsgiViz.Unity.Island
     {
 
         private CompilationUnit cUnit;
+        private Region parentRegion;
 
         void Awake()
         {
@@ -55,6 +56,15 @@ namespace OsgiViz.Unity.Island
         public void setCU(CompilationUnit cu)
         {
             cUnit = cu;
+        }
+
+        public void SetParentRegion(Region region)
+        {
+            parentRegion = region;
+        }
+        public Region GetParentRegion()
+        {
+            return parentRegion;
         }
 
 

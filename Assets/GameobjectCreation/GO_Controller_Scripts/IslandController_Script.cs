@@ -6,17 +6,18 @@ using Assets;
 using OSGI_Datatypes.OrganisationElements;
 using OSGI_Datatypes.ComposedTypes;
 using OsgiViz.Unity.Island;
+using OsgiViz.SoftwareArtifact;
 
 public class IslandController_Script : MonoBehaviour
 {
     public GameObject coastlinePrefab;
-    public GameObject deathareaPrefab;
+    //public GameObject deathareaPrefab;
     public GameObject importDockPrefab;
     public GameObject exportDockPrefab;
     public GameObject regionPrefab;
 
     private GameObject coastLine;
-    private GameObject deathArea;
+    //private GameObject deathArea;
     private GameObject exportDock;
     private GameObject importDock;
     private List<GameObject> regions;
@@ -24,6 +25,7 @@ public class IslandController_Script : MonoBehaviour
     private BundleMaster bundleMaster;
 
     private System.Random RNG;
+    private IslandGO islandGOScript;
     //private IslandObjectContainer_Script mainController;
     //private Commit currentCommit;
     //private bool transformationRunning;
@@ -50,6 +52,9 @@ public class IslandController_Script : MonoBehaviour
 
     public IEnumerator Initialise()
     {
+        gameObject.layer = LayerMask.NameToLayer("Visualization");
+        islandGOScript = gameObject.GetComponent<IslandGO>();
+
         regions = new List<GameObject>();
 
         coastLine = Instantiate(coastlinePrefab, new Vector3(0, 0, 0), Quaternion.identity);
@@ -57,40 +62,35 @@ public class IslandController_Script : MonoBehaviour
         coastLine.transform.parent = gameObject.transform;
         coastLine.transform.localPosition = new Vector3(0, 0, 0);
         coastLine.GetComponent<CoastlineController_Script>().SetGrid(bundleMaster.GetGrid());
-        coastLine.GetComponent<CoastlineController_Script>().ShowTimeDependentHight(false);
-
-        deathArea = Instantiate(deathareaPrefab, new Vector3(0, 0, 0), Quaternion.identity);
-        deathArea.name = "DeathArea";
-        deathArea.transform.parent = gameObject.transform;
-        deathArea.transform.localPosition = new Vector3(0, 0, 0);
-        deathArea.GetComponent<DeathAreaController_Script>().SetGrid(bundleMaster.GetGrid());
-        deathArea.GetComponent<MeshRenderer>().material = (Material)Resources.Load("Materials/Combined HoloMaterial");
+        islandGOScript.Coast = coastLine;
 
         importDock = Instantiate(importDockPrefab, new Vector3(0, 0, 0), Quaternion.identity);
         importDock.name = "ImportDock";
         importDock.transform.parent = gameObject.transform;
         importDock.transform.localPosition = new Vector3(0, Constants.dockYPos, 2);
+        importDock.layer = LayerMask.NameToLayer("Visualization");
+        islandGOScript.ImportDock = importDock;
 
         exportDock = Instantiate(exportDockPrefab, new Vector3(0, 0, 0), Quaternion.identity);
         exportDock.name = "ExportDock";
         exportDock.transform.parent = gameObject.transform;
         exportDock.transform.localPosition = new Vector3(2, Constants.dockYPos, 0);
+        exportDock.layer = LayerMask.NameToLayer("Visualization");
+        islandGOScript.ExportDock = exportDock;
 
-        int regionCount = 0;
         foreach (PackageMaster pm in bundleMaster.GetContainedMasterPackages())
         {
             GameObject region = Instantiate(regionPrefab, new Vector3(0, 0, 0), Quaternion.identity);
             region.name = "Region"; //TODO sinnnvoller Name für Region nach Packet
             region.transform.parent = gameObject.transform;
             region.transform.localPosition = new Vector3(0, 0, 0);
-            //TODO set ParentIsland
-            region.GetComponent<RegionController_Script>().SetPackage(pm, null);
-            //region.GetComponent<MeshRenderer>().material = (Material)Resources.Load("Materials/Combined HoloMaterial");
+            region.layer = LayerMask.NameToLayer("Visualization");
+            region.GetComponent<RegionController_Script>().SetPackage(pm);
+            region.GetComponent<Region>().setParentIsland(islandGOScript);
             region.GetComponent<RegionController_Script>().InitColor(new Vector2((float)RNG.NextDouble(), (float)RNG.NextDouble()*0.4f));
             region.GetComponent<MeshRenderer>().sharedMaterial = IslandVizVisualization.Instance.CombinedHoloMaterial;
             //TODO timedephight global regeln
             yield return region.GetComponent<RegionController_Script>().CreateBuildingManagers();
-            regionCount = (regionCount + 1) % Constants.colVals.Length;
             regions.Add(region);
         }
         yield return null;
@@ -99,18 +99,33 @@ public class IslandController_Script : MonoBehaviour
 
     public IEnumerator UpdateRoutine(Commit newCommit, IslandContainerController_Script controllerScript)
     {
+        //Update visible Sub-GameObjects
+        StartCoroutine(coastLine.GetComponent<CoastlineController_Script>().RenewCoastlineMesh(newCommit));
 
-        //TODO Death Area Rausnehmen update regions als Coroutinen probieren
+        List<Region> activeRegions = new List<Region>();
+        float islandHeight = 10;
         foreach (GameObject region in regions)
         {
             TimelineStatus tls = TimelineStatus.defValue;
             Region regionScriptComp = null;
-            StartCoroutine(region.GetComponent<RegionController_Script>().RenewRegion(null, newCommit, tls, regionScriptComp ));
-            //StartCoroutine(region.GetComponent<RegionController_Script>().UpdateBuildings(newCommit));
+            Vector2 regionHeight = Vector2.zero;
+            yield return StartCoroutine(region.GetComponent<RegionController_Script>().RenewRegion(null, newCommit, tls, regionScriptComp, regionHeight));
+            if (tls.Equals(TimelineStatus.present))
+            {
+                activeRegions.Add(regionScriptComp);
+            }
+            if(islandHeight < regionHeight.x)
+            {
+                islandHeight = regionHeight.x;
+            }
         }
-        //StartCoroutine(deathArea.GetComponent<DeathAreaController_Script>().RenewDeathAreaMesh(newCommit));
-        StartCoroutine(coastLine.GetComponent<CoastlineController_Script>().RenewCoastlineMesh(newCommit));
 
+        //Update IslandGO-Script Attributes
+        islandGOScript.SetRegions(activeRegions);
+        Bundle bundle = bundleMaster.GetElement(newCommit);
+        islandGOScript.Bundle = bundle;
+
+        //Get Island Radius
         int maxRingTotal = bundleMaster.GetGrid().GetOuterAssignedTotal(newCommit);
         int maxRingSegment = bundleMaster.GetGrid().GetOuterAssignedFirstTwoSixths(newCommit);
 
@@ -126,8 +141,15 @@ public class IslandController_Script : MonoBehaviour
         float radiusTotal = Constants.GetRadiusFromRing(maxRingTotal);
         float radiusSegment = Constants.GetRadiusFromRing(maxRingSegment);
 
+        //Reposition IslandDocks
         importDock.transform.localPosition = new Vector3(0f, Constants.dockYPos, radiusSegment + 2);
         exportDock.transform.localPosition = new Vector3(2f, Constants.dockYPos, radiusSegment + 1);
+
+        //Resize Island CapsuleCollider
+        CapsuleCollider cc = gameObject.GetComponent<CapsuleCollider>();
+        cc.height = islandHeight;
+        cc.radius = radiusTotal;
+        
 
         controllerScript.NotifyIslandTransformationFinished();
         yield return null;

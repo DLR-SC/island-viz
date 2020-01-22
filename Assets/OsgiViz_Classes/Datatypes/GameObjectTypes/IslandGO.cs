@@ -5,6 +5,7 @@ using Valve.VR.InteractionSystem;
 using TriangleNet.Voronoi;
 using TriangleNet.Topology;
 using OsgiViz.Island;
+using OsgiViz.SoftwareArtifact;
 
 namespace OsgiViz.Unity.Island
 {
@@ -16,6 +17,8 @@ namespace OsgiViz.Unity.Island
         public GameObject ImportDock { get; set; }
         public GameObject ExportDock { get; set; }
         public CartographicIsland CartoIsland { get; set; }
+
+        public Bundle Bundle { get; set; }
 
         public ZoomLevel CurrentZoomLevel;
 
@@ -310,6 +313,11 @@ namespace OsgiViz.Unity.Island
         public void AddRegion(Region reg)
         {
             Regions.Add(reg);
+        }
+
+        public void SetRegions(List<Region> regs)
+        {
+            Regions = regs;
         }
 
     }

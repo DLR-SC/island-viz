@@ -9,7 +9,6 @@ using OSGI_Datatypes.ComposedTypes;
 public class CoastlineController_Script : MonoBehaviour
 {
     private HexGrid grid;
-    private bool timeDepHight;
 
     // Start is called before the first frame update
     void Start()
@@ -32,17 +31,9 @@ public class CoastlineController_Script : MonoBehaviour
         grid = g;
     }
 
-    public void ShowTimeDependentHight(bool value)
-    {
-        //TODO dies ändern momentan nur false, da einfacher und anderer Fall noch nicht ausimplementiert
-        timeDepHight = false;
-        //TODO einkommentieren, obere Zeile löschen
-        //timeDepHight = value;
-    }
-
     public IEnumerator RenewCoastlineMesh(Commit c)
     {
-        if (timeDepHight)
+        if (HistoryNavigation.Instance.showTimeDependentHight)
         {
             yield return CoastlineTimeDependentHight(c);
         }

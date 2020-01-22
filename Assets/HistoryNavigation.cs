@@ -9,6 +9,7 @@ public class HistoryNavigation : MonoBehaviour
     private static HistoryNavigation instance; // The instance of this class.
 
     public float islandspeed;
+    public bool showTimeDependentHight { get; }
 
     private Project project;
     private Commit currentCommitToShow;
