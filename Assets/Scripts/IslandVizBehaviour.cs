@@ -87,7 +87,7 @@ public class IslandVizBehaviour : MonoBehaviour
         yield return IslandVizVisualization.Instance.InitVisualizationComponents(); // Load additional visualization components.
         yield return IslandVizInteraction.Instance.InitInputComponents(); // Load additional interaction components.
 
-        IslandVizUI.Instance.InitBundleNames(); // TODO Move 
+        //IslandVizUI.Instance.InitBundleNames(); // TODO Move 
 
         OnConstructionDone?.Invoke(); // Call the OnConstructionDone event.
     }
