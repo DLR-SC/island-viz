@@ -39,7 +39,15 @@ namespace OSGI_Datatypes.OrganisationElements
             time = t;
             commitId = id;
             commitIdString = idSt;
-            commitMessage = msg;
+            if (msg == null)
+            {
+                commitMessage = "";
+            }
+            else
+            {
+                commitMessage = msg;
+
+            }
             issues = issueList;
             commitIndex = i;
 
@@ -205,6 +213,20 @@ namespace OSGI_Datatypes.OrganisationElements
                     result += p.getCompilationUnits().Count;
                 }
             }
+            return result;
+        }
+
+        public string GetString()
+        {
+            string result = "Commit ";
+            int msgLength = commitMessage.Length;
+            if(msgLength > 20)
+            {
+                msgLength = 20;
+            }
+            result += commitIndex + "; " + author.GetToken() + "; " + commitMessage.Substring(0, msgLength);
+
+
             return result;
         }
 

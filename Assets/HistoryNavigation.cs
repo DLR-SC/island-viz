@@ -112,6 +112,7 @@ public class HistoryNavigation : MonoBehaviour
         if (newCommit != null&&newCommit!=oldCommit)
         {
             IslandVizInteraction.Instance.OnNewCommit(oldCommit, newCommit);
+            CommitTransformInfo(currentCommitToShow, newCommit);
             currentCommitToShow = newCommit;
         }
 
@@ -134,6 +135,7 @@ public class HistoryNavigation : MonoBehaviour
         if (newCommit != null && newCommit != oldCommit)
         {
             IslandVizInteraction.Instance.OnNewCommit(oldCommit, newCommit);
+            CommitTransformInfo(currentCommitToShow, newCommit);
             currentCommitToShow = newCommit;
         }
 
@@ -193,4 +195,16 @@ public class HistoryNavigation : MonoBehaviour
         }
     }
 
+    public void CommitTransformInfo(Commit oldCommit, Commit newCommit)
+    {
+        string c1 = "";
+        if(oldCommit != null)
+        {
+            c1 = oldCommit.GetString();
+        }
+        string c2 = newCommit.GetString();
+
+        string Message = "timestep from \n" + c1 + "\n to \n" + c2;
+        IslandVizUI.Instance.MakeNotification(2.5f, Message);
+    }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using OSGI_Datatypes.OrganisationElements;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -20,9 +21,12 @@ namespace OsgiViz.Relations
     {
         private Dictionary<IDPair, GameObject> pool;
 
+
         void Start()
         {
             pool = new Dictionary<IDPair, GameObject>();
+            IslandVizInteraction.Instance.OnNewCommit += ResetConnectionPool;
+
         }
 
         public GameObject getConnection(IDPair key)
@@ -47,6 +51,11 @@ namespace OsgiViz.Relations
                 pool.Add(key, connection);
 
             return;
+        }
+
+        public void ResetConnectionPool(Commit oldCommit, Commit newCommit)
+        {
+            pool = new Dictionary<IDPair, GameObject>();
         }
     }
 

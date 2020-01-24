@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Assets;
+using OsgiViz.Unity.Island;
 
 public class IslandContainerController_Script : MonoBehaviour
 {
@@ -38,14 +39,13 @@ public class IslandContainerController_Script : MonoBehaviour
 
         bundleMaster = bm;
         island.GetComponent<IslandController_Script>().SetBunldeMaster(bm);
+        bm.islandController = island.GetComponent<IslandController_Script>();
         yield return island.GetComponent<IslandController_Script>().Initialise();
         island.SetActive(false);
 
         //Subscribe to Event
         IslandVizInteraction.Instance.OnNewCommit += OnNewCommit;
 
-
-        //StartCoroutine(Renew());
     }
 
     // Update is called once per frame
@@ -119,6 +119,7 @@ public class IslandContainerController_Script : MonoBehaviour
             {
                 //if island still active set inactive
                 island.SetActive(false);
+                IslandVizVisualization.Instance.VisibleIslandGOs.Remove(island.transform.GetChild(0).GetComponent<IslandGO>());
             }
             //nothin further to do
             return;
@@ -134,6 +135,7 @@ public class IslandContainerController_Script : MonoBehaviour
         {
             Vector2 pos2D = bundleMaster.GetElement(newCommit).GetPosition();
             island.transform.localPosition = new Vector3(pos2D.x, 0f, pos2D.y);
+            IslandVizVisualization.Instance.VisibleIslandGOs.Add(island.transform.GetChild(0).GetComponent<IslandGO>());
         }
         else
         {
@@ -198,7 +200,7 @@ public class IslandContainerController_Script : MonoBehaviour
 
         Vector3 direction = target - island.transform.localPosition;
 
-        while (direction.magnitude >= 1.0 /*& Time.time - movingStartTime < 10*/)
+        while (direction.magnitude >= 0.1 /*& Time.time - movingStartTime < 10*/)
         {
             Vector3 newPos = island.transform.localPosition + direction.normalized * 0.1f * speed;
             island.transform.localPosition = newPos;

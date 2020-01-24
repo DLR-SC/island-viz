@@ -7,6 +7,7 @@ using OSGI_Datatypes.OrganisationElements;
 using OSGI_Datatypes.ComposedTypes;
 using OsgiViz.Unity.Island;
 using OsgiViz.SoftwareArtifact;
+using OsgiViz;
 
 public class IslandController_Script : MonoBehaviour
 {
@@ -18,8 +19,8 @@ public class IslandController_Script : MonoBehaviour
 
     private GameObject coastLine;
     //private GameObject deathArea;
-    private GameObject exportDock;
-    private GameObject importDock;
+    public GameObject exportDock { get; set; }
+    public GameObject importDock { get; set; }
     private List<GameObject> regions;
 
     private BundleMaster bundleMaster;
@@ -38,7 +39,7 @@ public class IslandController_Script : MonoBehaviour
 
     public void Start()
     {
-        IslandVizInteraction.Instance.OnNewCommit += OnNewCommit;
+        //IslandVizInteraction.Instance.OnNewCommit += OnNewCommit;
     }
 
     public void SetBunldeMaster(BundleMaster bm)
@@ -69,6 +70,7 @@ public class IslandController_Script : MonoBehaviour
         importDock.transform.parent = gameObject.transform;
         importDock.transform.localPosition = new Vector3(0, Constants.dockYPos, 2);
         importDock.layer = LayerMask.NameToLayer("Visualization");
+        importDock.GetComponent<DependencyDock>().DockType = DockType.ImportDock;
         islandGOScript.ImportDock = importDock;
 
         exportDock = Instantiate(exportDockPrefab, new Vector3(0, 0, 0), Quaternion.identity);
@@ -76,6 +78,7 @@ public class IslandController_Script : MonoBehaviour
         exportDock.transform.parent = gameObject.transform;
         exportDock.transform.localPosition = new Vector3(2, Constants.dockYPos, 0);
         exportDock.layer = LayerMask.NameToLayer("Visualization");
+        exportDock.GetComponent<DependencyDock>().DockType = DockType.ExportDock;
         islandGOScript.ExportDock = exportDock;
 
         foreach (PackageMaster pm in bundleMaster.GetContainedMasterPackages())
@@ -99,6 +102,9 @@ public class IslandController_Script : MonoBehaviour
 
     public IEnumerator UpdateRoutine(Commit newCommit, IslandContainerController_Script controllerScript)
     {
+        StartCoroutine(UpdateExportDock(newCommit));
+        StartCoroutine(UpdateImportDock(newCommit));
+
         //Update visible Sub-GameObjects
         StartCoroutine(coastLine.GetComponent<CoastlineController_Script>().RenewCoastlineMesh(newCommit));
 
@@ -156,7 +162,7 @@ public class IslandController_Script : MonoBehaviour
         yield return null;
     }
 
-    public void OnNewCommit(Commit oldCommit, Commit newCommit)
+/*    public void OnNewCommit(Commit oldCommit, Commit newCommit)
     {
         if (gameObject.activeInHierarchy)
         {
@@ -166,14 +172,8 @@ public class IslandController_Script : MonoBehaviour
 
     public IEnumerator UpdateRoutine2(Commit newCommit)
     {
-        //TODO Death Area Rausnehmen update regions als Coroutinen probieren
-       /* foreach (GameObject region in regions)
-        {
-            StartCoroutine(region.GetComponent<RegionController_Script>().RenewRegionMesh(newCommit));
-            StartCoroutine(region.GetComponent<RegionController_Script>().UpdateBuildings(newCommit));
-        }*/
-        //StartCoroutine(deathArea.GetComponent<DeathAreaController_Script>().RenewDeathAreaMesh(newCommit));
-        //StartCoroutine(coastLine.GetComponent<CoastlineController_Script>().RenewCoastlineMesh(newCommit));
+        StartCoroutine(UpdateExportDock(newCommit));
+        StartCoroutine(UpdateImportDock(newCommit));
 
         int maxRingTotal = bundleMaster.GetGrid().GetOuterAssignedTotal(newCommit);
         int maxRingSegment = bundleMaster.GetGrid().GetOuterAssignedFirstTwoSixths(newCommit);
@@ -196,7 +196,38 @@ public class IslandController_Script : MonoBehaviour
 
         //controllerScript.NotifyIslandTransformationFinished();
         yield return null;
+    }*/
+
+    public IEnumerator UpdateImportDock(Commit newCommit)
+    {
+        DependencyDock iDock = importDock.GetComponent<DependencyDock>();
+        iDock.ResetDependencies(null, null);
+
+        Bundle bundle = bundleMaster.GetElement(newCommit);
+        foreach (KeyValuePair<Bundle, float> importBundle in bundle.GetImportedBundles())
+        {
+            iDock.AddDockConnection(importBundle.Key.GetMaster().islandController.exportDock.GetComponent<DependencyDock>(), importBundle.Value);
+        }
+
+        yield return null;
+        iDock.ConstructConnectionArrows();
     }
+
+    public IEnumerator UpdateExportDock(Commit newCommit)
+    {
+        DependencyDock eDock = exportDock.GetComponent<DependencyDock>();
+        eDock.ResetDependencies(null, null);
+
+        Bundle bundle = bundleMaster.GetElement(newCommit);
+        foreach(KeyValuePair<Bundle, float> exportPartner in bundle.GetExportReceiverBundles())
+        {
+            eDock.AddDockConnection(exportPartner.Key.GetMaster().islandController.importDock.GetComponent<DependencyDock>(), exportPartner.Value);
+        }
+
+        yield return null;
+        eDock.ConstructConnectionArrows();
+    }
+
 }
 
 

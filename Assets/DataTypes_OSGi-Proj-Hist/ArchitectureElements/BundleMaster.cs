@@ -12,6 +12,7 @@ namespace OSGI_Datatypes.ArchitectureElements
         List<PackageMaster> containedPackages;
 
         HexGrid grid;
+        public IslandController_Script islandController { get; set; }
 
         public BundleMaster(Commit c, Bundle firstE)
         {

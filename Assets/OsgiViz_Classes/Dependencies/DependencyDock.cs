@@ -5,6 +5,7 @@ using Valve.VR.InteractionSystem;
 using OsgiViz.Relations;
 using OsgiViz.Core;
 using OsgiViz.Unity.Island;
+using OSGI_Datatypes.OrganisationElements;
 
 namespace OsgiViz
 {
@@ -33,7 +34,7 @@ namespace OsgiViz
         public bool expanded;
 
         void Awake()
-        { /*
+        { 
             connectionArrows = new List<GameObject>();
             connectedDocks = new List<DependencyDock>();
             dockWeights = new List<float>();
@@ -51,21 +52,21 @@ namespace OsgiViz
             else
                 throw new Exception("No connection pool component found, or too many connection pools! There can only be one.");
              
-            */
-            // Subscribe to events
-            //IslandVizInteraction.Instance.OnDockSelect += OnDockSelected;
-            //IslandVizVisualization.Instance.OnVisualizationScaleChanged += ZoomChanged;
             
+            // Subscribe to events
+            IslandVizInteraction.Instance.OnDockSelect += OnDockSelected;
+            IslandVizVisualization.Instance.OnVisualizationScaleChanged += ZoomChanged;
+            IslandVizInteraction.Instance.OnNewCommit += ResetDependencies;
+
 
         }
 
         
 
         public void AddDockConnection(DependencyDock dock, float weight)
-        {/*
+        {
             connectedDocks.Add(dock);
             dockWeights.Add(weight);
-            */
         }
 
 
@@ -75,7 +76,7 @@ namespace OsgiViz
         // ################
 
         public void ConstructConnectionArrows()
-        {           /* 
+        {
             //Construct new Arrows
             int cc = 0;
             foreach (DependencyDock dock in connectedDocks)
@@ -143,35 +144,29 @@ namespace OsgiViz
                 connectionArrows.Add(conArrow);
                 cc++;
             }
-            Destroy(rotPivot);*/
+            Destroy(rotPivot);
         }
 
 
 
         public void HideAllDependencies()
         {
-            /*
             expanded = false;
             foreach (GameObject arrow in connectionArrows)
                 arrow.SetActive(false);
-            */
         }
 
         public void ShowAllDependencies()
         {
-            /*
             expanded = true;
             foreach (GameObject arrow in connectionArrows)
                 arrow.SetActive(true); 
                             ZoomChanged();
 
-         */
         }
 
         private void ZoomChanged()
         {
-            /*
-       
             if (!expanded)
             {
                 return;
@@ -185,12 +180,11 @@ namespace OsgiViz
                 arrow.transform.GetChild(0).localScale = new Vector3(arrow.transform.GetChild(0).localScale.x, arrow.transform.GetChild(0).localScale.y, newZ * 2f); // Arrow Head
                 arrow.transform.GetChild(1).localScale = new Vector3(arrow.transform.GetChild(1).localScale.x, arrow.transform.GetChild(1).localScale.y, newZ); // Arrow Body
                 cc++;
-            }*/
+            }
         }
 
         private void UpdateViewToDependencies ()
         {
-            /*
             List<Transform> connectedDockTransforms = new List<Transform>();
             foreach (var item in connectedDocks)
             {
@@ -199,36 +193,23 @@ namespace OsgiViz
             }
             connectedDockTransforms.Add(this.transform.parent);
             IslandVizVisualization.Instance.FlyTo(connectedDockTransforms.ToArray());
-            */
         }
 
 
         private void OnDockSelected(DependencyDock dock, IslandVizInteraction.SelectionType selectionType, bool selected)
         {
-            /*
             // This dock gets highlighted.
             if (selectionType == IslandVizInteraction.SelectionType.Highlight && dock == this)
             {
                 IslandVizInteraction.Instance.OnIslandSelect(this.transform.parent.GetComponent<IslandGO>(), IslandVizInteraction.SelectionType.Highlight, selected);
+                Debug.Log("Dock Highlighted");
             }
             // This dock gets selected.
             else if (selectionType == IslandVizInteraction.SelectionType.Select)
             {
                 if (dock == this)
                 {
-<<<<<<< HEAD
-                    ShowAllDependencies();
-                    IslandVizInteraction.Instance.OnIslandSelect(this.transform.parent.GetComponent<IslandGO>(), IslandVizInteraction.SelectionType.Select, true);
-                    UpdateViewToDependencies();
-                    Selected = true;
-                }
-                else if (!selected && Selected)
-                {
-                    HideAllDependencies();
-                    foreach (var item in connectedDocks)
-=======
                     if (selected && !Selected)
->>>>>>> revised
                     {
                         ShowAllDependencies();
                         IslandVizInteraction.Instance.OnIslandSelect(this.transform.parent.GetComponent<IslandGO>(), IslandVizInteraction.SelectionType.Select, true);
@@ -264,17 +245,16 @@ namespace OsgiViz
                     IslandVizInteraction.Instance.OnDockSelect(this, IslandVizInteraction.SelectionType.Select, false);
                 }
             }
-            // Other dock was selected while this dock is selected.
-            else if (selectionType == IslandVizInteraction.SelectionType.Select && dock != this && dock != null && Selected && selected)
-            {
-                HideAllDependencies();
-                Selected = false;
-                IslandVizInteraction.Instance.OnDockSelect(this, IslandVizInteraction.SelectionType.Select, false);
-            }
-            */
-
         }
-            
+
+
+
+        public void ResetDependencies(Commit newCommit, Commit oldCommit)
+        {
+            connectedDocks = new List<DependencyDock>();
+            dockWeights = new List<float>();
+            connectionArrows = new List<GameObject>();
+        }
     }
 }
 

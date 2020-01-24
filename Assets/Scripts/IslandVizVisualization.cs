@@ -171,6 +171,7 @@ public class IslandVizVisualization : MonoBehaviour
         TransformContainer.IslandContainer = new GameObject("VisualizationContainer").transform;
         TransformContainer.IslandContainer.SetParent(VisualizationRoot);
         TransformContainer.DependencyContainer = new GameObject("DependencyContainer").transform;
+        TransformContainer.DependencyContainer.gameObject.AddComponent<DependencyContainer>();
         TransformContainer.DependencyContainer.SetParent(VisualizationRoot);
         
         // Create water visual.

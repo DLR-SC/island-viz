@@ -18,6 +18,8 @@ namespace OsgiViz.SoftwareArtifact
         private List<Package> packages;
         private List<Package> exportedPckgs;
         private List<Package> importedPckgs;
+        private Dictionary<Bundle, float> exportReceiverBundles;
+        private Dictionary<Bundle, float> importBundles; 
         private List<ServiceComponent> serviceComponents;
         private OsgiProject project;
 
@@ -53,6 +55,8 @@ namespace OsgiViz.SoftwareArtifact
             packages = new List<Package>();
             exportedPckgs = new List<Package>();
             importedPckgs = new List<Package>();
+            exportReceiverBundles = new Dictionary<Bundle, float>();
+            importBundles = new Dictionary<Bundle, float>();
             previous = new Dictionary<Branch, Bundle>();
             next = new Dictionary<Branch, Bundle>();
         }
@@ -152,8 +156,35 @@ namespace OsgiViz.SoftwareArtifact
         }
         public void addImportedPackage(Package f)
         {
+            if (f.getBundle() != this)
+            {
+                importedPckgs.Add(f);
+                //Add Bundle to importBundle-Dict
+                if (importBundles.ContainsKey(f.getBundle()))
+                {
+                    importBundles[f.getBundle()]++;
+                }
+                else{
+                    importBundles.Add(f.getBundle(), 1);
+                }
+                f.getBundle().AddExportPartner(this);
+
+            }
             importedPckgs.Add(f);
         }
+
+        public void AddExportPartner(Bundle partner)
+        {
+            if (exportReceiverBundles.ContainsKey(partner))
+            {
+                exportReceiverBundles[partner]++;
+            }
+            else
+            {
+                exportReceiverBundles.Add(partner, 1);
+            }
+        }
+
         public void addServiceComponent(ServiceComponent sc)
         {
             serviceComponents.Add(sc);
@@ -193,6 +224,15 @@ namespace OsgiViz.SoftwareArtifact
         public float GetRadius()
         {
             return radius;
+        }
+
+        public Dictionary<Bundle, float> GetImportedBundles()
+        {
+            return importBundles;
+        }
+        public Dictionary<Bundle, float> GetExportReceiverBundles()
+        {
+            return exportReceiverBundles;
         }
 
     }
