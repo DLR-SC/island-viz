@@ -41,6 +41,7 @@ namespace OsgiViz.SoftwareArtifact
             importedPckgs = new List<Package>();
             serviceComponents = new List<ServiceComponent>();
             project = p;
+
         }
 
         public Bundle(int id, string n, string sn, Commit c)
@@ -159,6 +160,10 @@ namespace OsgiViz.SoftwareArtifact
             if (f.getBundle() != this)
             {
                 importedPckgs.Add(f);
+                if (importBundles == null)
+                {
+                    return;
+                }
                 //Add Bundle to importBundle-Dict
                 if (importBundles.ContainsKey(f.getBundle()))
                 {
@@ -170,11 +175,14 @@ namespace OsgiViz.SoftwareArtifact
                 f.getBundle().AddExportPartner(this);
 
             }
-            importedPckgs.Add(f);
         }
 
         public void AddExportPartner(Bundle partner)
         {
+            if (exportReceiverBundles == null)
+            {
+                return;
+            }
             if (exportReceiverBundles.ContainsKey(partner))
             {
                 exportReceiverBundles[partner]++;
