@@ -1,4 +1,5 @@
 ﻿using OSGI_Datatypes.OrganisationElements;
+using OsgiViz.Core;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -96,6 +97,14 @@ public class HistoryNavigation : MonoBehaviour
         return currentCommitToShow;
     }
 
+    public void CallCommitEvent(Commit oldCommit, Commit newCommit)
+    {
+        IslandVizInteraction.Instance.OnNewCommit(oldCommit, newCommit);
+        CommitTransformInfo(currentCommitToShow, newCommit);
+        currentCommitToShow = newCommit;
+        GlobalVar.islandNumber = newCommit.GetBundleCount();
+    }
+
     public void StepNext()
     {
         Commit oldCommit = currentCommitToShow;
@@ -111,12 +120,8 @@ public class HistoryNavigation : MonoBehaviour
         }
         if (newCommit != null&&newCommit!=oldCommit)
         {
-            IslandVizInteraction.Instance.OnNewCommit(oldCommit, newCommit);
-            CommitTransformInfo(currentCommitToShow, newCommit);
-            currentCommitToShow = newCommit;
+            CallCommitEvent(currentCommitToShow, newCommit);
         }
-
-        
     }
 
     public void StepBack()
@@ -134,9 +139,7 @@ public class HistoryNavigation : MonoBehaviour
         }
         if (newCommit != null && newCommit != oldCommit)
         {
-            IslandVizInteraction.Instance.OnNewCommit(oldCommit, newCommit);
-            CommitTransformInfo(currentCommitToShow, newCommit);
-            currentCommitToShow = newCommit;
+            CallCommitEvent(currentCommitToShow, newCommit);
         }
 
     }

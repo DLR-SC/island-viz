@@ -96,6 +96,10 @@ namespace StaticIslandNamesComponent
             {
                 return;
             }
+            if (!island.gameObject.activeSelf)
+            {
+                return;
+            }
             if (selectionType == IslandVizInteraction.SelectionType.Select)
             {
                 if (selected)

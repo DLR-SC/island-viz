@@ -245,7 +245,26 @@ public class IslandVizVisualization : MonoBehaviour
 
         stopwatch.Stop();
         Debug.Log("IslandVizVisualization Construction finished after " + stopwatch.Elapsed.TotalSeconds.ToString("0.00") + " seconds!");
-    }       
+    }      
+    
+    public IEnumerator SmallInit()
+    {
+        //Visualisation Zoom Instantiation Copied form IslandVizVisualization.ConstructVisualization to Use in History Construction
+
+        yield return AutoZoom(); // TODO solve this with FlyToIsland()
+
+        GlobalVar.CurrentZoom = VisualizationRoot.localScale.x;
+        GlobalVar.MinZoom = VisualizationRoot.localScale.x;
+
+        //TODO do this again, wenn currentIslandGOs is fixed
+        //StartCoroutine(ZoomLevelRoutine()); // Start the ZoomLevelRoutine.
+
+        // TODO reenable in a smarter way
+        //GlobalVar.hologramTableHeight = IslandVizInteraction.Instance.GetPlayerEyeHeight() - 0.75f; 
+        OnTableHeightChanged(GlobalVar.hologramTableHeight); // Set table height
+
+        yield return null;
+    }
 
     /// <summary>
     /// Initialize all additional input components. Called by IslandVizBehavior.
@@ -537,15 +556,31 @@ public class IslandVizVisualization : MonoBehaviour
         float maxDistance = 0.7f; // TODO move to Settings
 
         // Search island which is furthest away from the center.
-        foreach (var islandGO in islandGOConstructor.getIslandGOs())
-        {
-            distance_temp = Vector3.Distance(islandGO.transform.position, Vector3.zero);
-            if (furthestIslandTransform == null || distance_temp > furthestDistance)
+        if (islandGOConstructor.getIslandGOs().Count > 0) { 
+            //this routine if static Visualisation
+            foreach (var islandGO in islandGOConstructor.getIslandGOs())
             {
-                furthestDistance = distance_temp;
-                furthestIslandTransform = islandGO.transform;
+                distance_temp = Vector3.Distance(islandGO.transform.position, Vector3.zero);
+                if (furthestIslandTransform == null || distance_temp > furthestDistance)
+                {
+                    furthestDistance = distance_temp;
+                    furthestIslandTransform = islandGO.transform;
+                }
+            }
+        }else if(VisibleIslandGOs.Count>0)
+        {
+            //this routine if HistoryViz
+            foreach (var islandGO in VisibleIslandGOs)
+            {
+                distance_temp = Vector3.Distance(islandGO.transform.position, Vector3.zero);
+                if (furthestIslandTransform == null || distance_temp > furthestDistance)
+                {
+                    furthestDistance = distance_temp;
+                    furthestIslandTransform = islandGO.transform;
+                }
             }
         }
+
         yield return null;
 
         VisualizationRoot.localScale *= maxDistance / furthestDistance;

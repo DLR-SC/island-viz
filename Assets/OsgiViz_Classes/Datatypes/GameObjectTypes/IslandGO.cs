@@ -147,6 +147,8 @@ namespace OsgiViz.Unity.Island
 
         public void ApplyZoomLevel (ZoomLevel newZoomLevel)
         {
+            if (!gameObject.activeSelf)
+                return;
             StartCoroutine(ApplyZoomLevelRoutine(newZoomLevel));
         }
 
@@ -320,5 +322,9 @@ namespace OsgiViz.Unity.Island
             Regions = regs;
         }
 
+        public void ResetRegions()
+        {
+            Regions = new List<Region>();
+        }
     }
 }

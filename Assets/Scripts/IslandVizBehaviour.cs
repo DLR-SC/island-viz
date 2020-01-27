@@ -110,6 +110,9 @@ public class IslandVizBehaviour : MonoBehaviour
 
     IEnumerator IslandVizInitiationRoutine_History()
     {
+        //Do this first for Visualisation Root Container
+        yield return IslandVizVisualization.Instance.Init();
+
         yield return new WaitForSeconds(1f);
         //Database Preprocessing for History-Information
         yield return DatabasePreprocessingScript.Instance.PreprocessingMain();
@@ -144,6 +147,11 @@ public class IslandVizBehaviour : MonoBehaviour
         vis.transform.localScale = new Vector3(0.00145f, 0.00145f, 0.00145f);
 
         HistoryNavigation.Instance.StepNext();
+
+        yield return new WaitForSeconds(1);
+
+        yield return IslandVizVisualization.Instance.SmallInit();
+
 
         OnConstructionDone?.Invoke(); // Call the OnConstructionDone event.
     }

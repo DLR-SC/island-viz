@@ -19,6 +19,7 @@ public class RegionController_Script : MonoBehaviour
     PackageMaster packageMaster;
     private List<GameObject> buildingMangagerGOs;
     private  OsgiViz.Unity.Island.Region regionScript;
+    GameObject parentIsland;
     private Vector2 colorValue;
 
 
@@ -41,6 +42,11 @@ public class RegionController_Script : MonoBehaviour
     {
         packageMaster = pm;
         region = pm.GetRegion();
+    }
+
+    public void SetParentIsland(GameObject island)
+    {
+        parentIsland = island;
     }
 
     public IEnumerator CreateBuildingManagers()
@@ -207,6 +213,7 @@ public class RegionController_Script : MonoBehaviour
         }else if (tls.Equals(TimelineStatus.present))
         {
             gameObject.name = package.getName();
+            parentIsland.GetComponent<IslandGO>().AddRegion(regionScript);
         }
         else if (tls.Equals(TimelineStatus.notPresentAnymore))
         {

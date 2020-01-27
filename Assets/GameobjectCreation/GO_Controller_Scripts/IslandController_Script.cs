@@ -89,6 +89,7 @@ public class IslandController_Script : MonoBehaviour
             region.transform.localPosition = new Vector3(0, 0, 0);
             region.layer = LayerMask.NameToLayer("Visualization");
             region.GetComponent<RegionController_Script>().SetPackage(pm);
+            region.GetComponent<RegionController_Script>().SetParentIsland(gameObject);
             region.GetComponent<Region>().setParentIsland(islandGOScript);
             region.GetComponent<RegionController_Script>().InitColor(new Vector2((float)RNG.NextDouble(), (float)RNG.NextDouble()*0.4f));
             region.GetComponent<MeshRenderer>().sharedMaterial = IslandVizVisualization.Instance.CombinedHoloMaterial;
@@ -102,6 +103,8 @@ public class IslandController_Script : MonoBehaviour
 
     public IEnumerator UpdateRoutine(Commit newCommit, IslandContainerController_Script controllerScript)
     {
+        islandGOScript.ResetRegions();
+
         StartCoroutine(UpdateExportDock(newCommit));
         StartCoroutine(UpdateImportDock(newCommit));
 

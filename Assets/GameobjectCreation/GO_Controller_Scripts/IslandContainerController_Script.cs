@@ -54,62 +54,6 @@ public class IslandContainerController_Script : MonoBehaviour
 
     }
 
-    private IEnumerator Renew()
-    {
-        while (true)
-        {
-            if (!transformationRunning && !movingRunning)
-            {
-                //newCommit = mainController.GetCurrentCommit();
-                newCommit = HistoryNavigation.Instance.GetCurrentCommit();
-                if (newCommit != null && newCommit != currentCommit)
-                {
-                    transformationRunning = true;
-
-                    if(bundleMaster.RelationOfCommitToTimeline(newCommit) != TimelineStatus.present)
-                    {
-                        //bundle not present in new Commit
-                        if (island.activeSelf)
-                        {
-                            //if island still active set inactive
-                            island.SetActive(false);
-                        }
-                        //nothin further to do
-                        NotifyIslandTransformationFinished();
-                        yield return new WaitForSeconds(1);
-                        continue;
-                    }
-
-                    bool justAktivated = false;
-                    if (!island.activeSelf && bundleMaster.RelationOfCommitToTimeline(newCommit) == TimelineStatus.present)
-                    {
-                        justAktivated = true;
-                        island.SetActive(true);
-                    }
-                    if (justAktivated)
-                    {
-                        Vector2 pos2D = bundleMaster.GetElement(newCommit).GetPosition();
-                        island.transform.localPosition = new Vector3(pos2D.x, 0f, pos2D.y);
-                    }
-                    else
-                    {
-                        movingStartTime = Time.time;
-                        movingRunning = true;
-                        //island.GetComponent<Rigidbody>().isKinematic = false;
-                        StartCoroutine(MoveIsland(newCommit));
-                        //TODO island position transformation
-                        //Vector2 pos2D = bundleMaster.GetElement(newCommit).GetPosition();
-                        //island.transform.localPosition = new Vector3(pos2D.x, 0f, pos2D.y);
-                    }
-                    //Island Appearance Transformation
-                    StartCoroutine(island.GetComponent<IslandController_Script>().UpdateRoutine(newCommit, this));
-                }
-            }
-            yield return new WaitForSeconds(1);
-        }
-    }
-
-
     private void OnNewCommit(Commit oldCommit, Commit newCommit)
     {
         if (bundleMaster.RelationOfCommitToTimeline(newCommit) != TimelineStatus.present)
@@ -119,7 +63,7 @@ public class IslandContainerController_Script : MonoBehaviour
             {
                 //if island still active set inactive
                 island.SetActive(false);
-                IslandVizVisualization.Instance.VisibleIslandGOs.Remove(island.transform.GetChild(0).GetComponent<IslandGO>());
+                //IslandVizVisualization.Instance.VisibleIslandGOs.Remove(island.transform.GetChild(0).GetComponent<IslandGO>());
             }
             //nothin further to do
             return;
@@ -135,7 +79,7 @@ public class IslandContainerController_Script : MonoBehaviour
         {
             Vector2 pos2D = bundleMaster.GetElement(newCommit).GetPosition();
             island.transform.localPosition = new Vector3(pos2D.x, 0f, pos2D.y);
-            IslandVizVisualization.Instance.VisibleIslandGOs.Add(island.transform.GetChild(0).GetComponent<IslandGO>());
+            //IslandVizVisualization.Instance.VisibleIslandGOs.Add(island.transform.GetChild(0).GetComponent<IslandGO>());
         }
         else
         {

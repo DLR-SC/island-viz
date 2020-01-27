@@ -179,7 +179,9 @@ public class IslandVizUI : MonoBehaviour
     {
         if (selectionType == IslandVizInteraction.SelectionType.Select && selected && island != null)
         {
-            UpdateCurrentSelectedInfo("Bundle", island.name, "Packages", island.Regions.Count.ToString());
+            //UpdateCurrentSelectedInfo("Bundle", island.name, "Packages", island.Regions.Count.ToString());
+            UpdateCurrentSelectedInfo("Bundle", island.name, "Packages", island.Bundle.getPackages().Count.ToString());
+            ;
         }
         else if (island == null)
         {
