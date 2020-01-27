@@ -90,6 +90,11 @@ public class IslandVizBehaviour : MonoBehaviour
     {
         yield return null;
 
+        if (IslandVizConfig.Instance.UseConfig)
+        {
+            yield return IslandVizConfig.Instance.LoadAndApplyConfig();
+        }
+
         yield return IslandVizData.Instance.ConstructOsgiProject(); // Load the data we want to visualize.
        
         yield return IslandVizVisualization.Instance.ConstructVisualization(); // Construct the basic visualization, i.e. islands, ports, and dependencies.
@@ -169,8 +174,7 @@ public class IslandVizBehaviour : MonoBehaviour
     /// Currently called by a UI_Button. Pressing the undo button will execute the second last action in the undo list.
     /// Note that the last action in the undo list is the current action.
     /// </summary>
-    /// <param name="hand">The hand where the undo button was pressed.</param>
-    public void Undo (Hand hand)
+    public void Undo ()
     {
         if (undoList.Count >= 2) // [Last Action|Current Action] --> We want the last action, so we take the second last item.
         {
