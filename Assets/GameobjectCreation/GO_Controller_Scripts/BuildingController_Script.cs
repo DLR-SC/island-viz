@@ -28,7 +28,7 @@ public class BuildingController_Script : MonoBehaviour
         regionScript = r;
     }
 
-    public Building UpdateBuilding (Commit c)
+    public Building UpdateBuilding (Commit c, ZoomLevel currentZoomlevel)
     {
         TimelineStatus tls = compUnit.RelationOfCommitToTimeline(c);
         if (tls != TimelineStatus.present)
@@ -66,6 +66,15 @@ public class BuildingController_Script : MonoBehaviour
                 buildingGo.layer = LayerMask.NameToLayer("Visualization");
                 CapsuleCollider capsuleCol = buildingGo.AddComponent<CapsuleCollider>();          
 
+            }
+
+            if (currentZoomlevel.Equals(ZoomLevel.Near))
+            {
+                buildingGo.SetActive(true);
+            }
+            else
+            {
+                buildingGo.SetActive(false);
             }
 
             if (tls.Equals(TimelineStatus.notYetPresent))

@@ -186,8 +186,8 @@ namespace OsgiViz.Unity.Island
             foreach (var region in Regions)
             {
                 // Disable region colliders.
-                if (region.GetComponent<MeshCollider>().enabled)
-                    region.GetComponent<MeshCollider>().enabled = true;
+                /*if (region.GetComponent<MeshCollider>().enabled)
+                    region.GetComponent<MeshCollider>().enabled = true;*/
 
                 // Enable buildings.
                 foreach (var building in region.getBuildings())
@@ -230,9 +230,7 @@ namespace OsgiViz.Unity.Island
                             }
                         }
                     }
-                }
-                //if (!GetComponent<MeshCollider>().enabled)
-                //    GetComponent<MeshCollider>().enabled = true;                
+                }              
             }
             // FAR -> MEDIUM
             else
@@ -250,9 +248,17 @@ namespace OsgiViz.Unity.Island
                     if (!region.GetComponent<MeshCollider>().enabled)
                         region.GetComponent<MeshCollider>().enabled = true;
                 }
+                //Disable Island Collider
 
-                //if (!GetComponent<MeshCollider>().enabled)
-                //    GetComponent<MeshCollider>().enabled = true;
+                if (GetComponent<MeshCollider>() != null)
+                {
+                    GetComponent<MeshCollider>().enabled = false;
+
+                }
+                else if (GetComponent<SphereCollider>() != null)
+                {
+                    GetComponent<SphereCollider>().enabled = false;
+                }
             }
         }
         
@@ -290,7 +296,16 @@ namespace OsgiViz.Unity.Island
             }
 
             // Enable island collider.
-            //GetComponent<MeshCollider>().enabled = true;
+            if (GetComponent<MeshCollider>() != null)
+            {
+                GetComponent<MeshCollider>().enabled = true;
+
+            }
+            else if (GetComponent<SphereCollider>() != null)
+            {
+                GetComponent<SphereCollider>().enabled = true;
+            }
+
         }
 
         #endregion

@@ -257,7 +257,7 @@ public class IslandVizVisualization : MonoBehaviour
         GlobalVar.MinZoom = VisualizationRoot.localScale.x;
 
         //TODO do this again, wenn currentIslandGOs is fixed
-        //StartCoroutine(ZoomLevelRoutine()); // Start the ZoomLevelRoutine.
+        StartCoroutine(ZoomLevelRoutine()); // Start the ZoomLevelRoutine.
 
         // TODO reenable in a smarter way
         //GlobalVar.hologramTableHeight = IslandVizInteraction.Instance.GetPlayerEyeHeight() - 0.75f; 

@@ -139,12 +139,12 @@ public class RegionController_Script : MonoBehaviour
         mc.sharedMesh = mesh;
     }
 
-    public IEnumerator UpdateBuildings(Commit c, List<Building> activeBuildingsInRegion)
+    public IEnumerator UpdateBuildings(Commit c, ZoomLevel currentZoomlevel, List<Building> activeBuildingsInRegion)
     {
         int i = 0;
         foreach(GameObject buildingManager in buildingMangagerGOs)
         {
-            Building result = buildingManager.GetComponent<BuildingController_Script>().UpdateBuilding(c);
+            Building result = buildingManager.GetComponent<BuildingController_Script>().UpdateBuilding(c, currentZoomlevel);
             if (result != null)
             {
                 activeBuildingsInRegion.Add(result);
@@ -167,12 +167,19 @@ public class RegionController_Script : MonoBehaviour
     /// <param name="tls"></param>
     /// <param name="regionScript"></param>
     /// <returns></returns>
-    public IEnumerator RenewRegion(Commit oldCommit, Commit newCommit, TimelineStatus tls, OsgiViz.Unity.Island.Region rS, Vector2 regionHeight)
+    public IEnumerator RenewRegion(Commit oldCommit, Commit newCommit, ZoomLevel currentZoomLevel, System.Action<OsgiViz.Unity.Island.Region> callback)
     {
-        tls = packageMaster.RelationOfCommitToTimeline(newCommit);
-        rS = regionScript;
-        //TODO Region Hight herausfinden und hier setzten
-        regionHeight.x = 2f;
+        TimelineStatus tls = packageMaster.RelationOfCommitToTimeline(newCommit);
+        if (tls.Equals(TimelineStatus.present))
+        {
+            callback(regionScript);
+        }
+        else
+        {
+            callback(null);
+        }
+
+        yield return null;
 
         //Variables
         List<Vector3> Vertices = new List<Vector3>();
@@ -196,12 +203,20 @@ public class RegionController_Script : MonoBehaviour
         //Set Mesh To MeshCollider
         MeshFilter meshFilter = gameObject.GetComponent<MeshFilter>();
         gameObject.GetComponent<MeshCollider>().sharedMesh = meshFilter.sharedMesh;
+        if (currentZoomLevel.Equals(ZoomLevel.Far))
+        {
+            gameObject.GetComponent<MeshCollider>().enabled = false;
+        }
+        else
+        {
+            gameObject.GetComponent<MeshCollider>().enabled = true;
+        }
 
         RenewColliderMesh(Vertices, Triangles, Normals);
 
         //Renew Buildings
         List<Building> activeBuildings = new List<Building>();
-        yield return UpdateBuildings(newCommit, activeBuildings);
+        yield return UpdateBuildings(newCommit, currentZoomLevel, activeBuildings);
 
         //Renew Attributes in RegionScript
         Package package = packageMaster.GetElement(newCommit);
@@ -213,7 +228,6 @@ public class RegionController_Script : MonoBehaviour
         }else if (tls.Equals(TimelineStatus.present))
         {
             gameObject.name = package.getName();
-            parentIsland.GetComponent<IslandGO>().AddRegion(regionScript);
         }
         else if (tls.Equals(TimelineStatus.notPresentAnymore))
         {
