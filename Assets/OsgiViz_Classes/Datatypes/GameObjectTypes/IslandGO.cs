@@ -6,6 +6,7 @@ using TriangleNet.Voronoi;
 using TriangleNet.Topology;
 using OsgiViz.Island;
 using OsgiViz.SoftwareArtifact;
+using OSGI_Datatypes.ComposedTypes;
 
 namespace OsgiViz.Unity.Island
 {
@@ -235,6 +236,9 @@ namespace OsgiViz.Unity.Island
             // FAR -> MEDIUM
             else
             {
+                //Disable changeIndikator
+                gameObject.GetComponent<IslandController_Script>().changeIndikator.SetActive(false);
+
                 // Enable Docks.
                 if (!ImportDock.activeSelf)
                 {
@@ -265,6 +269,12 @@ namespace OsgiViz.Unity.Island
         public IEnumerator ApplyFarZoomLevel ()
         {
             int counter = 0;
+            //Enable ChangeStatus Indikator
+            ChangeStatus cs = gameObject.GetComponent<IslandController_Script>().changeStatus;
+            if (cs.Equals(ChangeStatus.changedElement)||cs.Equals(ChangeStatus.newElement))
+            {
+                gameObject.GetComponent<IslandController_Script>().changeIndikator.SetActive(true);
+            }
 
             // Hide Docks.
             if (ImportDock.activeSelf)

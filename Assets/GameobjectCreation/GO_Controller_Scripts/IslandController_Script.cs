@@ -20,13 +20,13 @@ public class IslandController_Script : MonoBehaviour
     public GameObject exportDock { get; set; }
     public GameObject importDock { get; set; }
     private List<GameObject> regions;
-    private GameObject changeIndikator;
+    public GameObject changeIndikator { get; set; }
 
     private BundleMaster bundleMaster;
 
     private System.Random RNG;
     private IslandGO islandGOScript;
-    private ChangeStatus changeStatus;
+    public ChangeStatus changeStatus { get; set; }
     //private IslandObjectContainer_Script mainController;
     //private Commit currentCommit;
     //private bool transformationRunning;
@@ -121,11 +121,11 @@ public class IslandController_Script : MonoBehaviour
 
     public IEnumerator UpdateRoutine(Commit newCommit, IslandContainerController_Script controllerScript, bool justActivated)
     {
+        
         changeStatus = ChangeStatus.unknown;
         if (justActivated)
         {
             changeStatus = ChangeStatus.newElement;
-            SetChangeIndicator(changeStatus);
         }
         else
         {
@@ -139,6 +139,7 @@ public class IslandController_Script : MonoBehaviour
 
         //Update visible Sub-GameObjects
         StartCoroutine(coastLine.GetComponent<CoastlineController_Script>().RenewCoastlineMesh(newCommit));
+        yield return null;
 
         List<Region> activeRegions = new List<Region>();
         float islandHeight = 10;
@@ -146,12 +147,21 @@ public class IslandController_Script : MonoBehaviour
         {
             StartCoroutine(region.GetComponent<RegionController_Script>().RenewRegion(null, newCommit, currentZoomLevel, (returnScript)=> { if (returnScript != null) { activeRegions.Add(returnScript); } } ));
         }
+        yield return null;
 
         //Update IslandGO-Script Attributes
         islandGOScript.SetRegions(activeRegions);
         Bundle bundle = bundleMaster.GetElement(newCommit);
         islandGOScript.Bundle = bundle;
         gameObject.name = bundle.getName();
+
+        yield return null;
+
+        //New Get Radius
+        Renderer coastRender = coastLine.GetComponent<MeshRenderer>();
+        Vector3 center = coastRender.bounds.center;
+        Vector3 extends = coastRender.bounds.extents;
+        float radius = Mathf.Sqrt(Mathf.Pow(extends.x, 2) + Mathf.Pow(extends.z, 2)); 
 
         //Get Island Radius
         int maxRingTotal = bundleMaster.GetGrid().GetOuterAssignedTotal(newCommit);
@@ -175,7 +185,7 @@ public class IslandController_Script : MonoBehaviour
 
         //Resize Island Collider
         SphereCollider cc = gameObject.GetComponent<SphereCollider>();
-        cc.radius = radiusTotal;
+        cc.radius = radius;
         if (currentZoomLevel.Equals(ZoomLevel.Far))
         {
             cc.enabled = true;
@@ -185,7 +195,13 @@ public class IslandController_Script : MonoBehaviour
             cc.enabled = false;
         }
         //resize ChangeIndicator
-        changeIndikator.transform.localScale = new Vector3(radiusTotal, Constants.standardHeight / 3f, radiusTotal);
+        changeIndikator.transform.position = center;
+        Vector3 centerLocal = changeIndikator.transform.localPosition;
+        centerLocal.y = Constants.standardHeight / 6f;
+        changeIndikator.transform.localPosition = centerLocal;
+        changeIndikator.transform.localScale = new Vector3(2*radius/transform.lossyScale.x, Constants.standardHeight / 3f, 2*radius/transform.lossyScale.z);
+        StartCoroutine(SetChangeIndicator(changeStatus));
+
 
         islandGOScript.SetRegions(activeRegions);
 
@@ -207,7 +223,7 @@ public class IslandController_Script : MonoBehaviour
 
         yield return null;
         iDock.ConstructConnectionArrows();
-        if (currentZoomlevel.Equals(ZoomLevel.Far))
+        if (IslandVizVisualization.Instance.CurrentZoomLevel.Equals(ZoomLevel.Far))
         {
             importDock.SetActive(false);
         }
@@ -227,7 +243,7 @@ public class IslandController_Script : MonoBehaviour
 
         yield return null;
         eDock.ConstructConnectionArrows();
-        if (currentZoomlevel.Equals(ZoomLevel.Far))
+        if (IslandVizVisualization.Instance.CurrentZoomLevel.Equals(ZoomLevel.Far))
         {
             exportDock.SetActive(false);
         }
@@ -245,9 +261,13 @@ public class IslandController_Script : MonoBehaviour
         {
             GameobjectHelperClass.setUVsToSingularCoord(Constants.colValChangeHighlight, mf);
         }
-        if (!IslandVizVisualization.Instance.CurrentZoomLevel.Equals(ZoomLevel.Near))
+        if (!IslandVizVisualization.Instance.CurrentZoomLevel.Equals(ZoomLevel.Far))
         {
             changeIndikator.SetActive(false);
+        }
+        else
+        {
+            changeIndikator.SetActive(true);
         }
         yield return null;
     }
@@ -257,7 +277,7 @@ public class IslandController_Script : MonoBehaviour
         if (changeStatus.Equals(ChangeStatus.unknown))
         {
             changeStatus = ChangeStatus.changedElement;
-            SetChangeIndicator(changeStatus);
+            StartCoroutine(SetChangeIndicator(changeStatus));
         }
 
     }

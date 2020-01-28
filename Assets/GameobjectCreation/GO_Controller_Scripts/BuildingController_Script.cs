@@ -75,14 +75,7 @@ public class BuildingController_Script : MonoBehaviour
 
             }
 
-            if (currentZoomlevel.Equals(ZoomLevel.Near))
-            {
-                buildingGo.SetActive(true);
-            }
-            else
-            {
-                buildingGo.SetActive(false);
-            }
+
 
             if (cs.Equals(ChangeStatus.unknown))
             {
@@ -118,6 +111,15 @@ public class BuildingController_Script : MonoBehaviour
             Vector3 pos = gameObject.transform.localPosition;
             pos.y = heigth;
             gameObject.transform.localPosition = pos;
+
+            if (IslandVizVisualization.Instance.CurrentZoomLevel.Equals(ZoomLevel.Near))
+            {
+                buildingGo.SetActive(true);
+            }
+            else
+            {
+                buildingGo.SetActive(false);
+            }
 
 
             return buildingComponent;
