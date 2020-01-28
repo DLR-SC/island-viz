@@ -197,7 +197,7 @@ public class RegionController_Script : MonoBehaviour
         yield return null;
         //Set Color?
         MeshFilter regionMeshFilter = gameObject.GetComponent<MeshFilter>();
-        setUVsToSingularCoord(colorValue, regionMeshFilter);
+        GameobjectHelperClass.setUVsToSingularCoord(colorValue, regionMeshFilter);
         yield return null;
 
         //Set Mesh To MeshCollider
@@ -238,16 +238,6 @@ public class RegionController_Script : MonoBehaviour
             gameObject.name = "Unknown Package";
         }
 
-    }
-
-    private void setUVsToSingularCoord(Vector2 newUV, MeshFilter mesh)
-    {
-        Vector3[] uvs = mesh.mesh.vertices;
-        Vector2[] newUVs = new Vector2[uvs.Length];
-        for (int i = 0; i < uvs.Length; i++)
-            newUVs[i] = newUV;
-
-        mesh.sharedMesh.uv = newUVs;
     }
 }
 

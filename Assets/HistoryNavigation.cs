@@ -17,6 +17,7 @@ public class HistoryNavigation : MonoBehaviour
     public float islandspeed;
     public float timelapsInterval = 3;
     public bool showTimeDependentHight;
+    public bool showChangeSymbols;
 
     private Project project;
     private Commit currentCommitToShow;

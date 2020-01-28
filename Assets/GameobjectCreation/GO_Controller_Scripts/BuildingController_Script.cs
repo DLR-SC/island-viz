@@ -37,11 +37,13 @@ public class BuildingController_Script : MonoBehaviour
             {
                 oldBucket = -1;
                 Destroy(buildingGo);
+                CallIslandStructureChange();
             }
             return null;
         }
         else
         {
+            ChangeStatus cs = ChangeStatus.unknown;
             CompilationUnit cuCurrent = compUnit.GetElement(c);
             long loc = cuCurrent.getLoc();
             List<object> prefabAndBucket = bpScript.GetBuildingPrefabForLoc(loc);
@@ -49,6 +51,11 @@ public class BuildingController_Script : MonoBehaviour
             int newBucket = (int)prefabAndBucket[1];
             if (newBucket != oldBucket)
             {
+                if (oldBucket == -1)
+                    cs = ChangeStatus.newElement;
+                else
+                    cs = ChangeStatus.changedElement;
+
                 oldBucket = newBucket;
                 if (buildingGo != null)
                 {
@@ -75,6 +82,17 @@ public class BuildingController_Script : MonoBehaviour
             else
             {
                 buildingGo.SetActive(false);
+            }
+
+            if (cs.Equals(ChangeStatus.unknown))
+            {
+                RemoveChangeIndicator();
+            }else if (cs.Equals(ChangeStatus.newElement))
+            {
+                AddChangeIndicatorNew();
+            }else if (cs.Equals(ChangeStatus.changedElement))
+            {
+                AddChangeIndicatorChange();
             }
 
             if (tls.Equals(TimelineStatus.notYetPresent))
@@ -106,5 +124,57 @@ public class BuildingController_Script : MonoBehaviour
             
         }
         
-    }  
+    }
+
+    public void RemoveChangeIndicator()
+    {
+        if (buildingGo != null)
+        {
+            Transform ciT = buildingGo.transform.Find("ChangeIndicator");
+            if (ciT != null)
+            {
+                GameObject.Destroy(ciT.gameObject);
+            }
+        }
+    }
+    public void AddChangeIndicatorChange()
+    {
+        GameObject changeIdicator = AddChangeIndicator();
+        MeshFilter mf = changeIdicator.GetComponent<MeshFilter>();
+        GameobjectHelperClass.setUVsToSingularCoord(Constants.colValChangeHighlight, mf);
+    }
+    public void AddChangeIndicatorNew()
+    {
+        GameObject changeIdicator = AddChangeIndicator();
+        MeshFilter mf = changeIdicator.GetComponent<MeshFilter>();
+        GameobjectHelperClass.setUVsToSingularCoord(Constants.colValNewHighlight, mf);
+        CallIslandStructureChange();
+    }
+
+    public GameObject AddChangeIndicator()
+    {
+        if (buildingGo != null)
+        {
+            Transform ciT = buildingGo.transform.Find("ChangeIndicator");
+            if (ciT != null)
+            {
+                return ciT.gameObject;
+            }
+            GameObject changeIndicator = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            changeIndicator.transform.parent = buildingGo.transform;
+            changeIndicator.transform.localPosition = new Vector3(0f, 0.05f, 0f);
+            changeIndicator.transform.localScale = new Vector3(1.5f, 0.1f, 1.5f);
+            changeIndicator.name = "ChangeIndicator";
+            changeIndicator.GetComponent<CapsuleCollider>().enabled = false;
+            changeIndicator.GetComponent<MeshRenderer>().sharedMaterial = IslandVizVisualization.Instance.CombinedHoloMaterial;
+            return changeIndicator;
+        }
+        return null;
+
+    }
+
+    public void CallIslandStructureChange()
+    {
+        regionScript.getParentIsland().gameObject.GetComponent<IslandController_Script>().SubstructureChange();
+    }
 }

@@ -21,28 +21,18 @@ namespace Assets
         public static bool timeDepHight = false;
 
         //Colors for regions
-        public static Vector3[] colVals = new Vector3[] {
-        new Vector3(255,255,102), //gelb
-        new Vector3(255,153,0), //Mausorange
-        new Vector3(255,124,128), //Lachsfarben
-        new Vector3(255,0,0), // rot
-        //new Vector3(153,0,0), // dunkelrot
-        new Vector3(255,153,255), //hell lila
-        new Vector3(255,51,153), // pink
-        new Vector3(204,0,204), // violet
-        new Vector3(153,102,255), // veilchen lila
-        new Vector3(0,0,255), // blau
-        new Vector3(102,153,255), // himmelblau
-        //new Vector3(0,0,153), // dunkelblau
-        new Vector3(0,255,255), //cyan
-        new Vector3(0,255,153), //hellgrün
-        new Vector3(153,255,153), //gelbgrün
-        new Vector3(0,255,0), //grün
-        //new Vector3(0,128,0), //dunkelgrün
-        //new Vector3(153,102,51), //braun
-        //new Vector3(150,150,150), // grau
-        //new Vector3(0,0,0), // schwarz
+        public static Vector2[] colVals = new Vector2[] {
+            new Vector2(0.1f, 0.1f), //rot (unten links)
+            new Vector2(0.3f, 0.1f), //gelb
+            new Vector2(0.7f, 0.1f), //dunkelgrün
+            new Vector2(0.9f, 0.1f), //türkis (unten rechts)
+            new Vector2(0.1f, 0.3f), //dunkelblau (zweite zeile links)
+            new Vector2(0.3f, 0.3f), //violet
+            new Vector2(0.5f, 0.3f), //pink
+            new Vector2(0.7f, 0.3f), //orange
         };
+        public static Vector2 colValNewHighlight = new Vector2(0.5f, 0.1f);
+        public static Vector2 colValChangeHighlight = new Vector2(0.9f, 0.3f);
         //Color for Coastline
         public static Vector3 coastlineColor = new Vector3(238, 197, 145);
         //Color for DeathArea

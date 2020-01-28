@@ -89,7 +89,7 @@ public class IslandContainerController_Script : MonoBehaviour
             StartCoroutine(MoveIsland(newCommit));
         }
         //Island Appearance Transformation
-        StartCoroutine(island.GetComponent<IslandController_Script>().UpdateRoutine(newCommit, this));
+        StartCoroutine(island.GetComponent<IslandController_Script>().UpdateRoutine(newCommit, this, justAktivated));
     }
 
 

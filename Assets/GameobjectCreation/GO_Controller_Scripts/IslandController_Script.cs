@@ -12,21 +12,21 @@ using OsgiViz;
 public class IslandController_Script : MonoBehaviour
 {
     public GameObject coastlinePrefab;
-    //public GameObject deathareaPrefab;
     public GameObject importDockPrefab;
     public GameObject exportDockPrefab;
     public GameObject regionPrefab;
 
     private GameObject coastLine;
-    //private GameObject deathArea;
     public GameObject exportDock { get; set; }
     public GameObject importDock { get; set; }
     private List<GameObject> regions;
+    private GameObject changeIndikator;
 
     private BundleMaster bundleMaster;
 
     private System.Random RNG;
     private IslandGO islandGOScript;
+    private ChangeStatus changeStatus;
     //private IslandObjectContainer_Script mainController;
     //private Commit currentCommit;
     //private bool transformationRunning;
@@ -53,6 +53,8 @@ public class IslandController_Script : MonoBehaviour
 
     public IEnumerator Initialise()
     {
+        changeIndikator = AddChangeIndicator();
+
         gameObject.layer = LayerMask.NameToLayer("Visualization");
         islandGOScript = gameObject.GetComponent<IslandGO>();
 
@@ -81,6 +83,8 @@ public class IslandController_Script : MonoBehaviour
         exportDock.GetComponent<DependencyDock>().DockType = DockType.ExportDock;
         islandGOScript.ExportDock = exportDock;
 
+        int i = 0;
+
         foreach (PackageMaster pm in bundleMaster.GetContainedMasterPackages())
         {
             GameObject region = Instantiate(regionPrefab, new Vector3(0, 0, 0), Quaternion.identity);
@@ -91,18 +95,42 @@ public class IslandController_Script : MonoBehaviour
             region.GetComponent<RegionController_Script>().SetPackage(pm);
             region.GetComponent<RegionController_Script>().SetParentIsland(gameObject);
             region.GetComponent<Region>().setParentIsland(islandGOScript);
-            region.GetComponent<RegionController_Script>().InitColor(new Vector2((float)RNG.NextDouble(), (float)RNG.NextDouble()*0.4f));
+            region.GetComponent<RegionController_Script>().InitColor(Constants.colVals[i]);
             region.GetComponent<MeshRenderer>().sharedMaterial = IslandVizVisualization.Instance.CombinedHoloMaterial;
             //TODO timedephight global regeln
             yield return region.GetComponent<RegionController_Script>().CreateBuildingManagers();
             regions.Add(region);
+            i = (i+1)%8;
+
         }
         yield return null;
     }
 
-
-    public IEnumerator UpdateRoutine(Commit newCommit, IslandContainerController_Script controllerScript)
+    public GameObject AddChangeIndicator()
     {
+            GameObject changeIndicator = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            changeIndicator.transform.parent = gameObject.transform;
+            changeIndicator.transform.localPosition = new Vector3(0f, Constants.standardHeight/6f, 0f);
+            changeIndicator.transform.localScale = new Vector3(5f, Constants.standardHeight/3f, 5f);
+            changeIndicator.name = "ChangeIndicator";
+            changeIndicator.GetComponent<CapsuleCollider>().enabled = false;
+            changeIndicator.GetComponent<MeshRenderer>().sharedMaterial = IslandVizVisualization.Instance.CombinedHoloMaterial;
+            return changeIndicator;
+    }
+
+
+    public IEnumerator UpdateRoutine(Commit newCommit, IslandContainerController_Script controllerScript, bool justActivated)
+    {
+        changeStatus = ChangeStatus.unknown;
+        if (justActivated)
+        {
+            changeStatus = ChangeStatus.newElement;
+            SetChangeIndicator(changeStatus);
+        }
+        else
+        {
+            changeIndikator.SetActive(false);
+        }
         ZoomLevel currentZoomLevel = islandGOScript.CurrentZoomLevel;
         islandGOScript.ResetRegions();
 
@@ -156,6 +184,8 @@ public class IslandController_Script : MonoBehaviour
         {
             cc.enabled = false;
         }
+        //resize ChangeIndicator
+        changeIndikator.transform.localScale = new Vector3(radiusTotal, Constants.standardHeight / 3f, radiusTotal);
 
         islandGOScript.SetRegions(activeRegions);
 
@@ -203,10 +233,37 @@ public class IslandController_Script : MonoBehaviour
         }
     }
 
-    public void AddActiveRegion(Region r)
+
+    public IEnumerator SetChangeIndicator(ChangeStatus cs)
     {
-        islandGOScript.AddRegion(r);
+        MeshFilter mf = changeIndikator.GetComponent<MeshFilter>();
+        if (cs.Equals(ChangeStatus.newElement))
+        {
+            GameobjectHelperClass.setUVsToSingularCoord(Constants.colValNewHighlight, mf);
+        }
+        else if (cs.Equals(ChangeStatus.changedElement))
+        {
+            GameobjectHelperClass.setUVsToSingularCoord(Constants.colValChangeHighlight, mf);
+        }
+        if (!IslandVizVisualization.Instance.CurrentZoomLevel.Equals(ZoomLevel.Near))
+        {
+            changeIndikator.SetActive(false);
+        }
+        yield return null;
     }
+
+    public void SubstructureChange()
+    {
+        if (changeStatus.Equals(ChangeStatus.unknown))
+        {
+            changeStatus = ChangeStatus.changedElement;
+            SetChangeIndicator(changeStatus);
+        }
+
+    }
+
+    
+
 }
 
 
