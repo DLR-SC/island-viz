@@ -18,6 +18,7 @@ public class HistoryNavigation : MonoBehaviour
     public float timelapsInterval = 3;
     public bool showTimeDependentHight;
     public bool showChangeSymbols;
+    public bool historyHighlightActive { get; set; }
 
     private Project project;
     private Commit currentCommitToShow;
@@ -29,6 +30,8 @@ public class HistoryNavigation : MonoBehaviour
         instance = this;
         project = GameObject.Find("DataObject").GetComponent<OSGi_Project_Script>().GetProject();
         timeLapsStatus = TimeLapsStatus.stop;
+
+        historyHighlightActive = showChangeSymbols;
     }
 
     // Update is called once per frame
@@ -211,4 +214,26 @@ public class HistoryNavigation : MonoBehaviour
         string Message = "timestep from \n" + c1 + "\n to \n" + c2;
         IslandVizUI.Instance.MakeNotification(2.5f, Message);
     }
+
+    public void ToggleShowChangeHighlight()
+    {
+        if(!showChangeSymbols && !historyHighlightActive)
+        {
+            IslandVizUI.Instance.MakeNotification(2f, "History Highlight not available");
+            return;
+        }
+
+        if (historyHighlightActive)
+        {
+            historyHighlightActive = false;
+        }
+        else
+        {
+            historyHighlightActive = true;
+        }
+
+        IslandVizInteraction.Instance.OnHistoryHighlightChanged(historyHighlightActive);
+
+    }
+
 }

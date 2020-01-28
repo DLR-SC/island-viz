@@ -21,6 +21,8 @@ public class BuildingController_Script : MonoBehaviour
         compUnit = cum;
         oldBucket = -1;
         bpScript = GameObject.Find("IslandObjectContainer").GetComponent<BuildingProvider_Script>();
+        IslandVizInteraction.Instance.OnHistoryHighlightChanged += ChangeHighlight;
+
     }
 
     public void SetRegion(Region r)
@@ -115,6 +117,13 @@ public class BuildingController_Script : MonoBehaviour
             if (IslandVizVisualization.Instance.CurrentZoomLevel.Equals(ZoomLevel.Near))
             {
                 buildingGo.SetActive(true);
+                if (!HistoryNavigation.Instance.historyHighlightActive)
+                {
+                    if (buildingGo.transform.Find("ChangeIndicator") != null)
+                    {
+                        buildingGo.transform.Find("ChangeIndicator").gameObject.SetActive(false);
+                    }
+                }
             }
             else
             {
@@ -179,4 +188,25 @@ public class BuildingController_Script : MonoBehaviour
     {
         regionScript.getParentIsland().gameObject.GetComponent<IslandController_Script>().SubstructureChange();
     }
+
+
+    public void ChangeHighlight(bool enabled)
+    {
+        if (!gameObject.activeSelf || buildingGo == null || buildingGo.transform.Find("ChangeIndicator") == null)
+        {
+            return;
+        }
+        if (!enabled)
+        {
+            buildingGo.transform.Find("ChangeIndicator").gameObject.SetActive(false);
+        }
+        else
+        {
+            if (IslandVizVisualization.Instance.CurrentZoomLevel.Equals(ZoomLevel.Near))
+            {
+                buildingGo.transform.Find("ChangeIndicator").gameObject.SetActive(true);
+            }
+        }
+    }
+
 }

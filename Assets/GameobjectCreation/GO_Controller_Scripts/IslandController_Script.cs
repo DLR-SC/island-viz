@@ -39,7 +39,7 @@ public class IslandController_Script : MonoBehaviour
 
     public void Start()
     {
-        //IslandVizInteraction.Instance.OnNewCommit += OnNewCommit;
+        IslandVizInteraction.Instance.OnHistoryHighlightChanged += ChangeHighlight;
     }
 
     public void SetBunldeMaster(BundleMaster bm)
@@ -265,9 +265,13 @@ public class IslandController_Script : MonoBehaviour
         {
             changeIndikator.SetActive(false);
         }
-        else
+        else if(HistoryNavigation.Instance.historyHighlightActive)
         {
             changeIndikator.SetActive(true);
+        }
+        else
+        {
+            changeIndikator.SetActive(false);
         }
         yield return null;
     }
@@ -282,7 +286,24 @@ public class IslandController_Script : MonoBehaviour
 
     }
 
-    
+    public void ChangeHighlight(bool enabled)
+    {
+        if (!gameObject.activeSelf)
+        {
+            return;
+        }
+        if (!enabled)
+        {
+            changeIndikator.SetActive(false);
+        }
+        else
+        {
+            if ((changeStatus.Equals(ChangeStatus.newElement) || changeStatus.Equals(ChangeStatus.changedElement))&&IslandVizVisualization.Instance.CurrentZoomLevel.Equals(ZoomLevel.Far))
+            {
+                changeIndikator.SetActive(true);
+            }
+        }
+    }
 
 }
 

@@ -144,6 +144,10 @@ public class IslandVizInteraction : MonoBehaviour {
     /// Called when commit changes to be displayed.
     /// </summary>
     public NewCommit OnNewCommit;
+    /// <summary>
+    /// Called when History Highlight is enabled/disabled
+    /// </summary>
+    public HistoryHighlightChanged OnHistoryHighlightChanged;
 
     #endregion
 
@@ -285,6 +289,11 @@ public class IslandVizInteraction : MonoBehaviour {
     /// <param name="oldCommit">The commit that is currently displayed</param>
     /// <param name="newCommit">The commit to be displayed next</param>
     public delegate void NewCommit(Commit oldCommit, Commit newCommit);
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="enable">true if highlight shall be enabled, else false</param>
+    public delegate void HistoryHighlightChanged(bool enable);
     #endregion
 
 

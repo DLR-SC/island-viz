@@ -186,16 +186,19 @@ namespace OsgiViz.Unity.Island
 
             foreach (var region in Regions)
             {
-                // Disable region colliders.
-                /*if (region.GetComponent<MeshCollider>().enabled)
-                    region.GetComponent<MeshCollider>().enabled = true;*/
-
                 // Enable buildings.
                 foreach (var building in region.getBuildings())
                 {
                     if (!building.gameObject.activeSelf)
                     {
                         building.gameObject.SetActive(true);
+                        if (HistoryNavigation.Instance.historyHighlightActive)
+                        {
+                            if (building.gameObject.transform.Find("ChangeIndicator") != null)
+                            {
+                                building.gameObject.transform.Find("ChangeIndicator").gameObject.SetActive(true);
+                            }
+                        }
 
                         counter++;
                         if (counter >= BuildingsPerFrame)
@@ -271,7 +274,7 @@ namespace OsgiViz.Unity.Island
             int counter = 0;
             //Enable ChangeStatus Indikator
             ChangeStatus cs = gameObject.GetComponent<IslandController_Script>().changeStatus;
-            if (cs.Equals(ChangeStatus.changedElement)||cs.Equals(ChangeStatus.newElement))
+            if ((cs.Equals(ChangeStatus.changedElement)||cs.Equals(ChangeStatus.newElement))&&HistoryNavigation.Instance.historyHighlightActive)
             {
                 gameObject.GetComponent<IslandController_Script>().changeIndikator.SetActive(true);
             }

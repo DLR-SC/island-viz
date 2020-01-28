@@ -46,7 +46,10 @@ public class SlideableTabletController : MonoBehaviour
     {
         IslandVizBehaviour.Instance.Undo();
     }
-
+    public void ToggleHistoryHighlight()
+    {
+        HistoryNavigation.Instance.ToggleShowChangeHighlight();
+    }
     public void AllBundles()
     {
         IslandVizVisualization.Instance.HighlightAllIslands(true);
