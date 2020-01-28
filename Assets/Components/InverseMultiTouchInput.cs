@@ -68,8 +68,7 @@ public class InverseMultiTouchInput : AdditionalIslandVizComponent {
         // Subscribe input methods
         IslandVizInteraction.Instance.OnControllerEnter += OnControllerEnterEvent;
         IslandVizInteraction.Instance.OnControllerExit += OnControllerExitEvent;
-        IslandVizInteraction.Instance.OnControllerTriggerDown += OnControllerTriggerPressedEvent;
-        IslandVizInteraction.Instance.OnControllerTriggerUp += OnControllerTriggerReleasedEvent;
+        IslandVizInteraction.Instance.OnControllerButtonEvent += OnControllerTriggerPressedEvent;
         IslandVizVisualization.Instance.OnTableHeightChanged += OnTableHeightChangedEvent;
 
         touchingHandList = new List<Hand>();
@@ -115,25 +114,32 @@ public class InverseMultiTouchInput : AdditionalIslandVizComponent {
         }
     }
 
-    private void OnControllerTriggerPressedEvent (Hand hand)
+    private void OnControllerTriggerPressedEvent (IslandVizInteraction.Button button, IslandVizInteraction.PressType type, Hand hand)
     {
-        if (!usingHandList.Contains(hand) && touchingHandList.Contains(hand))
+        if (button != IslandVizInteraction.Button.Trigger)
         {
-            usingHandList.Add(hand);
+            return;
+        }
 
-            if (!tooltippsDisabled)
+        if (type == IslandVizInteraction.PressType.PressDown)
+        {
+            if (!usingHandList.Contains(hand) && touchingHandList.Contains(hand))
             {
-                tooltippsDisabled = true;
-                DisableTooltips();
+                usingHandList.Add(hand);
+
+                if (!tooltippsDisabled)
+                {
+                    tooltippsDisabled = true;
+                    DisableTooltips();
+                }
             }
         }
-    }
-
-    private void OnControllerTriggerReleasedEvent (Hand hand)
-    {
-        if (usingHandList.Contains(hand))
+        else if (type == IslandVizInteraction.PressType.PressUp)
         {
-            usingHandList.Remove(hand);
+            if (usingHandList.Contains(hand))
+            {
+                usingHandList.Remove(hand);
+            }
         }
     }
 

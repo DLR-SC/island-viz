@@ -25,7 +25,7 @@ public class ScreenshotFunctionality : AdditionalIslandVizComponent
     /// </summary>
     public override IEnumerator Init()
     {
-        IslandVizInteraction.Instance.OnControllerGripDown += OnButtonDown;
+        IslandVizInteraction.Instance.OnControllerButtonEvent += OnButtonDown;
 
         yield return null;
 
@@ -36,10 +36,12 @@ public class ScreenshotFunctionality : AdditionalIslandVizComponent
     #endregion
 
 
-    private void OnButtonDown(Hand hand)
+    private void OnButtonDown(IslandVizInteraction.Button button, IslandVizInteraction.PressType type, Hand hand)
     {
-        if (initiated)
+        if (initiated && button == IslandVizInteraction.Button.Menu && type == IslandVizInteraction.PressType.PressDown)
+        {
             StartCoroutine(TakeScreenshot());
+        }            
     }
 
      IEnumerator TakeScreenshot()

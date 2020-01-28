@@ -14,20 +14,39 @@ public class MultiplayerPlayer : NetworkBehaviour
     private Quaternion Hand1Rotation = Quaternion.identity;
     private Quaternion Hand2Rotation = Quaternion.identity;
 
+    private Valve.VR.InteractionSystem.Hand[] Hands;
 
 
     [ClientCallback]
     void Start()
     {
+        Hands = new Valve.VR.InteractionSystem.Hand[] { HandLeft.GetComponent<Valve.VR.InteractionSystem.Hand>(), HandRight.GetComponent<Valve.VR.InteractionSystem.Hand>() };
+
         if (isLocalPlayer)
         {
             Debug.Log("LOCAL PLAYER CONNECTED!");
+
+            IslandVizInteraction.Instance.OnControllerButtonEvent += OnPlayerInput;
+
+            Destroy(Hands[0]);
+            Destroy(Hands[1]);
+
+
         }
         else
         {
             Debug.Log("NOT A LOCAL PLAYER CONNECTED!");
         }
     }
+
+
+
+
+    // ################
+    // Head & Controller Movement
+    // ################
+
+    #region Head & Controller Movement
 
     [ClientCallback]
     void FixedUpdate()
@@ -65,4 +84,55 @@ public class MultiplayerPlayer : NetworkBehaviour
         HandRight.GetComponent<Rigidbody>().rotation = Hand2Rota;
         HandRight.GetComponent<Rigidbody>().position = Hand2Pos;
     }
+
+    #endregion
+
+
+
+    // ################
+    // Events
+    // ################
+
+    #region Events
+
+        // This is currently designed for two players!
+
+    [ClientCallback]
+    public void OnPlayerInput (IslandVizInteraction.Button button, IslandVizInteraction.PressType type, Valve.VR.InteractionSystem.Hand hand)
+    {
+        if (!isLocalPlayer)
+        {
+            return;
+        }
+
+        if (hand == IslandVizInteraction.Instance.Player.leftHand)
+        {
+            CmdControllerButtonEvent(button, type, 0);
+        }
+        else if (hand == IslandVizInteraction.Instance.Player.rightHand)
+        {
+            CmdControllerButtonEvent(button, type, 1);
+        }
+    }
+
+    [Command]
+    public void CmdControllerButtonEvent(IslandVizInteraction.Button button, IslandVizInteraction.PressType type, int handID)
+    {
+        RpcControllerButtonEvent(button, type, handID);
+    }
+
+    [ClientRpc]
+    public void RpcControllerButtonEvent(IslandVizInteraction.Button button, IslandVizInteraction.PressType type, int handID)
+    {
+        //Debug.LogError("RpcControllerButtonEvent ");
+
+        if (!isLocalPlayer && Hands[handID] != IslandVizInteraction.Instance.Player.leftHand && Hands[handID] != IslandVizInteraction.Instance.Player.rightHand)
+        {
+            IslandVizInteraction.Instance.OnControllerButtonEvent(IslandVizInteraction.Button.Touchpad, type, Hands[handID]);
+            //Debug.LogError("Other player pressed " + button);
+        }
+    }
+
+    #endregion
+
 }

@@ -37,7 +37,7 @@ public class RaycastSelection : AdditionalIslandVizComponent
     private GameObject[] laserBeamObjs; // The GameObjects of the laser beams.
     private LineRenderer[] lineRenderers; // The LineRenderer components of the laser beam GameObjects.
     
-    private bool[] touchpadTouch; // True if the touchpad is currently touched.
+    private bool[] raycastSelectionIsRunning; // True if the touchpad is currently touched.
     private bool[] currentlyHitting; // True if the SphereCast is currently hitting something.
 
     private bool initiated = false;
@@ -66,13 +66,11 @@ public class RaycastSelection : AdditionalIslandVizComponent
         forward = new Vector3[Hands.Length];
         hit = new RaycastHit[Hands.Length];
         hittingCollider = new Collider[Hands.Length];
-        touchpadTouch = new bool[] { false, false };
+        raycastSelectionIsRunning = new bool[] { false, false };
         currentlyHitting = new bool[] { false, false };
 
         // Subscribe to events.
-        IslandVizInteraction.Instance.OnControllerTouchpadDown += OnTouchpadPressed;
-        IslandVizInteraction.Instance.OnControllerTouchpadTouchDown += OnTouchpadTouchDown;
-        IslandVizInteraction.Instance.OnControllerTouchpadTouchUp += OnTouchpadTouchUp;
+        IslandVizInteraction.Instance.OnControllerButtonEvent += OnTouchpadEvent;
 
         // Create laser beams.
         for (int i = 0; i < Hands.Length; i++)
@@ -111,52 +109,44 @@ public class RaycastSelection : AdditionalIslandVizComponent
     // ################
 
     #region Input
+
     /// <summary>
-    /// If the Hands array contains the hand, the a RaySelection Coroutine is started.
+    /// This is called when the controller touchpad is pressed, released or touched.
     /// </summary>
-    /// <param name="hand">The hand where the touchpad was touched.</param>
-    private void OnTouchpadTouchDown(Hand hand)
+    /// <param name="button">The button that was pressed, released or touched.</param>
+    /// <param name="type">Weather the button was pressed, released or touched.</param>
+    /// <param name="hand">The hand that pressed the button.</param>
+    private void OnTouchpadEvent(IslandVizInteraction.Button button, IslandVizInteraction.PressType type, Hand hand)
     {
-        int handID = GetHandID(hand);
-
-        if (initiated && handID >= 0 && !touchpadTouch[handID])
+        if (button != IslandVizInteraction.Button.Touchpad || !initiated)
         {
-            touchpadTouch[handID] = true;
-            StartCoroutine(RaySelection(handID));
+            return;
+        }
 
-            if (!tooltipsDisabled)
+        int handID = GetHandID(hand);
+        if (handID < 0) // handID is -1 when no hand was found.
+        {
+            return;
+        }
+
+        if (type == IslandVizInteraction.PressType.TouchDown && !raycastSelectionIsRunning[handID])
+        {
+            raycastSelectionIsRunning[handID] = true;
+            StartCoroutine(RaySelection(handID)); // Start the RaySelection Coroutine.
+
+            if (!tooltipsDisabled) // Tooltips are only visible until first use.
             {
                 DisableTooltips();
             }
         }
-    }
-
-    /// <summary>
-    /// If the Hands array contains the hand, the touchpadTouch bool is set to false which stops the RaySelection Coroutine.
-    /// </summary>
-    /// <param name="hand">The hand where the touchpad is not touched anymore.</param>
-    private void OnTouchpadTouchUp(Hand hand)
-    {
-        int handID = GetHandID(hand);
-
-        if (handID >= 0 && touchpadTouch[handID])
+        else if (type == IslandVizInteraction.PressType.TouchUp && raycastSelectionIsRunning[handID])
         {
-            touchpadTouch[handID] = false;
+            raycastSelectionIsRunning[handID] = false; // This stops the RaySelection Coroutine.
         }
-    }
-
-    /// <summary>
-    /// TODO
-    /// </summary>
-    /// <param name="hand">The hand where the touchpad was pressed.</param>
-    private void OnTouchpadPressed(Hand hand)
-    {
-        int handID = GetHandID(hand);
-
-        if (handID >= 0 && touchpadTouch[handID] && currentlyHitting[handID])
+        else if (type == IslandVizInteraction.PressType.PressDown && raycastSelectionIsRunning[handID] && currentlyHitting[handID])
         {
             Collider collider = hit[handID].collider; // This local variable is very important for the undo to work!
-            ToggleSelection(collider, true);
+            ToggleSelection(collider, true); // Select the current selection.
         }
     }
 
@@ -182,7 +172,7 @@ public class RaycastSelection : AdditionalIslandVizComponent
     {
         laserBeamObjs[handID].SetActive(true);
 
-        while (touchpadTouch[handID]) // While touchpad is pressed.
+        while (raycastSelectionIsRunning[handID]) // While touchpad is pressed.
         {
             forward[handID] = Mode == RayMode.Laserpointer ? Hands[handID].transform.forward : (Hands[handID].transform.forward - Hands[handID].transform.up) / 2f;
 

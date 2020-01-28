@@ -52,8 +52,7 @@ public class TableHeightAdjuster : AdditionalIslandVizComponent
         // Subscribe input methods
         IslandVizInteraction.Instance.OnControllerEnter += OnControllerEnterEvent;
         IslandVizInteraction.Instance.OnControllerExit += OnControllerExitEvent;
-        IslandVizInteraction.Instance.OnControllerTriggerDown += OnControllerTriggerPressed;
-        IslandVizInteraction.Instance.OnControllerTriggerUp += OnControllerTriggerReleased;
+        IslandVizInteraction.Instance.OnControllerButtonEvent += OnControllerTriggerPressed;
 
         touchingHandList = new List<Hand>();
         initiated = true;
@@ -86,19 +85,26 @@ public class TableHeightAdjuster : AdditionalIslandVizComponent
         }
     }
 
-    private void OnControllerTriggerPressed(Hand hand)
+    private void OnControllerTriggerPressed(IslandVizInteraction.Button button, IslandVizInteraction.PressType type, Hand hand)
     {
-        if (currentHand == null && touchingHandList.Contains(hand))
+        if (button != IslandVizInteraction.Button.Trigger)
         {
-            StartCoroutine(HeightAdjustment(hand));
+            return;
         }
-    }
 
-    private void OnControllerTriggerReleased(Hand hand)
-    {
-        if (currentHand == hand)
+        if (type == IslandVizInteraction.PressType.PressDown)
         {
-            currentHand = null; // This stops the HeightAdjustment coroutine.
+            if (currentHand == null && touchingHandList.Contains(hand))
+            {
+                StartCoroutine(HeightAdjustment(hand));
+            }
+        }
+        else if (type == IslandVizInteraction.PressType.PressUp)
+        {
+            if (currentHand == hand)
+            {
+                currentHand = null; // This stops the HeightAdjustment coroutine.
+            }
         }
     }
 

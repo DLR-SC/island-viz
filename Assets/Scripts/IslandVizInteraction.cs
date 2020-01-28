@@ -12,8 +12,8 @@ using Valve.VR.InteractionSystem;
 /// Input delegates are called by this class in the Update method.
 /// Physics delegates are called by the class IslandVizInteractionController which is attached to both controllers.
 /// </summary>
-public class IslandVizInteraction : MonoBehaviour {
-
+public class IslandVizInteraction : MonoBehaviour
+{
     public static IslandVizInteraction Instance { get; private set; }
 
     public Player Player; // Set in Unity Editor.
@@ -58,38 +58,19 @@ public class IslandVizInteraction : MonoBehaviour {
 
     #endregion
 
-       
+
 
     // ################
-    // Interaction - Events
+    // Events
     // ################
 
-    #region Interaction - Events
+    #region Events
 
     /// <summary>
-    /// Called when the trigger button of a controller is pressed.
+    /// Called when a button of a controller is pressed, released or touched.
     /// </summary>
-    public ControllerTriggerDown OnControllerTriggerDown;
-    /// <summary>
-    /// Called when the trigger button of a controller is released.
-    /// </summary>
-    public ControllerTriggerUp OnControllerTriggerUp;
-    /// <summary>
-    /// Called when the touchpad of a controller is pressed down.
-    /// </summary>
-    public ControllerTouchpadDown OnControllerTouchpadDown;
-    /// <summary>
-    /// Called when the touchpad of a controller is released.
-    /// </summary>
-    public ControllerTouchpadUp OnControllerTouchpadUp;
-    /// <summary>
-    /// Called when the touchpad of a controller is pressed down.
-    /// </summary>
-    public ControllerTouchpadTouchStart OnControllerTouchpadTouchDown;
-    /// <summary>
-    /// Called when the touchpad of a controller is pressed down.
-    /// </summary>
-    public ControllerTouchpadTouchEnd OnControllerTouchpadTouchUp;
+    public ControllerButtonEvent OnControllerButtonEvent;
+
     /// <summary>
     /// Called when a controller entered a trigger.
     /// </summary>
@@ -98,6 +79,7 @@ public class IslandVizInteraction : MonoBehaviour {
     /// Called when a controller exited a trigger.
     /// </summary>
     public ControllerExit OnControllerExit;
+
     /// <summary>
     /// Called when an island was selected or deselected.
     /// </summary>
@@ -115,99 +97,41 @@ public class IslandVizInteraction : MonoBehaviour {
     /// </summary>
     public DockSelected OnDockSelect;
     /// <summary>
-    /// Called when any other object was selected or deselected.
-    /// </summary>
-    public OtherSelected OnOtherSelected;
-    /// <summary>
-    /// Called when the grip button of a controller is pressed.
-    /// Use this event for custom additional components.
-    /// </summary>
-    public ControllerGripDown OnControllerGripDown;
-    /// <summary>
-    /// Called when the grip button of a controller is released.
-    /// </summary>
-    public ControllerGripUp OnControllerGripUp;
-    /// <summary>
-    /// Called when the grip button of a controller is pressed.
-    /// </summary>
-    public ControllerMenuDown OnControllerMenuDown;
-    /// <summary>
-    /// Called when the grip button of a controller is released.
-    /// </summary>
-    public ControllerMenuUp OnControllerMenuUp;
-    /// <summary>
     /// Called when a ui button was selected or deselected.
     /// </summary>
     public UIButtonSelected OnUIButtonSelected;
+    /// <summary>
+    /// Called when any other object was selected or deselected.
+    /// </summary>
+    public OtherSelected OnOtherSelected;
+    #endregion
+
+
+
+
+
+    // ################
+    // Delegates - Input
+    // ################
+
+    #region Delegates - Input
+
+    /// <summary>
+    /// This is called when a controller button is pressed, released or touched.
+    /// </summary>
+    /// <param name="button">The button that was pressed, released or touched.</param>
+    /// <param name="type">Weather the button was pressed, released or touched.</param>
+    /// <param name="hand">The hand that pressed the button.</param>
+    public delegate void ControllerButtonEvent(Button button, PressType type, Hand hand);
 
     #endregion
 
 
     // ################
-    // Interaction - Input
+    // Delegates - Physics
     // ################
 
-    #region Interaction - Input
-
-    /// <summary>
-    /// Called when the trigger button of a controller is pressed.
-    /// </summary>
-    /// <param name="hand">The hand where the button was pressed.</param>
-    public delegate void ControllerTriggerDown(Hand hand);    
-    /// <summary>
-    /// Called when the trigger button of a controller is released.
-    /// </summary>
-    /// <param name="hand">The hand where the button was released.</param>
-    public delegate void ControllerTriggerUp(Hand hand);
-    /// <summary>
-    /// Called when the touchpad of a controller is pressed down.
-    /// </summary>
-    /// <param name="hand">The hand where the button was pressed.</param>
-    public delegate void ControllerTouchpadDown(Hand hand);
-    /// <summary>
-    /// Called when the touchpad of a controller is released.
-    /// </summary>
-    /// <param name="hand">The hand where the button was pressed.</param>
-    public delegate void ControllerTouchpadUp(Hand hand);
-    /// <summary>
-    /// Called when the touchpad of a controller is touched.
-    /// </summary>
-    /// <param name="hand">The hand where the button was pressed.</param>
-    public delegate void ControllerTouchpadTouchStart(Hand hand);
-    /// <summary>
-    /// Called when the touchpad of a controller is not touched anymore.
-    /// </summary>
-    /// <param name="hand">The hand where the button was pressed.</param>
-    public delegate void ControllerTouchpadTouchEnd(Hand hand);
-    /// <summary>
-    /// Called when the trigger button of a controller is pressed.
-    /// </summary>
-    /// <param name="hand">The hand where the button was pressed.</param>
-    public delegate void ControllerGripDown(Hand hand);
-    /// <summary>
-    /// Called when the trigger button of a controller is released.
-    /// </summary>
-    /// <param name="hand">The hand where the button was released.</param>
-    public delegate void ControllerGripUp(Hand hand);
-    /// <summary>
-    /// Called when the menu button of a controller is pressed.
-    /// </summary>
-    /// <param name="hand">The hand where the button was pressed.</param>
-    public delegate void ControllerMenuDown(Hand hand);
-    /// <summary>
-    /// Called when the menu button of a controller is released.
-    /// </summary>
-    /// <param name="hand">The hand where the button was released.</param>
-    public delegate void ControllerMenuUp(Hand hand);
-
-    #endregion
-
-
-    // ################
-    // Interaction - Physics
-    // ################
-
-    #region Interaction - Physics
+    #region Delegates - Physics
 
     /// <summary>
     /// Called when a controller entered a trigger.
@@ -226,10 +150,10 @@ public class IslandVizInteraction : MonoBehaviour {
 
 
     // ################
-    // Interaction - Visualization
+    // Delegates - Selection
     // ################
 
-    #region Interaction - Visualization
+    #region Delegates - Selection
 
     /// <summary>
     /// Called when an island GameObject was selected or deselected.
@@ -278,7 +202,7 @@ public class IslandVizInteraction : MonoBehaviour {
 
 
     // ################
-    // Interaction - Update
+    // Input Update
     // ################
 
     /// <summary>
@@ -289,49 +213,49 @@ public class IslandVizInteraction : MonoBehaviour {
     {        
         for (int i = 0; i < 2; i++)
         {
-            if (Player == null || Player.hands[i] == null || Player.hands[i].controller == null)
+            if (Player == null || Player.hands[i] == null || Player.hands[i].controller == null || OnControllerButtonEvent == null)
             {
                 continue;
             }
-            if (OnControllerTriggerDown != null && Player.hands[i].controller.GetPressDown(SteamVR_Controller.ButtonMask.Trigger))
+            if (Player.hands[i].controller.GetPressDown(SteamVR_Controller.ButtonMask.Trigger))
             {
-                OnControllerTriggerDown(Player.hands[i]);
+                OnControllerButtonEvent(Button.Trigger, PressType.PressDown, Player.hands[i]);
             }
-            if (OnControllerTriggerUp != null && Player.hands[i].controller.GetPressUp(SteamVR_Controller.ButtonMask.Trigger))
+            if (Player.hands[i].controller.GetPressUp(SteamVR_Controller.ButtonMask.Trigger))
             {
-                OnControllerTriggerUp(Player.hands[i]);
+                OnControllerButtonEvent(Button.Trigger, PressType.PressUp, Player.hands[i]);
             }
-            if (OnControllerTouchpadDown != null && Player.hands[i].controller.GetPressDown(SteamVR_Controller.ButtonMask.Touchpad))
+            if (Player.hands[i].controller.GetPressDown(SteamVR_Controller.ButtonMask.Touchpad))
             {
-                OnControllerTouchpadDown(Player.hands[i]);
+                OnControllerButtonEvent(Button.Touchpad, PressType.PressDown, Player.hands[i]);
             }
-            if (OnControllerTouchpadUp != null && Player.hands[i].controller.GetPressUp(SteamVR_Controller.ButtonMask.Touchpad))
+            if (Player.hands[i].controller.GetPressUp(SteamVR_Controller.ButtonMask.Touchpad))
             {
-                OnControllerTouchpadUp(Player.hands[i]);
+                OnControllerButtonEvent(Button.Touchpad, PressType.PressUp, Player.hands[i]);
             }
-            if (OnControllerTouchpadTouchDown != null && Player.hands[i].controller.GetTouchDown(SteamVR_Controller.ButtonMask.Touchpad))
+            if (Player.hands[i].controller.GetTouchDown(SteamVR_Controller.ButtonMask.Touchpad))
             {
-                OnControllerTouchpadTouchDown(Player.hands[i]);
+                OnControllerButtonEvent(Button.Touchpad, PressType.TouchDown, Player.hands[i]);
             }
-            if (OnControllerTouchpadTouchUp != null && Player.hands[i].controller.GetTouchUp(SteamVR_Controller.ButtonMask.Touchpad))
+            if (Player.hands[i].controller.GetTouchUp(SteamVR_Controller.ButtonMask.Touchpad))
             {
-                OnControllerTouchpadTouchUp(Player.hands[i]);
+                OnControllerButtonEvent(Button.Touchpad, PressType.TouchUp, Player.hands[i]);
             }
-            if (OnControllerGripDown != null && Player.hands[i].controller.GetPressDown(SteamVR_Controller.ButtonMask.Grip))
+            if (Player.hands[i].controller.GetPressDown(SteamVR_Controller.ButtonMask.Grip))
             {
-                OnControllerGripDown(Player.hands[i]);
+                OnControllerButtonEvent(Button.Grip, PressType.PressDown, Player.hands[i]);
             }
-            if (OnControllerGripDown != null && Player.hands[i].controller.GetPressUp(SteamVR_Controller.ButtonMask.Grip))
+            if (Player.hands[i].controller.GetPressUp(SteamVR_Controller.ButtonMask.Grip))
             {
-                OnControllerGripDown(Player.hands[i]);
+                OnControllerButtonEvent(Button.Grip, PressType.PressUp, Player.hands[i]);
             }
-            if (OnControllerMenuDown != null && Player.hands[i].controller.GetPressDown(SteamVR_Controller.ButtonMask.ApplicationMenu))
+            if (Player.hands[i].controller.GetPressDown(SteamVR_Controller.ButtonMask.ApplicationMenu))
             {
-                OnControllerMenuDown(Player.hands[i]);
+                OnControllerButtonEvent(Button.Menu, PressType.PressDown, Player.hands[i]);
             }
-            if (OnControllerMenuUp != null && Player.hands[i].controller.GetPressUp(SteamVR_Controller.ButtonMask.ApplicationMenu))
+            if (Player.hands[i].controller.GetPressUp(SteamVR_Controller.ButtonMask.ApplicationMenu))
             {
-                OnControllerMenuUp(Player.hands[i]);
+                OnControllerButtonEvent(Button.Menu, PressType.PressUp, Player.hands[i]);
             }
         }
     }
@@ -348,14 +272,22 @@ public class IslandVizInteraction : MonoBehaviour {
         Highlight        
     }
 
-    //public enum SelectableType
-    //{
-    //    Island,
-    //    Region,
-    //    Building,
-    //    Dock,
-    //    NotSelectable
-    //}
+    public enum Button
+    {
+        Trigger, 
+        Menu,
+        Touchpad,
+        Grip
+    }
+
+    public enum PressType
+    {
+        PressDown,
+        PressUp,
+        TouchDown,
+        TouchUp
+    }
+
 
     // ################
     // Helper Functions
@@ -363,43 +295,11 @@ public class IslandVizInteraction : MonoBehaviour {
 
     #region HelperFunctions
 
-    //public float GetPlayerEyeHeight ()
-    //{
-    //    return Player.eyeHeight;
-    //}    
 
     void DebugInput (Hand hand)
     {
         Debug.Log("Input with " + hand.GuessCurrentHandType().ToString() + " hand!");
     }
 
-    /// <summary>
-    /// Return the selectable type of 
-    /// </summary>
-    /// <param name="component">Can by any Unity Component, e.g. Collider, Transform, ...</param>
-    /// <returns></returns>
-    //public SelectableType SelectableTypeFromTarget (Component component)
-    //{
-    //    if (component.GetComponent<IslandGO>())
-    //    {
-    //        return SelectableType.Island;
-    //    }
-    //    else if (component.GetComponent<Region>())
-    //    {
-    //        return SelectableType.Region;
-    //    }
-    //    else if (component.GetComponent<Building>())
-    //    {
-    //        return SelectableType.Building;
-    //    }
-    //    else if (component.GetComponent<DependencyDock>())
-    //    {
-    //        return SelectableType.Dock;
-    //    }
-    //    else
-    //    {
-    //        return SelectableType.NotSelectable;
-    //    }
-    //}
     #endregion
 }
