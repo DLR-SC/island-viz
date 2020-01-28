@@ -187,7 +187,8 @@ public class RaycastSelection : AdditionalIslandVizComponent
                     ToggleHighlight(hit[handID].collider, true);
                     hittingCollider[handID] = hit[handID].collider;
 
-                    Hands[handID].controller.TriggerHapticPulse(250); // Vibrate
+                    if (Hands[handID] != null)
+                        Hands[handID].controller.TriggerHapticPulse(250); // Vibrate
                 }
 
                 currentlyHitting[handID] = true;

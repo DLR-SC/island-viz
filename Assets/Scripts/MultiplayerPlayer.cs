@@ -9,12 +9,17 @@ public class MultiplayerPlayer : NetworkBehaviour
     public Transform HandLeft;
     public Transform HandRight;
 
+    public GameObject AdditionalComponentsContainer;
+
     private Vector3 Hand1Position = Vector3.zero;
     private Vector3 Hand2Position = Vector3.zero;
     private Quaternion Hand1Rotation = Quaternion.identity;
     private Quaternion Hand2Rotation = Quaternion.identity;
 
-    private Valve.VR.InteractionSystem.Hand[] Hands;
+    private Valve.VR.InteractionSystem.Hand[] Hands; // Note: The Hand components must be disabled!
+
+    private AdditionalIslandVizComponent[] inputComponents; // Array of all additional input componets.
+
 
 
     [ClientCallback]
@@ -31,14 +36,35 @@ public class MultiplayerPlayer : NetworkBehaviour
             Destroy(Hands[0]);
             Destroy(Hands[1]);
 
+            Destroy(Head.GetChild(0).gameObject);
+            Destroy(HandLeft.GetChild(0).gameObject);
+            Destroy(HandRight.GetChild(0).gameObject);
 
+            Destroy(AdditionalComponentsContainer);
         }
         else
         {
             Debug.Log("NOT A LOCAL PLAYER CONNECTED!");
+
+            inputComponents = AdditionalComponentsContainer.GetComponents<AdditionalIslandVizComponent>();
+            if (inputComponents.Length > 0)
+                StartCoroutine(InitComponents());
         }
     }
 
+
+    /// <summary>
+    /// Initialize all input components. Called by IslandVizBehavior.
+    /// </summary>
+    /// <returns></returns>
+    public IEnumerator InitComponents()
+    {
+        foreach (var item in inputComponents)
+        {
+            if (item.enabled)
+                yield return item.Init();
+        }
+    }
 
 
 
@@ -129,7 +155,7 @@ public class MultiplayerPlayer : NetworkBehaviour
         if (!isLocalPlayer && Hands[handID] != IslandVizInteraction.Instance.Player.leftHand && Hands[handID] != IslandVizInteraction.Instance.Player.rightHand)
         {
             IslandVizInteraction.Instance.OnControllerButtonEvent(IslandVizInteraction.Button.Touchpad, type, Hands[handID]);
-            //Debug.LogError("Other player pressed " + button);
+            Debug.LogError("Other player pressed " + button);
         }
     }
 
