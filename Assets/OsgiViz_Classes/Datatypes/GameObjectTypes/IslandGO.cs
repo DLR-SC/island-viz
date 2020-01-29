@@ -239,8 +239,11 @@ namespace OsgiViz.Unity.Island
             // FAR -> MEDIUM
             else
             {
-                //Disable changeIndikator
-                gameObject.GetComponent<IslandController_Script>().changeIndikator.SetActive(false);
+                //Disable changeIndikator if in HistoryViz (meaning IslandController_Script is present)
+                if (gameObject.GetComponent<IslandController_Script>() != null)
+                {
+                    gameObject.GetComponent<IslandController_Script>().changeIndikator.SetActive(false);
+                }
 
                 // Enable Docks.
                 if (!ImportDock.activeSelf)
@@ -272,11 +275,14 @@ namespace OsgiViz.Unity.Island
         public IEnumerator ApplyFarZoomLevel ()
         {
             int counter = 0;
-            //Enable ChangeStatus Indikator
-            ChangeStatus cs = gameObject.GetComponent<IslandController_Script>().changeStatus;
-            if ((cs.Equals(ChangeStatus.changedElement)||cs.Equals(ChangeStatus.newElement))&&HistoryNavigation.Instance.historyHighlightActive)
+            //Enable ChangeStatus Indikator if in HistoryViz (meaning IslandController_Script is present)
+            if (gameObject.GetComponent<IslandController_Script>() != null)
             {
-                gameObject.GetComponent<IslandController_Script>().changeIndikator.SetActive(true);
+                ChangeStatus cs = gameObject.GetComponent<IslandController_Script>().changeStatus;
+                if ((cs.Equals(ChangeStatus.changedElement) || cs.Equals(ChangeStatus.newElement)) && HistoryNavigation.Instance.historyHighlightActive)
+                {
+                    gameObject.GetComponent<IslandController_Script>().changeIndikator.SetActive(true);
+                }
             }
 
             // Hide Docks.
