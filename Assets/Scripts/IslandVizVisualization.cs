@@ -34,6 +34,12 @@ public class IslandVizVisualization : MonoBehaviour
     public int RandomSeed; // The seed that is used for all procedrual generations, e.g. the island distribution.
     public Graph_Layout Graph_Layout; // You can change the spatial island distribution method in the editor.
 
+    [Header("Plane Size")]
+    public float maxX = 170f;
+    public float minX = -170;
+    public float maxZ = 100;
+    public float minZ = -140f;
+
     [Header("Prefabs")]
     public GameObject Water_Plane_Prefab; // Prefab of the water plane in which the islands "swim".
     public GameObject ImportArrowPrefab; //  = (GameObject) Resources.Load("Prefabs/ImportArrow")
@@ -502,6 +508,10 @@ public class IslandVizVisualization : MonoBehaviour
         float value = 0;
         while (value <= 1)
         {
+            if(float.IsInfinity(startPosition.x)|| float.IsInfinity(startPosition.z) || float.IsInfinity(endPosition.x) || float.IsInfinity(endPosition.z))
+            {
+                break;
+            }
             VisualizationRoot.localScale = Vector3.Lerp(startScale, endScale, value); 
             VisualizationRoot.position = Vector3.Lerp(startPosition, endPosition, value); 
             GlobalVar.CurrentZoom = VisualizationRoot.localScale.x;
@@ -569,16 +579,27 @@ public class IslandVizVisualization : MonoBehaviour
             }
         }else if(VisibleIslandGOs.Count>0)
         {
-            //this routine if HistoryViz
-            foreach (var islandGO in VisibleIslandGOs)
+            distance_temp = Mathf.Sqrt(Mathf.Pow(maxX, 2) + Mathf.Pow(maxZ, 2));
+            if(distance_temp > furthestDistance)
             {
-                distance_temp = Vector3.Distance(islandGO.transform.position, Vector3.zero);
-                if (furthestIslandTransform == null || distance_temp > furthestDistance)
-                {
-                    furthestDistance = distance_temp;
-                    furthestIslandTransform = islandGO.transform;
-                }
+                furthestDistance = distance_temp;
             }
+            distance_temp = Mathf.Sqrt(Mathf.Pow(maxX, 2) + Mathf.Pow(minZ, 2));
+            if (distance_temp > furthestDistance)
+            {
+                furthestDistance = distance_temp;
+            }
+            distance_temp = Mathf.Sqrt(Mathf.Pow(minX, 2) + Mathf.Pow(maxZ, 2));
+            if (distance_temp > furthestDistance)
+            {
+                furthestDistance = distance_temp;
+            }
+            distance_temp = Mathf.Sqrt(Mathf.Pow(minX, 2) + Mathf.Pow(minZ, 2));
+            if (distance_temp > furthestDistance)
+            {
+                furthestDistance = distance_temp;
+            }
+
         }
 
         yield return null;

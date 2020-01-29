@@ -147,7 +147,7 @@ public class IslandController_Script : MonoBehaviour
         yield return null;
 
         //Update IslandGO-Script Attributes
-        islandGOScript.SetRegions(activeRegions);
+        //islandGOScript.SetRegions(activeRegions);
         Bundle bundle = bundleMaster.GetElement(newCommit);
         islandGOScript.Bundle = bundle;
         gameObject.name = bundle.getName();
@@ -156,56 +156,36 @@ public class IslandController_Script : MonoBehaviour
 
         yield return null;
 
-        //New Get Radius
+        //Get Island Radius
         Renderer coastRender = coastLine.GetComponent<MeshRenderer>();
         Vector3 center = coastRender.bounds.center;
         Vector3 extends = coastRender.bounds.extents;
-        float radius = Mathf.Sqrt(Mathf.Pow(extends.x, 2) + Mathf.Pow(extends.z, 2)); 
-
-        //Get Island Radius
-        int maxRingTotal = bundleMaster.GetGrid().GetOuterAssignedTotal(newCommit);
-        int maxRingSegment = bundleMaster.GetGrid().GetOuterAssignedFirstTwoSixths(newCommit);
-
-        if (maxRingTotal < 1)
-        {
-            maxRingTotal = 1;
-        }
-        if (maxRingSegment < 1)
-        {
-            maxRingSegment = 1;
-        }
-
-        float radiusTotal = Constants.GetRadiusFromRing(maxRingTotal);
-        float radiusSegment = Constants.GetRadiusFromRing(maxRingSegment);
+        float radius = Mathf.Sqrt(Mathf.Pow(extends.x, 2) + Mathf.Pow(extends.z, 2));
 
         //Reposition IslandDocks
-        //importDock.transform.localPosition = new Vector3(0f, Constants.dockYPos, radiusSegment + 2);
-        //exportDock.transform.localPosition = new Vector3(2f, Constants.dockYPos, radiusSegment + 1);
-
-        yield return new WaitForEndOfFrame();
-        yield return null;
-        Debug.Log("SetDockPos " + importDock.name + "; " + importDock.transform.position + "; "+ importDock.transform.TransformPoint(Vector3.zero)+"; "+ transform.TransformPoint(new Vector3(0f, Constants.dockYPos, radiusSegment + 2)));
-        Debug.Log("SetDockPos " + exportDock.name + "; " + exportDock.transform.position);
+        float radius2 = bundleMaster.GetGrid().GetOuterAssignedFirstTwoSixths(newCommit);
+        if (radius2 < 1)
+            radius2 = 1;
+        radius2 = Constants.GetRadiusFromRing((int)radius2);
+        Vector3 centerlocal = transform.InverseTransformPoint(center);
+        centerlocal.y = 0;
+        importDock.transform.localPosition = new Vector3(0f, Constants.dockYPos, 1.1f*radius2 + 2);
+        exportDock.transform.localPosition = new Vector3(2f, Constants.dockYPos, 1.1f*radius2 + 1);
 
         StartCoroutine(UpdateExportDock(newCommit, currentZoomLevel));
         StartCoroutine(UpdateImportDock(newCommit, currentZoomLevel));
 
-        //Resize Island Collider
+        //Resize & Update Island Collider
         SphereCollider cc = gameObject.GetComponent<SphereCollider>();
-        cc.radius = radius;
-        if (currentZoomLevel.Equals(ZoomLevel.Far))
-        {
+        cc.radius = 2*radius;
+        if (IslandVizVisualization.Instance.CurrentZoomLevel.Equals(ZoomLevel.Far))
             cc.enabled = true;
-        }
         else
-        {
             cc.enabled = false;
-        }
-        //resize ChangeIndicator
-        changeIndikator.transform.position = center;
-        Vector3 centerLocal = changeIndikator.transform.localPosition;
-        centerLocal.y = Constants.standardHeight / 6f;
-        changeIndikator.transform.localPosition = centerLocal;
+
+        //Resize ChangeIndicator Based on MeshSizeOfIsland
+        centerlocal.y = Constants.standardHeight / 6f;
+        changeIndikator.transform.localPosition = centerlocal;
         changeIndikator.transform.localScale = new Vector3(2*radius/transform.lossyScale.x, Constants.standardHeight / 3f, 2*radius/transform.lossyScale.z);
         StartCoroutine(SetChangeIndicator(changeStatus));
 
@@ -229,7 +209,7 @@ public class IslandController_Script : MonoBehaviour
         }
 
         yield return null;
-        iDock.ConstructConnectionArrows();
+        //iDock.ConstructConnectionArrows();
         if (IslandVizVisualization.Instance.CurrentZoomLevel.Equals(ZoomLevel.Far))
         {
             importDock.SetActive(false);
@@ -249,7 +229,7 @@ public class IslandController_Script : MonoBehaviour
         }
 
         yield return null;
-        eDock.ConstructConnectionArrows();
+        //eDock.ConstructConnectionArrows();
         if (IslandVizVisualization.Instance.CurrentZoomLevel.Equals(ZoomLevel.Far))
         {
             exportDock.SetActive(false);

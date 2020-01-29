@@ -107,6 +107,22 @@ public class HistoryNavigation : MonoBehaviour
         CommitTransformInfo(currentCommitToShow, newCommit);
         currentCommitToShow = newCommit;
         GlobalVar.islandNumber = newCommit.GetBundleCount();
+        StartCoroutine(RenewDependenciesRoutine());
+    }
+
+    public IEnumerator RenewDependenciesRoutine()
+    {
+        Debug.Log("StartDependencyRoutine");
+        yield return new WaitForSeconds(3);
+        Transform rootTransform = IslandVizVisualization.Instance.VisualizationRoot;
+        Vector3 scaleTemp = rootTransform.localScale;
+        rootTransform.localScale = Vector3.one;
+
+        IslandVizInteraction.Instance.OnDependencyRenew();
+
+        yield return new WaitForSeconds(1f);
+        rootTransform.localScale = scaleTemp;
+        Debug.Log("StopDependencyRoutine");
     }
 
     public void StepNext()

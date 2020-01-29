@@ -57,6 +57,7 @@ namespace OsgiViz
             IslandVizInteraction.Instance.OnDockSelect += OnDockSelected;
             IslandVizVisualization.Instance.OnVisualizationScaleChanged += ZoomChanged;
             IslandVizInteraction.Instance.OnNewCommit += ResetDependencies;
+            IslandVizInteraction.Instance.OnDependencyRenew += ConstructConnectionArrows;
 
 
         }
@@ -77,11 +78,18 @@ namespace OsgiViz
 
         public void ConstructConnectionArrows()
         {
+            if (rotPivot == null)
+            {
+                rotPivot = new GameObject("Rotation Pivot");
+                rotPivot.transform.position = transform.position;
+                rotPivot.transform.SetParent(transform);
+            }
+
             //Construct new Arrows
             int cc = 0;
             foreach (DependencyDock dock in connectedDocks)
             {
-                Debug.Log(gameObject.name + "..." + transform.position + " |to| " + dock.gameObject.name + "..." + dock.transform.position);
+               // Debug.Log(gameObject.name + "..." + transform.position + " |to| " + dock.gameObject.name + "..." + dock.transform.position);
                 //Check if Arrow already exists
                 IDPair pair = new IDPair(this.GetInstanceID(), dock.GetInstanceID());
                 GameObject conArrow = connectionPool.getConnection(pair);

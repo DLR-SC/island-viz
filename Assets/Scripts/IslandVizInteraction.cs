@@ -148,6 +148,7 @@ public class IslandVizInteraction : MonoBehaviour {
     /// Called when History Highlight is enabled/disabled
     /// </summary>
     public HistoryHighlightChanged OnHistoryHighlightChanged;
+    public DependencyArrowRenew OnDependencyRenew;
 
     #endregion
 
@@ -294,6 +295,7 @@ public class IslandVizInteraction : MonoBehaviour {
     /// </summary>
     /// <param name="enable">true if highlight shall be enabled, else false</param>
     public delegate void HistoryHighlightChanged(bool enable);
+    public delegate void DependencyArrowRenew();
     #endregion
 
 
