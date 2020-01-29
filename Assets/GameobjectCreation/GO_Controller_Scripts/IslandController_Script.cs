@@ -134,9 +134,6 @@ public class IslandController_Script : MonoBehaviour
         ZoomLevel currentZoomLevel = islandGOScript.CurrentZoomLevel;
         islandGOScript.ResetRegions();
 
-        StartCoroutine(UpdateExportDock(newCommit, currentZoomLevel));
-        StartCoroutine(UpdateImportDock(newCommit, currentZoomLevel));
-
         //Update visible Sub-GameObjects
         StartCoroutine(coastLine.GetComponent<CoastlineController_Script>().RenewCoastlineMesh(newCommit));
         yield return null;
@@ -154,6 +151,8 @@ public class IslandController_Script : MonoBehaviour
         Bundle bundle = bundleMaster.GetElement(newCommit);
         islandGOScript.Bundle = bundle;
         gameObject.name = bundle.getName();
+        importDock.name = bundle.getName() + "_ImportDock";
+        exportDock.name = bundle.getName() + "_ExportDock";
 
         yield return null;
 
@@ -180,8 +179,16 @@ public class IslandController_Script : MonoBehaviour
         float radiusSegment = Constants.GetRadiusFromRing(maxRingSegment);
 
         //Reposition IslandDocks
-        importDock.transform.localPosition = new Vector3(0f, Constants.dockYPos, radiusSegment + 2);
-        exportDock.transform.localPosition = new Vector3(2f, Constants.dockYPos, radiusSegment + 1);
+        //importDock.transform.localPosition = new Vector3(0f, Constants.dockYPos, radiusSegment + 2);
+        //exportDock.transform.localPosition = new Vector3(2f, Constants.dockYPos, radiusSegment + 1);
+
+        yield return new WaitForEndOfFrame();
+        yield return null;
+        Debug.Log("SetDockPos " + importDock.name + "; " + importDock.transform.position + "; "+ importDock.transform.TransformPoint(Vector3.zero)+"; "+ transform.TransformPoint(new Vector3(0f, Constants.dockYPos, radiusSegment + 2)));
+        Debug.Log("SetDockPos " + exportDock.name + "; " + exportDock.transform.position);
+
+        StartCoroutine(UpdateExportDock(newCommit, currentZoomLevel));
+        StartCoroutine(UpdateImportDock(newCommit, currentZoomLevel));
 
         //Resize Island Collider
         SphereCollider cc = gameObject.GetComponent<SphereCollider>();

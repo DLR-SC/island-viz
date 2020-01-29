@@ -247,22 +247,18 @@ public class RaycastSelection : AdditionalIslandVizComponent
     {
         if (collider.GetComponent<IslandGO>())
         {
-            Debug.Log("Toggle Highlight Island");
             IslandVizInteraction.Instance.OnIslandSelect(collider.GetComponent<IslandGO>(), IslandVizInteraction.SelectionType.Highlight, select);
         }
         else if (collider.GetComponent<Region>())
         {
-            Debug.Log("Toggle Highlight Region");
             IslandVizInteraction.Instance.OnRegionSelect(collider.GetComponent<Region>(), IslandVizInteraction.SelectionType.Highlight, select);
         }
         else if (collider.GetComponent<Building>())
         {
-            Debug.Log("Toggle Highlight Building");
             IslandVizInteraction.Instance.OnBuildingSelect(collider.GetComponent<Building>(), IslandVizInteraction.SelectionType.Highlight, select);
         }
         else if (collider.GetComponent<DependencyDock>())
         {
-            Debug.Log("Toggle Highlight Dock");
             IslandVizInteraction.Instance.OnDockSelect(collider.GetComponent<DependencyDock>(), IslandVizInteraction.SelectionType.Highlight, select);
         }
         else if (collider.GetComponent<UI_Button>())
@@ -284,23 +280,19 @@ public class RaycastSelection : AdditionalIslandVizComponent
     {
         if (collider.GetComponent<IslandGO>())
         {
-            Debug.Log("Toggle Selection Island");
             IslandVizInteraction.Instance.OnIslandSelect(collider.GetComponent<IslandGO>(), IslandVizInteraction.SelectionType.Select, select);
             IslandVizVisualization.Instance.FlyTo(collider.transform);           
         }
         else if (collider.GetComponent<Region>())
         {
-            Debug.Log("Toggle Selection Region");
             IslandVizInteraction.Instance.OnRegionSelect(collider.GetComponent<Region>(), IslandVizInteraction.SelectionType.Select, select);            
         }
         else if (collider.GetComponent<Building>())
         {
-            Debug.Log("Toggle Selection Building");
             IslandVizInteraction.Instance.OnBuildingSelect(collider.GetComponent<Building>(), IslandVizInteraction.SelectionType.Select, select);          
         }
         else if (collider.GetComponent<DependencyDock>())
         {
-            Debug.Log("Toggle Selection Dock");
             IslandVizInteraction.Instance.OnDockSelect(collider.GetComponent<DependencyDock>(), IslandVizInteraction.SelectionType.Select, select);           
         }
         else if (collider.GetComponent<UI_Button>())

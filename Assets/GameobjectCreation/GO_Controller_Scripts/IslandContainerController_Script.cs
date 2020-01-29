@@ -86,7 +86,7 @@ public class IslandContainerController_Script : MonoBehaviour
             movingStartTime = Time.time;
             movingRunning = true;
             //island.GetComponent<Rigidbody>().isKinematic = false;
-            StartCoroutine(MoveIsland(newCommit));
+            //StartCoroutine(MoveIsland(newCommit));
         }
         //Island Appearance Transformation
         StartCoroutine(island.GetComponent<IslandController_Script>().UpdateRoutine(newCommit, this, justAktivated));

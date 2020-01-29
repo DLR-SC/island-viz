@@ -81,6 +81,7 @@ namespace OsgiViz
             int cc = 0;
             foreach (DependencyDock dock in connectedDocks)
             {
+                Debug.Log(gameObject.name + "..." + transform.position + " |to| " + dock.gameObject.name + "..." + dock.transform.position);
                 //Check if Arrow already exists
                 IDPair pair = new IDPair(this.GetInstanceID(), dock.GetInstanceID());
                 GameObject conArrow = connectionPool.getConnection(pair);
@@ -202,7 +203,6 @@ namespace OsgiViz
             if (selectionType == IslandVizInteraction.SelectionType.Highlight && dock == this)
             {
                 IslandVizInteraction.Instance.OnIslandSelect(this.transform.parent.GetComponent<IslandGO>(), IslandVizInteraction.SelectionType.Highlight, selected);
-                Debug.Log("Dock Highlighted");
             }
             // This dock gets selected.
             else if (selectionType == IslandVizInteraction.SelectionType.Select)

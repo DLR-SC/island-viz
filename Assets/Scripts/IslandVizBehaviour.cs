@@ -143,8 +143,8 @@ public class IslandVizBehaviour : MonoBehaviour
 
         GameObject vis = GameObject.Find("Visualization");
         //TODO Richtige Höhe für Visualisierung
-        vis.transform.position = new Vector3(0f, 1f, 0f);
-        vis.transform.localScale = new Vector3(0.00145f, 0.00145f, 0.00145f);
+        //vis.transform.position = new Vector3(0f, 1f, 0f);
+        //vis.transform.localScale = new Vector3(0.00145f, 0.00145f, 0.00145f);
 
         HistoryNavigation.Instance.StepNext();
 
