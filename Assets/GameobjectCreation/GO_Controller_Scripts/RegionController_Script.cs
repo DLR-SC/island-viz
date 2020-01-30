@@ -34,8 +34,6 @@ public class RegionController_Script : MonoBehaviour
     public void InitColor(Vector2 value)
     {
         colorValue = value;
-        //Vector3 color = Constants.colVals[i];
-        //gameObject.GetComponent<MeshRenderer>().material.color = new Color(color.x / 255f, color.y / 255f, color.z / 255f, 1f);
     }
     
     public void SetPackage(PackageMaster pm)
@@ -190,12 +188,11 @@ public class RegionController_Script : MonoBehaviour
         yield return null;
 
         CreateMesh(newCommit, Vertices, Triangles, Normals, out cellsInMesh);
-        //yield return null;
 
         //Set Mesh To Filter
         RenewRegionMesh(Vertices, Triangles, Normals);
         yield return null;
-        //Set Color?
+        //Set Color
         MeshFilter regionMeshFilter = gameObject.GetComponent<MeshFilter>();
         GameobjectHelperClass.setUVsToSingularCoord(colorValue, regionMeshFilter);
         yield return null;

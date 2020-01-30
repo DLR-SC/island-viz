@@ -25,7 +25,7 @@ namespace OsgiViz.Relations
         void Start()
         {
             pool = new Dictionary<IDPair, GameObject>();
-            IslandVizInteraction.Instance.OnNewCommit += ResetConnectionPool;
+            IslandVizInteraction.Instance.OnClearVisForNextCommit += ResetConnectionPool;
 
         }
 
@@ -53,7 +53,7 @@ namespace OsgiViz.Relations
             return;
         }
 
-        public void ResetConnectionPool(Commit oldCommit, Commit newCommit)
+        public void ResetConnectionPool()
         {
             pool = new Dictionary<IDPair, GameObject>();
         }

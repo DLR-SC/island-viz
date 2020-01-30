@@ -12,7 +12,6 @@ public class IslandContainerController_Script : MonoBehaviour
     GameObject island;
     BundleMaster bundleMaster;
 
-    private IslandObjectContainer_Script mainController;
     private Commit newCommit;
     private Commit currentCommit;
     private bool transformationRunning;
@@ -21,10 +20,6 @@ public class IslandContainerController_Script : MonoBehaviour
 
     private float speed;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-    }
     private void Awake()
     {
         HistoryNavigation.Instance.AddIsland(this);
@@ -32,7 +27,6 @@ public class IslandContainerController_Script : MonoBehaviour
 
     public IEnumerator Initialise(BundleMaster bm, int i)
     {
-        mainController = GameObject.Find("IslandObjectContainer").GetComponent<IslandObjectContainer_Script>();
         currentCommit = null;
         transformationRunning = false;
         movingRunning = false;
@@ -46,55 +40,8 @@ public class IslandContainerController_Script : MonoBehaviour
         bm.islandController = island.GetComponent<IslandController_Script>();
         yield return island.GetComponent<IslandController_Script>().Initialise();
         island.SetActive(false);
-
-        //Subscribe to Event
-        //IslandVizInteraction.Instance.OnNewCommit += OnNewCommit;
-
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
-    private void OnNewCommit(Commit oldCommit, Commit newCommit)
-    {
-        if (bundleMaster.RelationOfCommitToTimeline(newCommit) != TimelineStatus.present)
-        {
-            //bundle not present in new Commit
-            if (island.activeSelf)
-            {
-                //if island still active set inactive
-                island.SetActive(false);
-                //IslandVizVisualization.Instance.VisibleIslandGOs.Remove(island.transform.GetChild(0).GetComponent<IslandGO>());
-            }
-            //nothin further to do
-            return;
-        }
-
-        bool justAktivated = false;
-        if (!island.activeSelf && bundleMaster.RelationOfCommitToTimeline(newCommit) == TimelineStatus.present)
-        {
-            justAktivated = true;
-            island.SetActive(true);
-        }
-        if (justAktivated)
-        {
-            Vector2 pos2D = bundleMaster.GetElement(newCommit).GetPosition();
-            island.transform.localPosition = new Vector3(pos2D.x, 0f, pos2D.y);
-            //IslandVizVisualization.Instance.VisibleIslandGOs.Add(island.transform.GetChild(0).GetComponent<IslandGO>());
-        }
-        else
-        {
-            movingStartTime = Time.time;
-            movingRunning = true;
-            //island.GetComponent<Rigidbody>().isKinematic = false;
-            //StartCoroutine(MoveIsland(newCommit));
-        }
-        //Island Appearance Transformation
-        StartCoroutine(island.GetComponent<IslandController_Script>().UpdateRoutine(newCommit, this, justAktivated, null));
-    }
 
     public IEnumerator RenewIsland(Commit newCommit, System.Action<IslandContainerController_Script> callback)
     {
@@ -186,8 +133,6 @@ public class IslandContainerController_Script : MonoBehaviour
             yield return new WaitForSeconds(0.1f);
             direction = target - island.transform.position;
         }
-        NotivyIslandMovementFinished();
-
     }
 
     private IEnumerator MoveIsland(Commit newCommit, System.Action<IslandContainerController_Script> callback)
@@ -215,31 +160,4 @@ public class IslandContainerController_Script : MonoBehaviour
 
     }
 
-
-    public void NotifyIslandTransformationFinished()
-    {
-        transformationRunning = false;
-        NotifyAllFinished();
-
-    }
-
-    public void NotivyIslandMovementFinished()
-    {
-        /*movingRunning = false;
-        island.GetComponent<Rigidbody>().velocity = Vector3.zero;
-        island.GetComponent<ConstantForce>().force = Vector3.zero;
-        island.GetComponent<Rigidbody>().isKinematic = true;
-        NotifyAllFinished();*/
-
-    }
-
-    private void NotifyAllFinished()
-    {
-        if (!transformationRunning && !movingRunning)
-        {
-            currentCommit = newCommit;
-            newCommit = null;
-        }
-
-    }
 }

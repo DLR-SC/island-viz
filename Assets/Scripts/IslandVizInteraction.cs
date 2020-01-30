@@ -143,7 +143,7 @@ public class IslandVizInteraction : MonoBehaviour {
     /// <summary>
     /// Called when commit changes to be displayed.
     /// </summary>
-    public NewCommit OnNewCommit;
+    public ClearVisForNextCommit OnClearVisForNextCommit;
     /// <summary>
     /// Called when History Highlight is enabled/disabled
     /// </summary>
@@ -285,11 +285,9 @@ public class IslandVizInteraction : MonoBehaviour {
     /// <param name="selected">True = select, false = deselect.</param>
     public delegate void OtherSelected(GameObject go, SelectionType selectionType, bool selected);
     /// <summary>
-    /// Called when in HistoryComponent a change of commit is triggered 
+    /// Called when next commit shall be shown to clear all necessary datastructures
     /// </summary>
-    /// <param name="oldCommit">The commit that is currently displayed</param>
-    /// <param name="newCommit">The commit to be displayed next</param>
-    public delegate void NewCommit(Commit oldCommit, Commit newCommit);
+    public delegate void ClearVisForNextCommit();
     /// <summary>
     /// 
     /// </summary>

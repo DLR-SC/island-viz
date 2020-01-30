@@ -8,10 +8,10 @@ public class DependencyContainer : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        IslandVizInteraction.Instance.OnNewCommit += DeleteAllDepedencyArrows;
+        IslandVizInteraction.Instance.OnClearVisForNextCommit += DeleteAllDepedencyArrows;
     }
 
-    public void DeleteAllDepedencyArrows(Commit oldCommit, Commit newCommit)
+    public void DeleteAllDepedencyArrows()
     {
         foreach(Transform child in gameObject.transform)
         {

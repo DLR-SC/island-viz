@@ -57,7 +57,7 @@ namespace OsgiViz
             // Subscribe to events
             IslandVizInteraction.Instance.OnDockSelect += OnDockSelected;
             IslandVizVisualization.Instance.OnVisualizationScaleChanged += ZoomChanged;
-            IslandVizInteraction.Instance.OnNewCommit += ResetDependencies;
+            IslandVizInteraction.Instance.OnClearVisForNextCommit += ResetDependencies;
             //IslandVizInteraction.Instance.OnDependencyRenew += ConstructConnectionArrows;
 
             HistoryNavigation.Instance.AddDock(this);
@@ -273,7 +273,7 @@ namespace OsgiViz
 
 
 
-        public void ResetDependencies(Commit newCommit, Commit oldCommit)
+        public void ResetDependencies()
         {
             connectedDocks = new List<DependencyDock>();
             dockWeights = new List<float>();

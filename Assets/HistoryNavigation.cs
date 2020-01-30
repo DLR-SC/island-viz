@@ -120,8 +120,7 @@ public class HistoryNavigation : MonoBehaviour
         }
         if (newC != null&&newC !=oldCommit)
         {
-            IslandVizInteraction.Instance.OnNewCommit(oldCommit, newC);
-            currentCommitToShow = newC;
+            StartCoroutine(CallCommitEvent(oldCommit, newC, true));
         }
 
     }
@@ -134,7 +133,7 @@ public class HistoryNavigation : MonoBehaviour
     public IEnumerator CallCommitEvent(Commit oldCommit, Commit newCommit, bool createDependencies)
     {
         //Generals
-        IslandVizInteraction.Instance.OnNewCommit(oldCommit, newCommit);
+        IslandVizInteraction.Instance.OnClearVisForNextCommit();
         CommitTransformInfo(currentCommitToShow, newCommit);
         currentCommitToShow = newCommit;
         GlobalVar.islandNumber = newCommit.GetBundleCount();

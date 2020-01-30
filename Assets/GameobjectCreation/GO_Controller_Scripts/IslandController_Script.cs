@@ -27,9 +27,6 @@ public class IslandController_Script : MonoBehaviour
     private System.Random RNG;
     private IslandGO islandGOScript;
     public ChangeStatus changeStatus { get; set; }
-    //private IslandObjectContainer_Script mainController;
-    //private Commit currentCommit;
-    //private bool transformationRunning;
 
 
     public void Awake()
@@ -88,7 +85,7 @@ public class IslandController_Script : MonoBehaviour
         foreach (PackageMaster pm in bundleMaster.GetContainedMasterPackages())
         {
             GameObject region = Instantiate(regionPrefab, new Vector3(0, 0, 0), Quaternion.identity);
-            region.name = "Region"; //TODO sinnnvoller Name für Region nach Packet
+            region.name = "Region";
             region.transform.parent = gameObject.transform;
             region.transform.localPosition = new Vector3(0, 0, 0);
             region.layer = LayerMask.NameToLayer("Visualization");
@@ -97,7 +94,6 @@ public class IslandController_Script : MonoBehaviour
             region.GetComponent<Region>().setParentIsland(islandGOScript);
             region.GetComponent<RegionController_Script>().InitColor(Constants.colVals[i]);
             region.GetComponent<MeshRenderer>().sharedMaterial = IslandVizVisualization.Instance.CombinedHoloMaterial;
-            //TODO timedephight global regeln
             yield return region.GetComponent<RegionController_Script>().CreateBuildingManagers();
             regions.Add(region);
             i = (i+1)%8;
@@ -147,7 +143,6 @@ public class IslandController_Script : MonoBehaviour
         yield return null;
 
         //Update IslandGO-Script Attributes
-        //islandGOScript.SetRegions(activeRegions);
         Bundle bundle = bundleMaster.GetElement(newCommit);
         islandGOScript.Bundle = bundle;
         gameObject.name = bundle.getName();
@@ -193,7 +188,6 @@ public class IslandController_Script : MonoBehaviour
 
         islandGOScript.SetRegions(activeRegions);
 
-        controllerScript.NotifyIslandTransformationFinished();
         yield return null;
     }
 
@@ -201,7 +195,6 @@ public class IslandController_Script : MonoBehaviour
     {
         importDock.SetActive(true);
         DependencyDock iDock = importDock.GetComponent<DependencyDock>();
-        iDock.ResetDependencies(null, null);
 
         Bundle bundle = bundleMaster.GetElement(newCommit);
         foreach (KeyValuePair<Bundle, float> importBundle in bundle.GetImportedBundles())
@@ -210,7 +203,6 @@ public class IslandController_Script : MonoBehaviour
         }
 
         yield return null;
-        //iDock.ConstructConnectionArrows();
         if (IslandVizVisualization.Instance.CurrentZoomLevel.Equals(ZoomLevel.Far))
         {
             importDock.SetActive(false);
@@ -221,7 +213,6 @@ public class IslandController_Script : MonoBehaviour
     {
         exportDock.SetActive(true);
         DependencyDock eDock = exportDock.GetComponent<DependencyDock>();
-        eDock.ResetDependencies(null, null);
 
         Bundle bundle = bundleMaster.GetElement(newCommit);
         foreach(KeyValuePair<Bundle, float> exportPartner in bundle.GetExportReceiverBundles())
@@ -230,7 +221,6 @@ public class IslandController_Script : MonoBehaviour
         }
 
         yield return null;
-        //eDock.ConstructConnectionArrows();
         if (IslandVizVisualization.Instance.CurrentZoomLevel.Equals(ZoomLevel.Far))
         {
             exportDock.SetActive(false);
