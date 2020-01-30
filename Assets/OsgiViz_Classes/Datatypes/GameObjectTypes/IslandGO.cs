@@ -5,6 +5,7 @@ using Valve.VR.InteractionSystem;
 using TriangleNet.Voronoi;
 using TriangleNet.Topology;
 using OsgiViz.Island;
+using OsgiViz.SoftwareArtifact;
 
 namespace OsgiViz.Unity.Island
 {
@@ -12,10 +13,15 @@ namespace OsgiViz.Unity.Island
     public class IslandGO : MonoBehaviour
     {
         public List<Region> Regions { get; private set; }
+        public CartographicIsland CartoIsland { get; set; }
+
+        // GameObjects
         public GameObject Coast { get; set; }
         public GameObject ImportDock { get; set; }
         public GameObject ExportDock { get; set; }
-        public CartographicIsland CartoIsland { get; set; }
+
+
+        // Settings
 
         public ZoomLevel CurrentZoomLevel;
 

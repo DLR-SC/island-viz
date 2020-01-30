@@ -8,6 +8,10 @@ using OsgiViz.SoftwareArtifact;
 using OsgiViz.Unity.Island;
 
 
+/// <summary>
+/// This class is deprecated!
+/// </summary>
+
 namespace OsgiViz.Unity.MainThreadConstructors
 {
     public class HierarchyConstructor : MonoBehaviour {

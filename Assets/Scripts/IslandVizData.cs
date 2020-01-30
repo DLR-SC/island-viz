@@ -8,26 +8,30 @@ using OsgiViz.Core;
 /// </summary>
 public class IslandVizData : MonoBehaviour
 {
-    public static IslandVizData Instance { get { return instance; } } 
-    public OsgiProject OsgiProject { get { return osgiProject; } }
+    public static IslandVizData Instance { get; private set; } // The instance of this class.
+    public OsgiProject OsgiProject { get; private set; } // The OSGI project containing the data.
 
-    // Set in Unity Editor
+    // By default, this is set by the config file. 
+    // If the config file is disabled, this can be set in Unity Editor.
     public DataLoadingType DataLoading; // Wether the osgi project is loaded from a json file or a neo4j database.
-    //public string DataLocation; // TODO
+    public string JsonDataPath = "Resources/rce_lite.model"; // "Resources/rce_23_05_2017.model";
+    public string Neo4J_URI = "bolt://localhost:7687";
+    public string Neo4J_User = "neo4j";
+    public string Neo4J_Password = "123";
 
     [Header("Additional Components Container")]
     public GameObject DataComponentsGameObject; // GameObject where all additional data components are located. 
 
-    private AdditionalIslandVizComponent[] inputComponents; // Array of all additional data componets.
 
-    private static IslandVizData instance; // The instance of this class.
-    private OsgiProject osgiProject; // The OSGI project.
+    // Additional components
+    private AdditionalIslandVizComponent[] inputComponents; // Array of all additional data componets.
 
     // Constructors
     private JsonObjConstructor jConstructor; // JsonFile->JsonObject constructor.
     private OsgiProjectConstructor jsonOsgiProjectConstructor; // JsonObject->OsgiProject constructor.
     private Neo4jOsgiConstructor neo4jOsgiProjectConstructor; // Neo4J->OsgiProject constructor.
 
+    // Other
     private bool waiting = true; // This only exists for the JsonObjConstructor. TODO remove in future.
 
 
@@ -44,8 +48,8 @@ public class IslandVizData : MonoBehaviour
     /// </summary>
     void Awake()
     {
-        instance = this;
-        inputComponents = DataComponentsGameObject.GetComponents<AdditionalIslandVizComponent>();
+        Instance = this;
+        inputComponents = DataComponentsGameObject.GetComponents<AdditionalIslandVizComponent>(); // Store all additional componenets.
     }
 
     /// <summary>
@@ -54,10 +58,7 @@ public class IslandVizData : MonoBehaviour
     /// </summary>
     public IEnumerator ConstructOsgiProject()
     {
-        yield return null;
-
         System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
-
         stopwatch.Start(); // Timer to measure construction time.
 
         if (DataLoading == DataLoadingType.Json)
@@ -67,13 +68,13 @@ public class IslandVizData : MonoBehaviour
 
             IslandVizUI.Instance.UpdateLoadingScreenUI("OSGi-Project from Json", ""); // Update UI.
 
-            jConstructor.Construct(GlobalVar.projectmodelPath, Done); // Read & construct a Json Object.
+            jConstructor.Construct(JsonDataPath, Done); // Read & construct a Json Object.
                         
-            while (waiting) // Wait for jConstructor.Construct. TODO remove in future
+            while (waiting) // Wait for jConstructor.Construct.
                 yield return null;
 
             yield return jsonOsgiProjectConstructor.Construct(jConstructor.getJsonModel()); // Construct a OsgiProject from the JsonObject.
-            osgiProject = jsonOsgiProjectConstructor.getProject(); 
+            OsgiProject = jsonOsgiProjectConstructor.getProject(); 
         }
         else if (DataLoading == DataLoadingType.Neo4J)
         {
@@ -86,10 +87,10 @@ public class IslandVizData : MonoBehaviour
             yield return new WaitForSeconds(1f); // We need to wait a little bit until the Neo4jOsgiConstructor connected to the neo4j server. 
 
             yield return neo4jOsgiProjectConstructor.Construct(); // Construct a osgi Object from the neo4J database.
-            osgiProject = neo4jOsgiProjectConstructor.GetOsgiProject();
+            OsgiProject = neo4jOsgiProjectConstructor.GetOsgiProject();
         }
 
-        GlobalVar.islandNumber = osgiProject.getBundles().Count;
+        GlobalVar.islandNumber = OsgiProject.getBundles().Count;
         
         stopwatch.Stop();
         Debug.Log("IslandVizData Construction finished after " + stopwatch.Elapsed.TotalSeconds.ToString("0.00") + " seconds!");
@@ -99,7 +100,6 @@ public class IslandVizData : MonoBehaviour
     /// <summary>
     /// Initialize all input components. Called by IslandVizBehavior.
     /// </summary>
-    /// <returns></returns>
     public IEnumerator InitInputComponents()
     {
         foreach (var item in inputComponents)

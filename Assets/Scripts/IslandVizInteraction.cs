@@ -7,21 +7,21 @@ using Valve.VR.InteractionSystem;
 
 /// <summary>
 /// This class handles all interactions in the application with delegates.
-/// Basically other classes, who depend on interaction events, subscribe to delegates, like "OnControllerTriggerDown", 
+/// Basically other classes, who depend on interaction events, subscribe to delegates, like "OnControllerButtonEvent", 
 /// which then are called.
 /// Input delegates are called by this class in the Update method.
 /// Physics delegates are called by the class IslandVizInteractionController which is attached to both controllers.
+/// Selection delegates are called by additional components, e.g. RaycastSelection.
 /// </summary>
 public class IslandVizInteraction : MonoBehaviour
 {
-    public static IslandVizInteraction Instance { get; private set; }
+    public static IslandVizInteraction Instance { get; private set; } // The instance of this class.
 
     public Player Player; // Set in Unity Editor.
 
     [Header("Additional Components Container")]
     public GameObject InteractionComponentsGameObject; // GameObject where all additional input components are located. 
     private AdditionalIslandVizComponent[] inputComponents; // Array of all additional input componets.
-    private IslandSelectionComponent islandSelectionComponent;
     
 
 
@@ -36,17 +36,16 @@ public class IslandVizInteraction : MonoBehaviour
     /// </summary>
     void Awake()
     {
-        Instance = this;
-        inputComponents = InteractionComponentsGameObject.GetComponents<AdditionalIslandVizComponent>();
-
-        islandSelectionComponent = InteractionComponentsGameObject.AddComponent<IslandSelectionComponent>(); // TODO
+        Instance = this; 
+        inputComponents = InteractionComponentsGameObject.GetComponents<AdditionalIslandVizComponent>(); // Store all additional components.
+        Player.hands[0].gameObject.AddComponent<ControllerInTriggerEventThrower>(); // This triggers the OnControllerEnter events.
+        Player.hands[1].gameObject.AddComponent<ControllerInTriggerEventThrower>(); // This triggers the OnControllerEnter events.
         //OnControllerTriggerDown += DebugInput;
     }
 
     /// <summary>
     /// Initialize all input components. Called by IslandVizBehavior.
     /// </summary>
-    /// <returns></returns>
     public IEnumerator InitInputComponents()
     {        
         foreach (var item in inputComponents)
@@ -85,15 +84,15 @@ public class IslandVizInteraction : MonoBehaviour
     /// </summary>
     public IslandSelected OnIslandSelect;
     /// <summary>
-    /// Called when an island was selected or deselected.
+    /// Called when a region was selected or deselected.
     /// </summary>
     public RegionSelected OnRegionSelect;
     /// <summary>
-    /// Called when an island was selected or deselected.
+    /// Called when a building was selected or deselected.
     /// </summary>
     public BuildingSelected OnBuildingSelect;
     /// <summary>
-    /// Called when an island was selected or deselected.
+    /// Called when a dock was selected or deselected.
     /// </summary>
     public DockSelected OnDockSelect;
     /// <summary>
@@ -177,14 +176,14 @@ public class IslandVizInteraction : MonoBehaviour
     /// <param name="selected">True = select, false = deselect.</param>
     public delegate void BuildingSelected(Building building, SelectionType selectionType, bool selected);
     /// <summary>
-    /// Called when a building GameObject was selected or deselected.
+    /// Called when a dock GameObject was selected or deselected.
     /// </summary>
     /// <param name="dock">The dock that was selected.</param>
     /// <param name="selectionType">The type of the selection.</param>
     /// <param name="selected">True = select, false = deselect.</param>
     public delegate void DockSelected(DependencyDock dock, SelectionType selectionType, bool selected);
     /// <summary>
-    /// Called when a building GameObject was selected or deselected.
+    /// Called when a UI button GameObject was selected or deselected.
     /// </summary>
     /// <param name="button">The UI button that was selected.</param>
     /// <param name="selectionType">The type of the selection.</param>
@@ -207,7 +206,7 @@ public class IslandVizInteraction : MonoBehaviour
 
     /// <summary>
     /// Called by Unity every frame.
-    /// This goes through both hands, checks if buttons are pressed down and calls the delegates.
+    /// This goes through both hands, checks if buttons are pressed or released and calls the delegates.
     /// </summary>
     void Update()
     {        

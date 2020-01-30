@@ -7,7 +7,7 @@ using Valve.VR.InteractionSystem;
 /// This class is attached to a SteamVR controller and is calling OnTriggerEnter and OnTriggerExit delegates from 
 /// the IslandVizInteraction class.
 /// </summary>
-public class IslandVizInteractionController : MonoBehaviour {
+public class ControllerInTriggerEventThrower : MonoBehaviour {
 
     private Hand hand; // The hand this script is attached.
 
@@ -15,8 +15,6 @@ public class IslandVizInteractionController : MonoBehaviour {
     {
         hand = GetComponent<Hand>();
     }
-
-    // TODO Add this via script.
 
     void OnTriggerEnter(Collider other)
     {

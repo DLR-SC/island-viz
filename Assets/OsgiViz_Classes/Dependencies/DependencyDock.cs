@@ -37,7 +37,7 @@ namespace OsgiViz
             connectionArrows = new List<GameObject>();
             connectedDocks = new List<DependencyDock>();
             dockWeights = new List<float>();
-            dependencyContainer = IslandVizVisualization.Instance.TransformContainer.DependencyContainer.gameObject;
+            dependencyContainer = IslandVizVisualization.Instance.DependencyContainer.gameObject;
             
             expanded = false;
             DockType = DockType.ImportDock;

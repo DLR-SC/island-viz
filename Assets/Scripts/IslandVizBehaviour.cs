@@ -11,7 +11,7 @@ using Valve.VR.InteractionSystem;
 /// </summary>
 public class IslandVizBehaviour : MonoBehaviour
 {
-    public static IslandVizBehaviour Instance { get; private set; }
+    public static IslandVizBehaviour Instance { get; private set; } // The instance of this class.
 
     private List<Action> undoList; // List containing the last user actions.
 

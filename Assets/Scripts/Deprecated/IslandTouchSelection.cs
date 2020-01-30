@@ -4,9 +4,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using Valve.VR.InteractionSystem;
 
-public class IslandSelectionComponent : MonoBehaviour
+/// <summary>
+/// This class is deprecated since the island selection is handled via raycasts! 
+/// </summary>
+/// 
+public class IslandTouchSelection : MonoBehaviour
 {
-    public static IslandSelectionComponent Instance;
+    public static IslandTouchSelection Instance;
 
     private List<Hand> touchingHandList; // List of hands, that are currently touching the handle.
     private Hand currentHand; // The hand that is currently using the handle.

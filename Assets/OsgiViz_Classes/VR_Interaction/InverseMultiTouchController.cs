@@ -49,7 +49,7 @@ namespace OsgiViz
             clippingCenterShaderID = Shader.PropertyToID("hologramCenter");
             hologramScaleShaderID = Shader.PropertyToID("hologramScale");
             
-            transformCandidate = IslandVizVisualization.Instance.VisualizationRoot.gameObject;
+            transformCandidate = IslandVizVisualization.Instance.VisualizationContainer.gameObject;
 
             mainSliceContainer = GameObject.Find("ServiceSliceContainer");
             downwardConnectionContainer = GameObject.Find("DownwardConnectionContainer");

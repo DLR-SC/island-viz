@@ -5,6 +5,10 @@ using OsgiViz.SideThreadConstructors;
 using OsgiViz.Core;
 using OsgiViz.Island;
 
+/// <summary>
+/// This class is deprecated!
+/// </summary>
+
 namespace OsgiViz.Unity.MainThreadConstructors
 {
 
@@ -82,7 +86,7 @@ namespace OsgiViz.Unity.MainThreadConstructors
 
             #region Remove in future
             // Read & construct a Json Object.
-            jConstructor.Construct(GlobalVar.projectmodelPath, Done);            
+            jConstructor.Construct("", Done);            
             // Wait for jConstructor.Construct.
             while (waiting)
                 yield return null;

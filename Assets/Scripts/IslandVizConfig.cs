@@ -48,7 +48,22 @@ public class IslandVizConfig : MonoBehaviour
             }
             else if (entries[0] == "DataLocation")
             {
-                IslandVizData.Instance.DataLoading = IslandVizData.DataLoadingType.Json;
+                if (IslandVizData.Instance.DataLoading == IslandVizData.DataLoadingType.Neo4J)
+                {
+                    IslandVizData.Instance.Neo4J_URI = entries[1];
+                }
+                else
+                {
+                    IslandVizData.Instance.JsonDataPath = entries[1];
+                }
+            }
+            else if (entries[0] == "UserName")
+            {
+                IslandVizData.Instance.Neo4J_User = entries[1];
+            }
+            else if (entries[0] == "Password")
+            {
+                IslandVizData.Instance.Neo4J_Password = entries[1];
             }
             else if (entries[0] == "Seed")
             {

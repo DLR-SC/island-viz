@@ -240,7 +240,7 @@ public class InverseMultiTouchInput : AdditionalIslandVizComponent {
         }
 
         currentTranslationVelocity = ClampTranslationVelocityVector(currentTranslationVelocity);
-        IslandVizVisualization.Instance.VisualizationRoot.Translate(-currentTranslationVelocity * Time.deltaTime * TranslationMult, Space.World);
+        IslandVizVisualization.Instance.VisualizationContainer.Translate(-currentTranslationVelocity * Time.deltaTime * TranslationMult, Space.World);
     }
 
     public void RotateAndScale(Vector3 origin, float amountRot, float amountScale)
@@ -253,11 +253,11 @@ public class InverseMultiTouchInput : AdditionalIslandVizComponent {
         }
 
         Vector3 scaleVec = new Vector3(amountScale, amountScale, amountScale);
-        Helperfunctions.scaleFromPivot(IslandVizVisualization.Instance.VisualizationRoot, origin, scaleVec);
-        IslandVizVisualization.Instance.VisualizationRoot.RotateAround(origin, Vector3.up, -amountRot);
+        Helperfunctions.scaleFromPivot(IslandVizVisualization.Instance.VisualizationContainer, origin, scaleVec);
+        IslandVizVisualization.Instance.VisualizationContainer.RotateAround(origin, Vector3.up, -amountRot);
 
         #region Update due to scale change
-        GlobalVar.CurrentZoom = IslandVizVisualization.Instance.VisualizationRoot.localScale.x;
+        GlobalVar.CurrentZoom = IslandVizVisualization.Instance.VisualizationContainer.localScale.x;
         IslandVizVisualization.Instance.OnVisualizationScaleChanged();
         #endregion
     }

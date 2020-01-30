@@ -6,20 +6,20 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// This class manages all user interface (UI) elements in the IslandViz application.
+/// This class manages all user interface (UI) elements in the IslandViz base application (exclusive additional components).
 /// All UI elements are accessable through this class. 
 /// Additionally this class provides some helper functions for UI actions.
 /// </summary>
 public class IslandVizUI : MonoBehaviour
 {
-    public static IslandVizUI Instance; // The instance of this class.
+    public static IslandVizUI Instance { get; private set; } // The instance of this class.
 
     [Header("General UI Components")]
     public Transform TableUI_Parent; // Parent Transform of all UI elements, that are "attached" to the table.
     public Transform StaticUI_Parent; // Parent Transform of all static UI elements.
     public GameObject LoadingScreen; // Parent GameObject of all loading screen UI elements.
     public GameObject ZoomLevel; // Parent GameObject of all zoom level UI elements.
-    public GameObject Notification;
+    public GameObject Notification; // Parent GameObject of all notification UI elements.
     public GameObject BundleNameSelection; // The the Scroll View containing the bundle names.
 
     [Header("Loading Screen Components")]
@@ -34,11 +34,11 @@ public class IslandVizUI : MonoBehaviour
     public Text CurrentVisivleIslandsValue; // Text element containing the current number of visible islands (in %). 
 
     [Header("Current Notification Components")]
-    public Text NotificationValue;
+    public Text NotificationValue; // Text element containing the current notification text. 
 
     [Header("Current Selected Components")]
-    public Text CurrentSelectedHeader; 
-    public Text CurrentSelectedBody;
+    public Text CurrentSelectedHeader; // Text element containing the name of the current selected component.
+    public Text CurrentSelectedBody; // Text element containgin additional informations of the current selected component.
 
     [Header("Bundle Name Selection Components")]
     public Transform BundleNameSelectionContent; // The "Content" child of the Scroll View containing the bundle names.
@@ -48,12 +48,12 @@ public class IslandVizUI : MonoBehaviour
     {
         Instance = this;
 
-        IslandVizBehaviour.Instance.OnConstructionDone += OnConstructionDone; // Subscribe to the OnConstructionDone event of the IslandVizBehaviour.
+        LoadingScreen.SetActive(true); // This is probably disabled because it is annoying in the editor, so we enable it here ;)
+        Notification.SetActive(false); // Notification UI should not always be visible.
 
-        StaticUI_Parent.gameObject.SetActive(true); // This is probably disabled because it is annoying in the editor, so we enable it here ;)
-        Notification.SetActive(false);
+        IslandVizBehaviour.Instance.OnConstructionDone += DisableLoadingScreen; // Subscribe to the OnConstructionDone event of the IslandVizBehaviour.
 
-        IslandVizVisualization.Instance.OnTableHeightChanged += TableHeightChanged;
+        IslandVizVisualization.Instance.OnTableHeightChanged += UpdateTableUIHeight;
 
         IslandVizInteraction.Instance.OnIslandSelect += OnIslandSelected;
         IslandVizInteraction.Instance.OnRegionSelect += OnRegionSelected;
@@ -62,26 +62,19 @@ public class IslandVizUI : MonoBehaviour
 
 
     // ################
-    // Event Handling
+    // Table Height
     // ################
 
     /// <summary>
     /// Call this when the table height was changed to also change the height of all UI elements that are attached to the table.
     /// </summary>
-    public void TableHeightChanged (float newHeight)
+    /// <param name="newHeight">The new height of the table.</param>
+    public void UpdateTableUIHeight (float newHeight)
     {
         TableUI_Parent.position = Vector3.up * newHeight;
     }
 
-    /// <summary>
-    /// This method is called when the IslandViz construction is done.
-    /// </summary>
-    public void OnConstructionDone ()
-    {
-        StaticUI_Parent.gameObject.SetActive(false); // Disable the loading screen.
-    }
-
-
+    
 
 
 
@@ -90,16 +83,23 @@ public class IslandVizUI : MonoBehaviour
     // ################
 
     /// <summary>
-    /// Change the process name and progress of the loading screen.
+    /// Change the loading process name and progress of the loading screen.
     /// </summary>
-    /// <param name="processName">The name of the process that is current loading.</param>
+    /// <param name="processName">The name of the current loading process.</param>
     /// <param name="processProgress">The loading progress of the current process (e.g. "88.76%"). Leave empty when you do not want to show progress.</param>
     public void UpdateLoadingScreenUI (string processName, string processProgress)
     {
         LoadingScreenNameValue.text = processName;
         LoadingScreenProgressValue.text = processProgress;
     }
-       
+
+    /// <summary>
+    /// This method is called when the IslandViz construction is done.
+    /// </summary>
+    public void DisableLoadingScreen()
+    {
+        LoadingScreen.SetActive(false); // Disable the loading screen.
+    }
 
 
 

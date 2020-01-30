@@ -38,10 +38,10 @@ public class ServiceVisualization : AdditionalIslandVizComponent
         Debug.Log(IslandVizData.Instance.OsgiProject.getServices().Count + " SERVICES!");
 
         ServiceSliceContainer = new GameObject("ServiceSliceContainer");
-        ServiceSliceContainer.transform.SetParent(IslandVizVisualization.Instance.VisualizationRoot, false);
+        ServiceSliceContainer.transform.SetParent(IslandVizVisualization.Instance.VisualizationContainer, false);
 
         DownwardConnectionContainer = new GameObject("DownwardConnectionContainer");
-        DownwardConnectionContainer.transform.SetParent(IslandVizVisualization.Instance.VisualizationRoot, false);
+        DownwardConnectionContainer.transform.SetParent(IslandVizVisualization.Instance.VisualizationContainer, false);
 
         serviceVolume = new ServiceVolume();
         
