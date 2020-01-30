@@ -272,15 +272,17 @@ public class RaycastSelection : AdditionalIslandVizComponent
         if (collider.GetComponent<IslandGO>())
         {
             IslandVizInteraction.Instance.OnIslandSelect(collider.GetComponent<IslandGO>(), IslandVizInteraction.SelectionType.Select, select);
-            IslandVizVisualization.Instance.FlyTo(collider.transform);           
+            IslandVizVisualization.Instance.FlyToSingleTarget(collider.transform, 5f);
         }
         else if (collider.GetComponent<Region>())
         {
-            IslandVizInteraction.Instance.OnRegionSelect(collider.GetComponent<Region>(), IslandVizInteraction.SelectionType.Select, select);            
+            IslandVizInteraction.Instance.OnRegionSelect(collider.GetComponent<Region>(), IslandVizInteraction.SelectionType.Select, select);
+            //IslandVizVisualization.Instance.FlyToSingleTarget(collider.transform, 0.25f);
         }
         else if (collider.GetComponent<Building>())
         {
-            IslandVizInteraction.Instance.OnBuildingSelect(collider.GetComponent<Building>(), IslandVizInteraction.SelectionType.Select, select);          
+            IslandVizInteraction.Instance.OnBuildingSelect(collider.GetComponent<Building>(), IslandVizInteraction.SelectionType.Select, select);
+            //IslandVizVisualization.Instance.FlyToSingleTarget(collider.transform, 0.5f);
         }
         else if (collider.GetComponent<DependencyDock>())
         {

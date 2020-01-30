@@ -177,7 +177,7 @@ namespace OsgiViz
             }
         }
 
-        private void UpdateViewToDependencies ()
+        private void FlyToDependencies ()
         {
             List<Transform> connectedDockTransforms = new List<Transform>();
             foreach (var item in connectedDocks)
@@ -186,7 +186,8 @@ namespace OsgiViz
                 IslandVizInteraction.Instance.OnIslandSelect(item.transform.parent.GetComponent<IslandGO>(), IslandVizInteraction.SelectionType.Highlight, true);
             }
             connectedDockTransforms.Add(this.transform.parent);
-            IslandVizVisualization.Instance.FlyTo(connectedDockTransforms.ToArray());
+
+            IslandVizVisualization.Instance.FlyToMultipleTargets(connectedDockTransforms.ToArray());
         }
         
 
@@ -206,7 +207,7 @@ namespace OsgiViz
                     {
                         ShowAllDependencies();
                         IslandVizInteraction.Instance.OnIslandSelect(this.transform.parent.GetComponent<IslandGO>(), IslandVizInteraction.SelectionType.Select, true);
-                        UpdateViewToDependencies();
+                        FlyToDependencies();
                         Selected = true;
                     }
                     else if (!selected && Selected)

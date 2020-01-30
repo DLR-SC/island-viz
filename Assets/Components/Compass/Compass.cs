@@ -55,9 +55,9 @@ public class Compass : AdditionalIslandVizComponent
         if (!initialized)
             return;
 
-        if (compassNeedle.localRotation.z != IslandVizVisualization.Instance.VisualizationContainer.rotation.y)
+        if (compassNeedle.localRotation.z != IslandVizVisualization.Instance.Visualization.rotation.y)
         {
-            compassNeedle.localRotation = Quaternion.Euler(0, 0, IslandVizVisualization.Instance.VisualizationContainer.rotation.eulerAngles.y);
+            compassNeedle.localRotation = Quaternion.Euler(0, 0, IslandVizVisualization.Instance.Visualization.rotation.eulerAngles.y);
         }
     }
 

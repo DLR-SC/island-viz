@@ -118,11 +118,6 @@ namespace OsgiViz.Unity.Island
         {
             if (island == this)
             {
-                // Enable all children, i.e. make island visible.
-                foreach (var region in Regions)
-                {
-                    region.gameObject.SetActive(true);
-                }
                 Visible = true;
             }            
         }
@@ -136,6 +131,12 @@ namespace OsgiViz.Unity.Island
                 {
                     region.gameObject.SetActive(false);
                 }
+                Coast.SetActive(false);
+                ImportDock.SetActive(false);
+                ExportDock.SetActive(false);
+
+                CurrentZoomLevel = ZoomLevel.None;
+
                 Visible = false;
             }            
         }
@@ -167,132 +168,51 @@ namespace OsgiViz.Unity.Island
             }
             else if (newZoomLevel == ZoomLevel.Near)
             {
-                yield return ApplyNearZoomLevel();
+                yield return EnableIslandElements(true, true, true, true, true);
             }
             else if (newZoomLevel == ZoomLevel.Medium)
             {
-                yield return ApplyMediumZoomLevel();
+                yield return EnableIslandElements(true, true, true, true, false);
             }
             else if (newZoomLevel == ZoomLevel.Far)
             {
-                yield return ApplyFarZoomLevel();
+                yield return EnableIslandElements(true, false, true, false, false);
             }
             CurrentZoomLevel = newZoomLevel;
         }
         
-        public IEnumerator ApplyNearZoomLevel()
+        public IEnumerator EnableIslandElements (bool enableCoast, bool enableDocks, bool enableRegions, bool enableRegionColliders, bool enableBuildings)
         {
-            int counter = 0;
+            int counter = 0; // Counter for performance optimization.
+
+            if (Coast.activeSelf != enableCoast)
+                Coast.SetActive(enableCoast);
+
+            if (ImportDock.activeSelf != enableDocks)
+                ImportDock.SetActive(enableDocks);
+
+            if (ExportDock.activeSelf != enableDocks)
+                ExportDock.SetActive(enableDocks);
 
             foreach (var region in Regions)
             {
-                // Disable region colliders.
-                if (region.GetComponent<MeshCollider>().enabled)
-                    region.GetComponent<MeshCollider>().enabled = true;
+                if (region.gameObject.activeSelf != enableRegions)
+                    region.gameObject.SetActive(enableRegions);
 
-                // Enable buildings.
+                if (region.GetComponent<MeshCollider>().enabled != enableRegionColliders)
+                    region.GetComponent<MeshCollider>().enabled = enableRegionColliders;
+
                 foreach (var building in region.getBuildings())
                 {
-                    if (!building.gameObject.activeSelf)
+                    if (building.gameObject.activeSelf != enableBuildings)
                     {
-                        building.gameObject.SetActive(true);
-
+                        building.gameObject.SetActive(enableBuildings);
                         counter++;
-                        if (counter >= BuildingsPerFrame)
-                        {
-                            counter = 0;
-                            yield return null;
-                        }
+                        if (counter >= BuildingsPerFrame) { counter = 0; yield return null; }
                     }
                 }
             }
-        }
-        
-        public IEnumerator ApplyMediumZoomLevel()
-        {
-            int counter = 0;
-
-            // NEAR -> MEDIUM 
-            if (CurrentZoomLevel == ZoomLevel.Near)
-            {
-                foreach (var region in Regions)
-                {
-                    foreach (var building in region.getBuildings())
-                    {
-                        if (building.gameObject.activeSelf)
-                        {
-                            building.gameObject.SetActive(false);
-
-                            counter++;
-                            if (counter >= BuildingsPerFrame)
-                            {
-                                counter = 0;
-                                yield return null;
-                            }
-                        }
-                    }
-                }
-                //if (!GetComponent<MeshCollider>().enabled)
-                //    GetComponent<MeshCollider>().enabled = true;                
-            }
-            // FAR -> MEDIUM
-            else
-            {
-                // Enable Docks.
-                if (!ImportDock.activeSelf)
-                {
-                    ImportDock.SetActive(true);
-                    ExportDock.SetActive(true);
-                }                
-
-                // Enable region colliders.
-                foreach (var region in Regions)
-                {
-                    if (!region.GetComponent<MeshCollider>().enabled)
-                        region.GetComponent<MeshCollider>().enabled = true;
-                }
-
-                //if (!GetComponent<MeshCollider>().enabled)
-                //    GetComponent<MeshCollider>().enabled = true;
-            }
-        }
-        
-        public IEnumerator ApplyFarZoomLevel ()
-        {
-            int counter = 0;
-
-            // Hide Docks.
-            if (ImportDock.activeSelf)
-            {
-                ImportDock.SetActive(false);
-                ExportDock.SetActive(false);
-            }   
-
-            // Disable region colliders & hide buildings.
-            foreach (var region in Regions)
-            {
-                if (region.GetComponent<MeshCollider>().enabled)
-                    region.GetComponent<MeshCollider>().enabled = false;
-                
-                foreach (var building in region.getBuildings())
-                {
-                    if (building.gameObject.activeSelf)
-                    {
-                        building.gameObject.SetActive(false);
-
-                        counter++;
-                        if (counter >= BuildingsPerFrame)
-                        {
-                            counter = 0;
-                            yield return null;
-                        }
-                    }
-                }
-            }
-
-            // Enable island collider.
-            //GetComponent<MeshCollider>().enabled = true;
-        }
+        }       
 
         #endregion
 

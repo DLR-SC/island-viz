@@ -20,7 +20,7 @@ public class IslandVizVisualization : MonoBehaviour
     public List<CartographicIsland> IslandStructures { get; private set; } // List of all IslandStructures.
     public List<IslandGO> IslandGOs { get; private set; } // List of all IslandGOs.
     public List<IslandGO> VisibleIslandGOs { get; private set; } // List of all IslandGOs that are currently visible.
-    public Transform VisualizationContainer { get; private set; } // Parent transform of all visualization objects. E.g. when the visualization is scaled, we scale this.
+    public Transform Visualization { get; private set; } // Parent transform of all visualization objects. E.g. when the visualization is scaled, we scale this.
     public Transform IslandContainer { get; private set; } // Parent tranform of all island objects.
     public Transform DependencyContainer { get; private set; } // Parent transform of all dependencies.
     public ZoomLevel CurrentZoomLevel { get; private set; }
@@ -165,11 +165,11 @@ public class IslandVizVisualization : MonoBehaviour
         bdConstructor = new Graph_Layout_Constructor();
 
         // Create root transforms and add some stuff.
-        VisualizationContainer = new GameObject("Visualization").transform;
+        Visualization = new GameObject("Visualization").transform;
         IslandContainer = new GameObject("VisualizationContainer").transform;
-        IslandContainer.SetParent(VisualizationContainer);
+        IslandContainer.SetParent(Visualization);
         DependencyContainer = new GameObject("DependencyContainer").transform;
-        DependencyContainer.SetParent(VisualizationContainer);
+        DependencyContainer.SetParent(Visualization);
 
         // Create water visual.
         GameObject water = (GameObject)Instantiate(Water_Plane_Prefab, IslandContainer);
@@ -225,13 +225,11 @@ public class IslandVizVisualization : MonoBehaviour
 
         yield return AutoZoom(); // TODO solve this with FlyToIsland()
 
-        GlobalVar.CurrentZoom = VisualizationContainer.localScale.x;
-        GlobalVar.MinZoom = VisualizationContainer.localScale.x;
+        GlobalVar.CurrentZoom = Visualization.localScale.x;
+        GlobalVar.MinZoom = Visualization.localScale.x;
 
         StartCoroutine(ZoomLevelRoutine()); // Start the ZoomLevelRoutine.
 
-        // TODO reenable in a smarter way
-        //GlobalVar.hologramTableHeight = IslandVizInteraction.Instance.GetPlayerEyeHeight() - 0.75f; 
         OnTableHeightChanged(GlobalVar.hologramTableHeight); // Set table height
 
         stopwatch.Stop();
@@ -241,7 +239,6 @@ public class IslandVizVisualization : MonoBehaviour
     /// <summary>
     /// Initialize all additional input components. Called by IslandVizBehavior.
     /// </summary>
-    /// <returns></returns>
     public IEnumerator InitVisualizationComponents()
     {
         foreach (var item in visualizationComponents)
@@ -335,7 +332,7 @@ public class IslandVizVisualization : MonoBehaviour
         {
             if (zoomDirty) // Zoom was changed.
             {
-                zoomDirty = false;              
+                zoomDirty = false;
 
                 zoomLevelPercentage = Mathf.Sqrt(Mathf.Sqrt((GlobalVar.CurrentZoom - GlobalVar.MinZoom) / (GlobalVar.MaxZoom - GlobalVar.MinZoom))) * 100;
                 zoomLevel = PercentageToZoomLevel(zoomLevelPercentage);
@@ -353,8 +350,7 @@ public class IslandVizVisualization : MonoBehaviour
             if (islandsDirty) // Island(s) with wrong ZoomLevel, e.g. because zoomlevel was changed or a new island appeared.
             {
                 islandsDirty = false; // This has to be done first, because dirty islands can appear at any point.
-
-                int counter = 0;
+                int counter = 0; // Counter for performance optimization.
 
                 // Check every island and apply current ZoomLevel if needed.
                 for (int i = 0; i < VisibleIslandGOs.Count; i++)
@@ -367,20 +363,15 @@ public class IslandVizVisualization : MonoBehaviour
                         counter++;
                     }
 
-                    if (counter >= islandsPerFrame)
-                    {
-                        counter = 0;
-                        yield return null;
-                    }
+                    if (counter >= islandsPerFrame) { counter = 0; yield return null; } // Performance optimization.
                 }
-
-                IslandVizUI.Instance.UpdateZoomLevelUI(zoomLevelPercentage);
+                //IslandVizUI.Instance.UpdateZoomLevelUI(zoomLevelPercentage);
             }
 
             yield return new WaitForFixedUpdate();
         }
     }
-    
+
     #endregion
 
 
@@ -389,63 +380,50 @@ public class IslandVizVisualization : MonoBehaviour
     // Fly To
     // ################
 
-    public void FlyTo (Transform target)
+    #region Fly To
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="target">The target that should be at the center of the table.</param>
+    /// <param name="distanceMultiplier">The distance we want to be zoomed out. GlobalVar.MinZoom * distanceMultiplier</param>
+    public void FlyToSingleTarget (Transform target, float distanceMultiplier = 4f)
     {
-        Vector3 endScale = Vector3.one;
-        if (target.GetComponent<IslandGO>() != null)
-        {
-            endScale *= GlobalVar.MinZoom * 5;
-        }
-        else if (target.GetComponent<Region>() != null)
-        {
-            endScale *= GlobalVar.MaxZoom / 4;
-        }
-        else if (target.GetComponent<Building>() != null)
-        {
-            endScale *= GlobalVar.MaxZoom / 2;
-        }
-        else
-        {
-            endScale *= GlobalVar.MinZoom * 4;
-        }
+        float endScale = GlobalVar.MinZoom * distanceMultiplier;
 
         // When the user is already zoomed in, we do not want to zoom out again.
-        if (endScale.x < GlobalVar.CurrentZoom)
+        if (endScale < GlobalVar.CurrentZoom)
         {
-            endScale = Vector3.one * GlobalVar.CurrentZoom;
+            endScale = GlobalVar.CurrentZoom;
         }
 
-        Vector3 startPosition = VisualizationContainer.position;
-        Vector3 endPosition = (startPosition / GlobalVar.CurrentZoom - target.position / GlobalVar.CurrentZoom) * endScale.x;
+        Vector3 startPosition = Visualization.position;
+        Vector3 endPosition = (startPosition / GlobalVar.CurrentZoom - target.position / GlobalVar.CurrentZoom) * endScale;
         endPosition.y = GlobalVar.hologramTableHeight;
 
         StartCoroutine(FlyToPosition(endPosition, endScale));
     }
 
-    public void FlyTo(Transform[] targets)
-    {
-        StartCoroutine(FlyToMultiple(targets));
-    }
         
-    private IEnumerator FlyToMultiple(Transform[] targetTransforms)
+    public void FlyToMultipleTargets(Transform[] targetTransforms)
     {
         float distance;
         Vector3 centerLocalPosition = FindCentroid(targetTransforms, out distance);
-        Vector3 centerWorldPosition = centerLocalPosition * GlobalVar.CurrentZoom + VisualizationContainer.transform.position;
+        Vector3 centerWorldPosition = centerLocalPosition * GlobalVar.CurrentZoom + Visualization.transform.position;
 
         float zoomMultiplier = 0.75f / (GlobalVar.CurrentZoom * distance);        
-        Vector3 startScale = Vector3.one * GlobalVar.CurrentZoom;
-        Vector3 endScale = startScale * zoomMultiplier;
+        float startScale = GlobalVar.CurrentZoom;
+        float endScale = startScale * zoomMultiplier;
 
         // Debug
         GameObject DebugCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
         DebugCube.transform.localScale = new Vector3(0.01f, 100, 0.01f);
-        DebugCube.transform.parent = VisualizationContainer;
+        DebugCube.transform.parent = Visualization;
         DebugCube.transform.localPosition = centerLocalPosition;
         Debug.Log("DebugCube Position: " + DebugCube.transform.position + " --- WorldPosition: " + centerWorldPosition);
         
-        Vector3 startPosition = VisualizationContainer.position;
-        Vector3 endPosition = (startPosition / GlobalVar.CurrentZoom - DebugCube.transform.position / GlobalVar.CurrentZoom) * endScale.x;
+        Vector3 startPosition = Visualization.position;
+        Vector3 endPosition = (startPosition / GlobalVar.CurrentZoom - DebugCube.transform.position / GlobalVar.CurrentZoom) * endScale;
         endPosition.y = startPosition.y;
 
         Destroy(DebugCube); // TODO this is inly a quick hack! Remove in future;
@@ -453,37 +431,41 @@ public class IslandVizVisualization : MonoBehaviour
         //Debug.Log("startScale: " + startScale + " --- endScale: " + endScale);
         //Debug.Log("startPosition: " + startPosition + " --- worldCenterPosition: " + DebugCube.transform.position + " --- endPosition: " + endPosition);
         
-        yield return FlyToPosition(endPosition, endScale);
+        StartCoroutine(FlyToPosition(endPosition, endScale));
     }
 
-    private IEnumerator FlyToPosition(Vector3 endPosition, Vector3 endScale, float speed = 0.5f)
+    /// <summary>
+    /// This coroutine moves and scales the visualization to the endPosition and endScale.
+    /// </summary>
+    /// <param name="endPosition">The position that should be at the center of the table.</param>
+    /// <param name="endScale">The target scale of the visualization.</param>
+    /// <param name="speed">The animation speed multiplier.</param>
+    private IEnumerator FlyToPosition(Vector3 endPosition, float endScale, float speed = 0.5f)
     {
         Vector3 startScale = Vector3.one * GlobalVar.CurrentZoom;
-        Vector3 startPosition = VisualizationContainer.localPosition;
+        Vector3 startPosition = Visualization.localPosition;
         startPosition.y = GlobalVar.hologramTableHeight;
 
-        if (endScale.x < GlobalVar.MinZoom)
-        {
-            endScale = Vector3.one * GlobalVar.MinZoom;
-        }
-        else if (endScale.x > GlobalVar.MaxZoom)
-        {
-            endScale = Vector3.one * GlobalVar.MaxZoom;
-        }
-
+        endScale = Mathf.Clamp(endScale, GlobalVar.MinZoom, GlobalVar.MaxZoom);
+        Vector3 endScale_ = Vector3.one * endScale;
+        
         float value = 0;
         while (value <= 1)
         {
-            VisualizationContainer.localScale = Vector3.Lerp(startScale, endScale, value); 
-            VisualizationContainer.position = Vector3.Lerp(startPosition, endPosition, value); 
-            GlobalVar.CurrentZoom = VisualizationContainer.localScale.x;
+            Visualization.localScale = Vector3.Lerp(startScale, endScale_, value); 
+            Visualization.position = Vector3.Lerp(startPosition, endPosition, value); 
+            GlobalVar.CurrentZoom = Visualization.localScale.x;
 
-            OnVisualizationScaleChanged();
+            OnVisualizationScaleChanged?.Invoke();
+            OnVisualizationPositionChanged?.Invoke();
 
             value += 0.01f * speed;
             yield return new WaitForFixedUpdate();
         }
     }
+
+    #endregion
+
 
 
     // ################
@@ -512,7 +494,7 @@ public class IslandVizVisualization : MonoBehaviour
 
     public void RecenterView ()
     {
-        StartCoroutine(FlyToPosition(Vector3.up * GlobalVar.hologramTableHeight, Vector3.one * GlobalVar.MinZoom, 1f));
+        StartCoroutine(FlyToPosition(Vector3.up * GlobalVar.hologramTableHeight, GlobalVar.MinZoom, 1f));
     }
 
     /// <summary>
@@ -539,7 +521,7 @@ public class IslandVizVisualization : MonoBehaviour
         }
         yield return null;
 
-        VisualizationContainer.localScale *= maxDistance / furthestDistance;
+        Visualization.localScale *= maxDistance / furthestDistance;
         
     }
 
@@ -550,7 +532,7 @@ public class IslandVizVisualization : MonoBehaviour
     public void ApplyTableHeight (float newHeight)
     {
         Table.transform.position = new Vector3(Table.transform.position.x, newHeight, Table.transform.position.z);
-        VisualizationContainer.transform.position = new Vector3(VisualizationContainer.transform.position.x, newHeight, VisualizationContainer.transform.position.z);
+        Visualization.transform.position = new Vector3(Visualization.transform.position.x, newHeight, Visualization.transform.position.z);
         GlobalVar.hologramTableHeight = newHeight;
     }
 
@@ -621,6 +603,7 @@ public enum ZoomLevel
 {
     Near,
     Medium,
-    Far
+    Far,
+    None
 }
 
