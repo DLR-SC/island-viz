@@ -30,7 +30,7 @@ public class BuildingController_Script : MonoBehaviour
         regionScript = r;
     }
 
-    public Building UpdateBuilding (Commit c, ZoomLevel currentZoomlevel)
+    public Building UpdateBuilding (Commit c)
     {
         TimelineStatus tls = compUnit.RelationOfCommitToTimeline(c);
         if (tls != TimelineStatus.present)

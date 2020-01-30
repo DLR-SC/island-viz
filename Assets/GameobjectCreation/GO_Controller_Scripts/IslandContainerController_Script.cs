@@ -138,15 +138,15 @@ public class IslandContainerController_Script : MonoBehaviour
     private IEnumerator MoveIsland(Commit newCommit, System.Action<IslandContainerController_Script> callback)
     {
         yield return null;
-        /*speed = HistoryNavigation.Instance.islandspeed;
+        speed = HistoryNavigation.Instance.islandspeed;
 
         Vector2 pos2D = bundleMaster.GetElement(newCommit).GetPosition();
         Vector3 target = new Vector3(pos2D.x, 0f, pos2D.y);
 
         Vector3 direction = target - island.transform.localPosition;
 
-        while (direction.magnitude >= 0.1 /*& Time.time - movingStartTime < 10*/ //)
-       /* {
+        while (direction.magnitude >= 0.5f /*& Time.time - movingStartTime < 10*/ )
+        {
             Vector3 newPos = island.transform.localPosition + direction.normalized * 0.1f * speed;
             island.transform.localPosition = newPos;
             //island.transform.Translate(direction.normalized * 0.1f*speed);
@@ -154,7 +154,7 @@ public class IslandContainerController_Script : MonoBehaviour
 
             yield return new WaitForSeconds(0.1f);
             direction = target - island.transform.localPosition;
-        }*/
+        }
         //NotivyIslandMovementFinished();
         callback(this);
 

@@ -117,7 +117,6 @@ public class IslandController_Script : MonoBehaviour
 
     public IEnumerator UpdateRoutine(Commit newCommit, IslandContainerController_Script controllerScript, bool justActivated, System.Action<IslandController_Script> callback)
     {
-        
         changeStatus = ChangeStatus.unknown;
         if (justActivated)
         {
@@ -127,18 +126,25 @@ public class IslandController_Script : MonoBehaviour
         {
             changeIndikator.SetActive(false);
         }
-        ZoomLevel currentZoomLevel = islandGOScript.CurrentZoomLevel;
-        islandGOScript.ResetRegions();
+
+        //Reposition & Update IslandDocks
+        float radius2 = bundleMaster.GetGrid().GetOuterAssignedFirstTwoSixths(newCommit);
+        if (radius2 < 1)
+            radius2 = 1;
+        radius2 = Constants.GetRadiusFromRing((int)radius2);
+        importDock.transform.localPosition = new Vector3(0f, Constants.dockYPos, 1.1f * radius2 + 2);
+        exportDock.transform.localPosition = new Vector3(2f, Constants.dockYPos, 1.1f * radius2 + 1);
+        yield return UpdateExportDock(newCommit);
+        yield return UpdateImportDock(newCommit);
+        //after this docks are ready for Dependency Arrow creation
+        callback(this);
 
         //Update visible Sub-GameObjects
         StartCoroutine(coastLine.GetComponent<CoastlineController_Script>().RenewCoastlineMesh(newCommit));
-        yield return null;
-
         List<Region> activeRegions = new List<Region>();
-        float islandHeight = 10;
         foreach (GameObject region in regions)
         {
-            StartCoroutine(region.GetComponent<RegionController_Script>().RenewRegion(null, newCommit, currentZoomLevel, (returnScript)=> { if (returnScript != null) { activeRegions.Add(returnScript); } } ));
+            StartCoroutine(region.GetComponent<RegionController_Script>().RenewRegion(null, newCommit, (returnScript)=> { if (returnScript != null) { activeRegions.Add(returnScript); } } ));
         }
         yield return null;
 
@@ -155,35 +161,22 @@ public class IslandController_Script : MonoBehaviour
         Renderer coastRender = coastLine.GetComponent<MeshRenderer>();
         Vector3 center = coastRender.bounds.center;
         Vector3 extends = coastRender.bounds.extents;
-        float radius = Mathf.Sqrt(Mathf.Pow(extends.x, 2) + Mathf.Pow(extends.z, 2));
-
-        //Reposition IslandDocks
-        float radius2 = bundleMaster.GetGrid().GetOuterAssignedFirstTwoSixths(newCommit);
-        if (radius2 < 1)
-            radius2 = 1;
-        radius2 = Constants.GetRadiusFromRing((int)radius2);
-        Vector3 centerlocal = transform.InverseTransformPoint(center);
-        centerlocal.y = 0;
-        importDock.transform.localPosition = new Vector3(0f, Constants.dockYPos, 1.1f*radius2 + 2);
-        exportDock.transform.localPosition = new Vector3(2f, Constants.dockYPos, 1.1f*radius2 + 1);
-        callback(this);
-
-        StartCoroutine(UpdateExportDock(newCommit, currentZoomLevel));
-        StartCoroutine(UpdateImportDock(newCommit, currentZoomLevel));
+        float radius = Mathf.Max(extends.x, extends.z);
 
         //Resize & Update Island Collider
         SphereCollider cc = gameObject.GetComponent<SphereCollider>();
-        cc.radius = 2*radius;
+        cc.radius = 2*radius / transform.lossyScale.x;
         if (IslandVizVisualization.Instance.CurrentZoomLevel.Equals(ZoomLevel.Far))
             cc.enabled = true;
         else
             cc.enabled = false;
 
         //Resize ChangeIndicator Based on MeshSizeOfIsland
+        Vector3 centerlocal = transform.InverseTransformPoint(center);
         centerlocal.y = Constants.standardHeight / 6f;
         changeIndikator.transform.localPosition = centerlocal;
         changeIndikator.transform.localScale = new Vector3(2*radius/transform.lossyScale.x, Constants.standardHeight / 3f, 2*radius/transform.lossyScale.z);
-        StartCoroutine(SetChangeIndicator(changeStatus));
+        SetChangeIndicator(changeStatus);
 
 
         islandGOScript.SetRegions(activeRegions);
@@ -191,7 +184,7 @@ public class IslandController_Script : MonoBehaviour
         yield return null;
     }
 
-    public IEnumerator UpdateImportDock(Commit newCommit, ZoomLevel currentZoomlevel)
+    public IEnumerator UpdateImportDock(Commit newCommit)
     {
         importDock.SetActive(true);
         DependencyDock iDock = importDock.GetComponent<DependencyDock>();
@@ -209,7 +202,7 @@ public class IslandController_Script : MonoBehaviour
         }
     }
 
-    public IEnumerator UpdateExportDock(Commit newCommit, ZoomLevel currentZoomlevel)
+    public IEnumerator UpdateExportDock(Commit newCommit)
     {
         exportDock.SetActive(true);
         DependencyDock eDock = exportDock.GetComponent<DependencyDock>();
@@ -228,7 +221,7 @@ public class IslandController_Script : MonoBehaviour
     }
 
 
-    public IEnumerator SetChangeIndicator(ChangeStatus cs)
+    public void SetChangeIndicator(ChangeStatus cs)
     {
         MeshFilter mf = changeIndikator.GetComponent<MeshFilter>();
         if (cs.Equals(ChangeStatus.newElement))
@@ -251,7 +244,7 @@ public class IslandController_Script : MonoBehaviour
         {
             changeIndikator.SetActive(false);
         }
-        yield return null;
+       
     }
 
     public void SubstructureChange()
@@ -259,7 +252,7 @@ public class IslandController_Script : MonoBehaviour
         if (changeStatus.Equals(ChangeStatus.unknown))
         {
             changeStatus = ChangeStatus.changedElement;
-            StartCoroutine(SetChangeIndicator(changeStatus));
+            SetChangeIndicator(changeStatus);
         }
 
     }

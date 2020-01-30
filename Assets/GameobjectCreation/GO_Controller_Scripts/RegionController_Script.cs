@@ -137,12 +137,12 @@ public class RegionController_Script : MonoBehaviour
         mc.sharedMesh = mesh;
     }
 
-    public IEnumerator UpdateBuildings(Commit c, ZoomLevel currentZoomlevel, List<Building> activeBuildingsInRegion)
+    public IEnumerator UpdateBuildings(Commit c, List<Building> activeBuildingsInRegion)
     {
         int i = 0;
         foreach(GameObject buildingManager in buildingMangagerGOs)
         {
-            Building result = buildingManager.GetComponent<BuildingController_Script>().UpdateBuilding(c, currentZoomlevel);
+            Building result = buildingManager.GetComponent<BuildingController_Script>().UpdateBuilding(c);
             if (result != null)
             {
                 activeBuildingsInRegion.Add(result);
@@ -165,7 +165,7 @@ public class RegionController_Script : MonoBehaviour
     /// <param name="tls"></param>
     /// <param name="regionScript"></param>
     /// <returns></returns>
-    public IEnumerator RenewRegion(Commit oldCommit, Commit newCommit, ZoomLevel currentZoomLevel, System.Action<OsgiViz.Unity.Island.Region> callback)
+    public IEnumerator RenewRegion(Commit oldCommit, Commit newCommit, System.Action<OsgiViz.Unity.Island.Region> callback)
     {
         TimelineStatus tls = packageMaster.RelationOfCommitToTimeline(newCommit);
         if (tls.Equals(TimelineStatus.present))
@@ -200,7 +200,7 @@ public class RegionController_Script : MonoBehaviour
         //Set Mesh To MeshCollider
         MeshFilter meshFilter = gameObject.GetComponent<MeshFilter>();
         gameObject.GetComponent<MeshCollider>().sharedMesh = meshFilter.sharedMesh;
-        if (currentZoomLevel.Equals(ZoomLevel.Far))
+        if (IslandVizVisualization.Instance.CurrentZoomLevel.Equals(ZoomLevel.Far))
         {
             gameObject.GetComponent<MeshCollider>().enabled = false;
         }
@@ -213,7 +213,7 @@ public class RegionController_Script : MonoBehaviour
 
         //Renew Buildings
         List<Building> activeBuildings = new List<Building>();
-        yield return UpdateBuildings(newCommit, currentZoomLevel, activeBuildings);
+        yield return UpdateBuildings(newCommit, activeBuildings);
 
         //Renew Attributes in RegionScript
         Package package = packageMaster.GetElement(newCommit);
