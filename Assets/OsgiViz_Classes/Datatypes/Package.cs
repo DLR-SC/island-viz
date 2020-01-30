@@ -90,6 +90,10 @@ namespace OsgiViz.SoftwareArtifact
             return neoId;
         }
 
+        public void SetNeoId(int id)
+        {
+            neoId = id;
+        }
         public string getName()
         {
             return name;

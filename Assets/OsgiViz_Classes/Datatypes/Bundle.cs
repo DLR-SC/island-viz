@@ -108,7 +108,10 @@ namespace OsgiViz.SoftwareArtifact
         {
             return neoId;
         }
-
+        public void SetNeoId(int id)
+        {
+            neoId = id;
+        }
         public OsgiProject getParentProject()
         {
             return project;

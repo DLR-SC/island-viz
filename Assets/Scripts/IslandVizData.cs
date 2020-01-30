@@ -85,7 +85,8 @@ public class IslandVizData : MonoBehaviour
 
             yield return new WaitForSeconds(1f); // We need to wait a little bit until the Neo4jOsgiConstructor connected to the neo4j server. 
 
-            yield return neo4jOsgiProjectConstructor.Construct(); // Construct a osgi Object from the neo4J database.
+            //yield return neo4jOsgiProjectConstructor.Construct(); // Construct a osgi Object from the neo4J database.
+            yield return neo4jOsgiProjectConstructor.Construct(802); // Construct a osgi Object from the neo4J database.
             osgiProject = neo4jOsgiProjectConstructor.GetOsgiProject();
         }
 

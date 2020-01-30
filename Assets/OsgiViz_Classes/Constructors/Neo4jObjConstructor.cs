@@ -65,7 +65,8 @@ public class Neo4jOsgiConstructor : MonoBehaviour {
 
     private void Start()
     {
-        neo4j = new Neo4JDriver.Neo4J("bolt://localhost:7687", "neo4j", "123");
+        //Changed from 123 for History Database
+        neo4j = new Neo4JDriver.Neo4J("bolt://localhost:7687", "neo4j", "asdf");
     }
 
     /// <summary>
@@ -393,12 +394,206 @@ public class Neo4jOsgiConstructor : MonoBehaviour {
         Debug.Log("Finished OSGi-Project construction!");
     }
 
+    /// <summary>
+    /// Read Software Structure from Lynns Neo4J Database for one commit with given id
+    /// </summary>
+    /// <param name="commitNeoId"></param>
+    /// <returns></returns>
+    public IEnumerator Construct(int commitNeoId)
+    {
+        Debug.Log("Starting OSGi-Project construction!");
+
+        osgiProject = new OsgiProject("Default"); // TODO
+
+        IStatementResult result = null;
+        try
+        {
+            // Find all bundles
+            result = neo4j.Transaction("MATCH (c:CommitImpl)-[:HAS]->(b:BundleImpl) WHERE id(c)=" + commitNeoId + " RETURN id(b), b.symbolicName, b.name");
+        }
+        catch (Exception e)
+        {
+            IslandVizUI.Instance.UpdateLoadingScreenUI("Connecting to Neo4J", "<color=red>Connection failed!</color>");
+            throw e;
+        }
+        var bundleList = result.ToList();
+
+        IslandVizUI.Instance.UpdateLoadingScreenUI("OSGi-Project from Neo4J", "");
+        yield return null;
+
+        List<string> interfaceNameList = new List<string>();
+
+
+        if (bundleList == null || bundleList.Count == 0)
+        {
+            Debug.LogError("Neo4jOsgiConstructor: Project does not contain any Bundles!");
+        }
+        else
+        {
+            Debug.Log("Neo4jOsgiConstructor: Project contains " + bundleList.Count + " bundles.");
+        }
+
+        long maxLOC = 0;
+
+        for (int bundleID = 0; bundleID < bundleList.Count; bundleID++)
+        {
+            //CreateBundle
+            var bundleInfo = bundleList[bundleID];
+            Bundle bundle = new Bundle(bundleInfo["b.name"].As<string>(), bundleInfo["b.symbolicName"].As<string>(), osgiProject);
+            bundle.SetNeoId(bundleInfo["id(b)"].As<int>());
+            osgiProject.addBundle(bundle);
+
+            //GetPackages
+            result = neo4j.Transaction("MATCH (b:BundleImpl)-[:USE]->(pf:PackageFragmentImpl)-[:BELONGS_TO]->(p:PackageImpl) WHERE id(b)=" + bundle.GetNeoId() + " RETURN id(pf), p.name, p.qualifiedName");
+
+            var packageList = result.ToList();
+            if (packageList != null && packageList.Count > 0)
+            {
+                for (int packageID = 0; packageID < packageList.Count; packageID++)
+                {
+                    //Create Package
+                    var packageInfo = packageList[packageID];
+                    Package package = new Package(bundle, packageInfo["p.name"].As<string>());
+                    package.SetNeoId(packageInfo["id(pf)"].As<int>());
+                    bundle.addPackage(package);
+
+                    //Get CompUnits
+                    result = neo4j.Transaction("MATCH (p:PackageFragmentImpl)-[:HAS]->(cu:CompilationUnitImpl)-[:CLASS]->(c) WHERE id(p)=" + package.GetNeoId() +
+                    " AND (c:ClassImpl OR c:InterfaceImpl) AND NOT exists(() -[:NESTED_TYPES]->(c)) " +
+                    "return id(cu), c.name, c:InterfaceImpl, cu.LOC");
+
+                    var cuList = result.ToList();
+
+                    if (cuList != null && cuList.Count > 0)
+                    {
+                        for (int classID = 0; classID < cuList.Count; classID++)
+                        {
+                            var cuInfo = cuList[classID];
+                            CompilationUnit compilationUnit;
+                            string name = cuInfo["c.name"].As<string>();
+                            int loc = 0;
+                            if (cuInfo["cu.LOC"] != null)
+                            {
+                                loc = cuInfo["cu.LOC"].As<int>();
+                            }
+                            if (cuInfo["c:InterfaceImpl"].As<bool>())
+                            {
+                                compilationUnit = new CompilationUnit(name, type.Interface, modifier.Default, loc, package);
+                            }
+                            else
+                            {
+                                compilationUnit = new CompilationUnit(name, type.Class, modifier.Default, loc, package);
+                            }
+                            if (compilationUnit.getLoc() > maxLOC)
+                            {
+                                maxLOC = compilationUnit.getLoc();
+                            }
+                            package.addCompilationUnit(compilationUnit);
+                        }
+                    }
+                }
+
+            }
+            IslandVizUI.Instance.UpdateLoadingScreenUI("OSGi-Project from Neo4J", osgiProject.getBundles().Count + "/" + bundleList.Count + " Bundles loaded");
+            yield return null;
+        }
+
+        GlobalVar.maximumLOCinProject = maxLOC;
+
+        // Resolve import/export + construct ServiceComponents + build dependency graph
+        BidirectionalGraph<GraphVertex, GraphEdge> dependencyGraph = osgiProject.getDependencyGraph();
+
+        IslandVizUI.Instance.UpdateLoadingScreenUI("OSGi-Project from Neo4J", "...");
+
+        //Construct and resolve ServiceComponents
+        foreach (Bundle bundle in osgiProject.getBundles())
+        {
+            //Resolve Exports for Bundle
+            result = neo4j.Transaction("MATCH (b:BundleImpl)-[h:EXPORT]->(pf:PackageFragmentImpl)-[:BELONGS_TO]->(p:PackageImpl) WHERE id(b)=" + bundle.GetNeoId()+
+                        " RETURN p.name as name");
+            List<string> packageFileNameList = result.Select(record => record["name"].As<string>()).ToList();
+
+            if (packageFileNameList != null && packageFileNameList.Count > 0)
+            {
+                foreach (var packageFileName in packageFileNameList)
+                {
+                    Package p = FindPackage(packageFileName);
+                    if (p != null)
+                    {
+                        p.setExport(true);
+                        bundle.addExportedPackage(p);
+                    }
+                }
+            }
+
+
+            //Resolve Imports for Bundle
+
+            result = neo4j.Transaction("MATCH (b:BundleImpl)-[h:IMPORT]->(pf:PackageFragmentImpl)-[:BELONGS_TO]->(p:PackageImpl) WHERE id(b)=" + bundle.GetNeoId()+
+                        " RETURN p.name as name");
+            packageFileNameList = result.Select(record => record["name"].As<string>()).ToList();
+
+            if (packageFileNameList != null && packageFileNameList.Count > 0)
+            {
+                foreach (var packageFileName in packageFileNameList)
+                {
+                    Package p = FindPackage(packageFileName);
+                    if (p != null && bundle.getName() != p.getBundle().getName()) // Ignore self Import redundancy
+                    {
+                        bundle.addImportedPackage(p);
+
+                        //Package dependency
+                        //Check if Vertices already in Graph
+
+                        List<GraphVertex> allVertices = dependencyGraph.Vertices.ToList();
+                        GraphVertex vert1 = allVertices.Find(v => (string.Equals(v.getName(), bundle.getName())));
+                        GraphVertex vert2 = allVertices.Find(v => (string.Equals(v.getName(), p.getBundle().getName())));
+
+                        if (vert1 == null)
+                            vert1 = new GraphVertex(bundle.getName());
+                        if (vert2 == null)
+                            vert2 = new GraphVertex(p.getBundle().getName());
+
+                        dependencyGraph.AddVertex(vert1);
+                        dependencyGraph.AddVertex(vert2);
+                        GraphEdge edge;
+                        bool edgePresent = dependencyGraph.TryGetEdge(vert1, vert2, out edge);
+                        if (edgePresent && dependencyGraph.AllowParallelEdges)
+                        {
+                            edge.incrementWeight(1f);
+                        }
+                        else
+                        {
+                            edge = new GraphEdge(vert1, vert2);
+                            dependencyGraph.AddEdge(edge);
+                        }
+
+                        GraphEdge opposingEdge;
+                        float bidirectionalEdgeWeight = edge.getWeight();
+                        bool oppEdgePresent = dependencyGraph.TryGetEdge(vert2, vert1, out opposingEdge);
+                        if (oppEdgePresent)
+                        {
+
+                            bidirectionalEdgeWeight += opposingEdge.getWeight();
+                        }
+
+                        if (bidirectionalEdgeWeight > osgiProject.getMaxImportCount())
+                            osgiProject.setMaxImportCount((int)bidirectionalEdgeWeight);
+                    }
+                }
+            }
+
+        }
+        Debug.Log("Finished OSGi-Project construction!");
+
+
+    }
 
 
     // ################
     // Public Getter Methods
     // ################
-    
+
     /// <summary>
     /// Returns the extracted data from the Neo4J server.
     /// </summary>
