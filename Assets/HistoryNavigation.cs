@@ -1,4 +1,5 @@
 ﻿using OSGI_Datatypes.OrganisationElements;
+using OsgiViz;
 using OsgiViz.Core;
 using System.Collections;
 using System.Collections.Generic;
@@ -22,9 +23,18 @@ public class HistoryNavigation : MonoBehaviour
 
     private Project project;
     private Commit currentCommitToShow;
-    private TimeLapsStatus timeLapsStatus; 
+    private TimeLapsStatus timeLapsStatus;
 
-    // Start is called before the first frame update
+    private List<IslandContainerController_Script> islands;
+    private List<DependencyDock> docks;
+
+    private void Awake()
+    {
+        islands = new List<IslandContainerController_Script>();
+        docks = new List<DependencyDock>();
+    }
+
+    #region Instantiation Methods
     void Start()
     {
         instance = this;
@@ -34,7 +44,23 @@ public class HistoryNavigation : MonoBehaviour
         historyHighlightActive = showChangeSymbols;
     }
 
-    // Update is called once per frame
+    public void AddDock(DependencyDock d)
+    {
+        docks.Add(d);
+    }
+
+    public void AddIsland(IslandContainerController_Script i)
+    {
+        islands.Add(i);
+    }
+
+    #endregion
+
+    /// <summary>
+    /// History Navigation Via KeyBoard Entry:
+    /// Left-/Right-Arrow = Step Back, Step Next
+    /// Numbers 1-9 Call show Commit add index-1 in commitList if available
+    /// </summary>
     void Update()
     {
         Commit newC = null;
@@ -42,6 +68,10 @@ public class HistoryNavigation : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.RightArrow))
         {
             StepNext();
+        }
+        if (Input.GetKeyDown(KeyCode.LeftArrow))
+        {
+            StepBack();
         }
         if (Input.GetKeyDown("1"))
         {
@@ -101,28 +131,49 @@ public class HistoryNavigation : MonoBehaviour
         return currentCommitToShow;
     }
 
-    public void CallCommitEvent(Commit oldCommit, Commit newCommit)
+    public IEnumerator CallCommitEvent(Commit oldCommit, Commit newCommit, bool createDependencies)
     {
+        //Generals
         IslandVizInteraction.Instance.OnNewCommit(oldCommit, newCommit);
         CommitTransformInfo(currentCommitToShow, newCommit);
         currentCommitToShow = newCommit;
         GlobalVar.islandNumber = newCommit.GetBundleCount();
-        StartCoroutine(RenewDependenciesRoutine());
+
+        //Notify IslandContainers to change Islands
+        int countFinishedIslands = 0;
+        foreach(IslandContainerController_Script islandC in islands)
+        {
+            StartCoroutine(islandC.RenewIsland(newCommit, (returnScript) => { if (returnScript != null) { countFinishedIslands++; } }));
+        }
+        //Wait for all IslandContainers to finish 
+        while(countFinishedIslands < islands.Count)
+        {
+            yield return new WaitForSeconds(0.1f);
+        }
+
+        if (createDependencies)
+        {
+            yield return CreateDependenciesRoutine();
+        }
+        yield return null;
     }
 
-    public IEnumerator RenewDependenciesRoutine()
+    public IEnumerator CreateDependenciesRoutine()
     {
-        Debug.Log("StartDependencyRoutine");
-        yield return new WaitForSeconds(3);
         Transform rootTransform = IslandVizVisualization.Instance.VisualizationRoot;
         Vector3 scaleTemp = rootTransform.localScale;
         rootTransform.localScale = Vector3.one;
 
-        IslandVizInteraction.Instance.OnDependencyRenew();
-
-        yield return new WaitForSeconds(1f);
+        int countFinishedDocks = 0;
+        foreach (DependencyDock dock in docks)
+        {
+            StartCoroutine(dock.ConnectionArrowConstructionRoutine((returnScript) => { if (returnScript != null) { countFinishedDocks++; } }));
+        }
+        while (countFinishedDocks < docks.Count)
+        {
+            yield return new WaitForSeconds(0.1f);
+        }
         rootTransform.localScale = scaleTemp;
-        Debug.Log("StopDependencyRoutine");
     }
 
     public void StepNext()
@@ -140,7 +191,8 @@ public class HistoryNavigation : MonoBehaviour
         }
         if (newCommit != null&&newCommit!=oldCommit)
         {
-            CallCommitEvent(currentCommitToShow, newCommit);
+            //CallCommitEvent(currentCommitToShow, newCommit);
+            StartCoroutine(CallCommitEvent(currentCommitToShow, newCommit, true));
         }
     }
 
@@ -159,7 +211,9 @@ public class HistoryNavigation : MonoBehaviour
         }
         if (newCommit != null && newCommit != oldCommit)
         {
-            CallCommitEvent(currentCommitToShow, newCommit);
+            //CallCommitEvent(currentCommitToShow, newCommit);
+            StartCoroutine(CallCommitEvent(currentCommitToShow, newCommit, true));
+
         }
 
     }
@@ -192,6 +246,7 @@ public class HistoryNavigation : MonoBehaviour
             timeLapsStatus = TimeLapsStatus.stop;
         }
     }
+
     public IEnumerator TimelapsForwardsRoutine()
     {
         while(timeLapsStatus.Equals(TimeLapsStatus.forwards)&& currentCommitToShow.GetNext(currentCommitToShow.GetBranch()) != null)

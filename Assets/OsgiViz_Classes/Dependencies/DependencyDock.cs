@@ -6,6 +6,7 @@ using OsgiViz.Relations;
 using OsgiViz.Core;
 using OsgiViz.Unity.Island;
 using OSGI_Datatypes.OrganisationElements;
+using System.Collections;
 
 namespace OsgiViz
 {
@@ -57,12 +58,13 @@ namespace OsgiViz
             IslandVizInteraction.Instance.OnDockSelect += OnDockSelected;
             IslandVizVisualization.Instance.OnVisualizationScaleChanged += ZoomChanged;
             IslandVizInteraction.Instance.OnNewCommit += ResetDependencies;
-            IslandVizInteraction.Instance.OnDependencyRenew += ConstructConnectionArrows;
+            //IslandVizInteraction.Instance.OnDependencyRenew += ConstructConnectionArrows;
 
+            HistoryNavigation.Instance.AddDock(this);
 
         }
 
-        
+
 
         public void AddDockConnection(DependencyDock dock, float weight)
         {
@@ -78,6 +80,13 @@ namespace OsgiViz
 
         public void ConstructConnectionArrows()
         {
+            //Quick Return if nothing todo
+            if (connectedDocks.Count == 0)
+            {
+                return;
+            }
+
+            //renew pivot if not available
             if (rotPivot == null)
             {
                 rotPivot = new GameObject("Rotation Pivot");
@@ -156,6 +165,13 @@ namespace OsgiViz
             Destroy(rotPivot);
         }
 
+
+        public IEnumerator ConnectionArrowConstructionRoutine(System.Action<DependencyDock> callback)
+        {
+            ConstructConnectionArrows();
+            yield return null;
+            callback(this);
+        }
 
 
         public void HideAllDependencies()

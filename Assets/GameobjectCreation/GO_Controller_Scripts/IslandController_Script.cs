@@ -119,7 +119,7 @@ public class IslandController_Script : MonoBehaviour
     }
 
 
-    public IEnumerator UpdateRoutine(Commit newCommit, IslandContainerController_Script controllerScript, bool justActivated)
+    public IEnumerator UpdateRoutine(Commit newCommit, IslandContainerController_Script controllerScript, bool justActivated, System.Action<IslandController_Script> callback)
     {
         
         changeStatus = ChangeStatus.unknown;
@@ -171,6 +171,7 @@ public class IslandController_Script : MonoBehaviour
         centerlocal.y = 0;
         importDock.transform.localPosition = new Vector3(0f, Constants.dockYPos, 1.1f*radius2 + 2);
         exportDock.transform.localPosition = new Vector3(2f, Constants.dockYPos, 1.1f*radius2 + 1);
+        callback(this);
 
         StartCoroutine(UpdateExportDock(newCommit, currentZoomLevel));
         StartCoroutine(UpdateImportDock(newCommit, currentZoomLevel));
