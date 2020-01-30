@@ -7,6 +7,11 @@ using UnityEngine;
 
 public class HistoryNavigation : MonoBehaviour
 {
+    private enum StepDirection
+    {
+        forward, backward
+    }
+
     private enum TimeLapsStatus
     {
         forwards, backwards, stop
@@ -16,7 +21,7 @@ public class HistoryNavigation : MonoBehaviour
     private static HistoryNavigation instance; // The instance of this class.
 
     public float islandspeed;
-    public float timelapsInterval = 3;
+    public float timelapsInterval = 1;
     public bool showTimeDependentHight;
     public bool showChangeSymbols;
     public bool historyHighlightActive { get; set; }
@@ -24,6 +29,7 @@ public class HistoryNavigation : MonoBehaviour
     private Project project;
     private Commit currentCommitToShow;
     private TimeLapsStatus timeLapsStatus;
+    private bool transformationRunning;
 
     private List<IslandContainerController_Script> islands;
     private List<DependencyDock> docks;
@@ -40,6 +46,7 @@ public class HistoryNavigation : MonoBehaviour
         instance = this;
         project = GameObject.Find("DataObject").GetComponent<OSGi_Project_Script>().GetProject();
         timeLapsStatus = TimeLapsStatus.stop;
+        transformationRunning = false;
 
         historyHighlightActive = showChangeSymbols;
     }
@@ -132,6 +139,7 @@ public class HistoryNavigation : MonoBehaviour
 
     public IEnumerator CallCommitEvent(Commit oldCommit, Commit newCommit, bool createDependencies)
     {
+        transformationRunning = true;
         //Generals
         IslandVizInteraction.Instance.OnClearVisForNextCommit();
         CommitTransformInfo(currentCommitToShow, newCommit);
@@ -149,78 +157,94 @@ public class HistoryNavigation : MonoBehaviour
         {
             yield return new WaitForSeconds(0.1f);
         }
-
+        //Create DependencyArrows
         if (createDependencies)
         {
-            yield return CreateDependenciesRoutine();
+            yield return CreateDependenciesRoutine(false);
         }
         yield return null;
+        transformationRunning = false;
     }
 
-    public IEnumerator CreateDependenciesRoutine()
+    public IEnumerator CreateDependenciesRoutine(bool standalone)
     {
+        if (standalone)
+            transformationRunning = true;
+
+        //Scale Visualisation Root to (1, 1, 1) because ConnectionConstruction doesn't work otherwise
         Transform rootTransform = IslandVizVisualization.Instance.VisualizationRoot;
         Vector3 scaleTemp = rootTransform.localScale;
         rootTransform.localScale = Vector3.one;
 
+        //Notify Docks to create their dependencies
         int countFinishedDocks = 0;
         foreach (DependencyDock dock in docks)
         {
             StartCoroutine(dock.ConnectionArrowConstructionRoutine((returnScript) => { if (returnScript != null) { countFinishedDocks++; } }));
         }
+        //Wait for all Docks to finish
         while (countFinishedDocks < docks.Count)
         {
             yield return new WaitForSeconds(0.1f);
         }
+        //Scale Visualisation Root to previous value
         rootTransform.localScale = scaleTemp;
+
+        if (standalone)
+            transformationRunning = false;
     }
 
+    private Commit GetCommit(StepDirection direction)
+    {
+        if(currentCommitToShow == null)
+        {
+            return project.GetOrderedCommitList()[0];
+        }
+
+        Commit newCommit = null;
+        if (direction.Equals(StepDirection.forward))
+            newCommit = currentCommitToShow.GetNext(currentCommitToShow.GetBranch());
+        else if (direction.Equals(StepDirection.backward))
+            newCommit = currentCommitToShow.GetPrevious(currentCommitToShow.GetBranch());
+        else
+            return null;
+
+        if (newCommit != null && newCommit != currentCommitToShow)
+            return newCommit;
+
+        return null;
+
+    }
+
+    #region Functions called by user interaction with buttons
     public void StepNext()
     {
-        Commit oldCommit = currentCommitToShow;
-        Commit newCommit = null;
-
-        if (currentCommitToShow == null)
+        if (!transformationRunning && timeLapsStatus.Equals(TimeLapsStatus.stop))
         {
-            newCommit = project.GetOrderedCommitList()[0];
-        }
-        else
-        {
-            newCommit = currentCommitToShow.GetNext(currentCommitToShow.GetBranch());
-        }
-        if (newCommit != null&&newCommit!=oldCommit)
-        {
-            //CallCommitEvent(currentCommitToShow, newCommit);
-            StartCoroutine(CallCommitEvent(currentCommitToShow, newCommit, true));
+            Commit nextCommit = GetCommit(StepDirection.forward);
+            if(nextCommit != null)
+            {
+                StartCoroutine(CallCommitEvent(currentCommitToShow, nextCommit, true));
+            }
         }
     }
 
     public void StepBack()
     {
-        Commit oldCommit = currentCommitToShow;
-        Commit newCommit = null;
-
-        if (currentCommitToShow == null)
+        if (!transformationRunning && timeLapsStatus.Equals(TimeLapsStatus.stop))
         {
-            newCommit = project.GetOrderedCommitList()[0];
+            Commit nextCommit = GetCommit(StepDirection.backward);
+            if (nextCommit != null)
+            {
+                StartCoroutine(CallCommitEvent(currentCommitToShow, nextCommit, true));
+            }
         }
-        else
-        {
-            newCommit = currentCommitToShow.GetPrevious(currentCommitToShow.GetBranch());
-        }
-        if (newCommit != null && newCommit != oldCommit)
-        {
-            //CallCommitEvent(currentCommitToShow, newCommit);
-            StartCoroutine(CallCommitEvent(currentCommitToShow, newCommit, true));
-
-        }
-
     }
 
     public void TimelapsForwards()
     {
         Debug.Log("TLNextFired");
-        if (timeLapsStatus.Equals(TimeLapsStatus.stop))
+        if (!transformationRunning && timeLapsStatus.Equals(TimeLapsStatus.stop) && GetCommit(StepDirection.forward) != null)
         {
             timeLapsStatus = TimeLapsStatus.forwards;
             StartCoroutine(TimelapsForwardsRoutine());
@@ -230,7 +254,7 @@ public class HistoryNavigation : MonoBehaviour
     public void TimelapsBackwards()
     {
         Debug.Log("TLBackFired");
-        if (timeLapsStatus.Equals(TimeLapsStatus.stop))
+        if (!transformationRunning && timeLapsStatus.Equals(TimeLapsStatus.stop) && GetCommit(StepDirection.backward) != null)
         {
             timeLapsStatus = TimeLapsStatus.backwards;
             StartCoroutine(TimelapsBackwardsRoutine());
@@ -246,27 +270,36 @@ public class HistoryNavigation : MonoBehaviour
         }
     }
 
+    #endregion
+
     public IEnumerator TimelapsForwardsRoutine()
     {
-        while(timeLapsStatus.Equals(TimeLapsStatus.forwards)&& currentCommitToShow.GetNext(currentCommitToShow.GetBranch()) != null)
+        while(timeLapsStatus.Equals(TimeLapsStatus.forwards)&& GetCommit(StepDirection.forward) != null)
         {
-            StepNext();
-            yield return new WaitForSeconds(timelapsInterval);
+
+            Commit nextCommit = GetCommit(StepDirection.forward);
+            yield return CallCommitEvent(currentCommitToShow, nextCommit, false);
+            yield return new WaitForSeconds(timelapsInterval);    
         }
-        if(currentCommitToShow.GetNext(currentCommitToShow.GetBranch()) == null)
+        yield return CreateDependenciesRoutine(true);
+        if (GetCommit(StepDirection.forward) == null)
         {
             timeLapsStatus = TimeLapsStatus.stop;
         }
+        
     }
 
     public IEnumerator TimelapsBackwardsRoutine()
     {
-        while (timeLapsStatus.Equals(TimeLapsStatus.backwards) && currentCommitToShow.GetPrevious(currentCommitToShow.GetBranch()) != null)
+        while (timeLapsStatus.Equals(TimeLapsStatus.backwards) && GetCommit(StepDirection.backward) != null)
         {
-            StepBack();
+
+            Commit nextCommit = GetCommit(StepDirection.backward);
+            yield return CallCommitEvent(currentCommitToShow, nextCommit, false);
             yield return new WaitForSeconds(timelapsInterval);
         }
-        if (currentCommitToShow.GetPrevious(currentCommitToShow.GetBranch()) == null)
+        yield return CreateDependenciesRoutine(true);
+        if (GetCommit(StepDirection.backward) == null)
         {
             timeLapsStatus = TimeLapsStatus.stop;
         }
@@ -282,7 +315,7 @@ public class HistoryNavigation : MonoBehaviour
         string c2 = newCommit.GetString();
 
         string Message = "timestep from \n" + c1 + "\n to \n" + c2;
-        IslandVizUI.Instance.MakeNotification(2.5f, Message);
+        IslandVizUI.Instance.MakeNotification(timelapsInterval, Message);
     }
 
     public void ToggleShowChangeHighlight()
