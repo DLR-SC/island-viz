@@ -4,6 +4,7 @@ using OsgiViz.Core;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class HistoryNavigation : MonoBehaviour
 {
@@ -219,24 +220,51 @@ public class HistoryNavigation : MonoBehaviour
     #region Functions called by user interaction with buttons
     public void StepNext()
     {
-        if (!transformationRunning && timeLapsStatus.Equals(TimeLapsStatus.stop))
+        Debug.Log("Step Next");
+        if (IslandVizBehaviour.Instance.vizType.Equals(IslandVizBehaviour.VisualizationType.History))
         {
-            Commit nextCommit = GetCommit(StepDirection.forward);
-            if(nextCommit != null)
+            if (!transformationRunning && timeLapsStatus.Equals(TimeLapsStatus.stop))
             {
-                StartCoroutine(CallCommitEvent(currentCommitToShow, nextCommit, true));
+                Commit nextCommit = GetCommit(StepDirection.forward);
+                if (nextCommit != null)
+                {
+                    StartCoroutine(CallCommitEvent(currentCommitToShow, nextCommit, true));
+                }
             }
         }
+        else
+        {
+            //Für Vergleichssystem
+            int aktiveSceneId = SceneManager.GetActiveScene().buildIndex;
+            if (aktiveSceneId == 0)
+            {
+                SceneManager.LoadScene(1);
+            }
+
+        }
+        
     }
 
     public void StepBack()
     {
-        if (!transformationRunning && timeLapsStatus.Equals(TimeLapsStatus.stop))
+        if (IslandVizBehaviour.Instance.vizType.Equals(IslandVizBehaviour.VisualizationType.History))
         {
-            Commit nextCommit = GetCommit(StepDirection.backward);
-            if (nextCommit != null)
+            if (!transformationRunning && timeLapsStatus.Equals(TimeLapsStatus.stop))
             {
-                StartCoroutine(CallCommitEvent(currentCommitToShow, nextCommit, true));
+                Commit nextCommit = GetCommit(StepDirection.backward);
+                if (nextCommit != null)
+                {
+                    StartCoroutine(CallCommitEvent(currentCommitToShow, nextCommit, true));
+                }
+            }
+        }
+        else
+        {
+            //Für Vergleichssystem
+            int aktiveSceneId = SceneManager.GetActiveScene().buildIndex;
+            if (aktiveSceneId == 1)
+            {
+                SceneManager.LoadScene(0);
             }
         }
     }
@@ -244,7 +272,7 @@ public class HistoryNavigation : MonoBehaviour
     public void TimelapsForwards()
     {
         Debug.Log("TLNextFired");
-        if (!transformationRunning && timeLapsStatus.Equals(TimeLapsStatus.stop) && GetCommit(StepDirection.forward) != null)
+        if (IslandVizBehaviour.Instance.vizType.Equals(IslandVizBehaviour.VisualizationType.History) && !transformationRunning && timeLapsStatus.Equals(TimeLapsStatus.stop) && GetCommit(StepDirection.forward) != null)
         {
             timeLapsStatus = TimeLapsStatus.forwards;
             StartCoroutine(TimelapsForwardsRoutine());
@@ -254,7 +282,7 @@ public class HistoryNavigation : MonoBehaviour
     public void TimelapsBackwards()
     {
         Debug.Log("TLBackFired");
-        if (!transformationRunning && timeLapsStatus.Equals(TimeLapsStatus.stop) && GetCommit(StepDirection.backward) != null)
+        if (IslandVizBehaviour.Instance.vizType.Equals(IslandVizBehaviour.VisualizationType.History) && !transformationRunning && timeLapsStatus.Equals(TimeLapsStatus.stop) && GetCommit(StepDirection.backward) != null)
         {
             timeLapsStatus = TimeLapsStatus.backwards;
             StartCoroutine(TimelapsBackwardsRoutine());

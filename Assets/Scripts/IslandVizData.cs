@@ -14,6 +14,7 @@ public class IslandVizData : MonoBehaviour
     // Set in Unity Editor
     public DataLoadingType DataLoading; // Wether the osgi project is loaded from a json file or a neo4j database.
     //public string DataLocation; // TODO
+    public int CommitNeoID;
 
     [Header("Additional Components Container")]
     public GameObject DataComponentsGameObject; // GameObject where all additional data components are located. 
@@ -84,9 +85,15 @@ public class IslandVizData : MonoBehaviour
             IslandVizUI.Instance.UpdateLoadingScreenUI("Connecting to Neo4J", ""); // Update UI.
 
             yield return new WaitForSeconds(1f); // We need to wait a little bit until the Neo4jOsgiConstructor connected to the neo4j server. 
-
-            //yield return neo4jOsgiProjectConstructor.Construct(); // Construct a osgi Object from the neo4J database.
-            yield return neo4jOsgiProjectConstructor.Construct(802); // Construct a osgi Object from the neo4J database.
+            if (CommitNeoID == 0)
+            {
+                yield return neo4jOsgiProjectConstructor.Construct(); // Construct a osgi Object from the neo4J database.
+            }
+            else
+            {
+                yield return neo4jOsgiProjectConstructor.Construct(CommitNeoID); // Construct a osgi Object from the neo4J database. Lynns Database Shema
+            }
+            
             osgiProject = neo4jOsgiProjectConstructor.GetOsgiProject();
         }
 

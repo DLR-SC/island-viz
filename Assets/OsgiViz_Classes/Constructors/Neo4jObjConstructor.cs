@@ -505,11 +505,12 @@ public class Neo4jOsgiConstructor : MonoBehaviour {
 
         IslandVizUI.Instance.UpdateLoadingScreenUI("OSGi-Project from Neo4J", "...");
 
-        //Construct and resolve ServiceComponents
+        //Resolve Exports of Bundle
         foreach (Bundle bundle in osgiProject.getBundles())
         {
+            string bundleName = bundle.getName();
             //Resolve Exports for Bundle
-            result = neo4j.Transaction("MATCH (b:BundleImpl)-[h:EXPORT]->(pf:PackageFragmentImpl)-[:BELONGS_TO]->(p:PackageImpl) WHERE id(b)=" + bundle.GetNeoId()+
+            result = neo4j.Transaction("MATCH (b:BundleImpl)-[h:EXPORT]->(pf:PackageFragmentImpl)-[:BELONGS_TO]->(p:PackageImpl) WHERE id(b)=" + bundle.GetNeoId() +
                         " RETURN p.name as name");
             List<string> packageFileNameList = result.Select(record => record["name"].As<string>()).ToList();
 
@@ -525,13 +526,13 @@ public class Neo4jOsgiConstructor : MonoBehaviour {
                     }
                 }
             }
+        }
 
-
-            //Resolve Imports for Bundle
-
+        //Resolve Imports for Bundle
+        foreach (Bundle bundle in osgiProject.getBundles()) { 
             result = neo4j.Transaction("MATCH (b:BundleImpl)-[h:IMPORT]->(pf:PackageFragmentImpl)-[:BELONGS_TO]->(p:PackageImpl) WHERE id(b)=" + bundle.GetNeoId()+
                         " RETURN p.name as name");
-            packageFileNameList = result.Select(record => record["name"].As<string>()).ToList();
+            List<string> packageFileNameList = result.Select(record => record["name"].As<string>()).ToList();
 
             if (packageFileNameList != null && packageFileNameList.Count > 0)
             {
@@ -579,6 +580,64 @@ public class Neo4jOsgiConstructor : MonoBehaviour {
 
                         if (bidirectionalEdgeWeight > osgiProject.getMaxImportCount())
                             osgiProject.setMaxImportCount((int)bidirectionalEdgeWeight);
+                    }
+                }
+            }
+
+            //Resolve Required_Bundles for Bundle
+
+            result = neo4j.Transaction("MATCH (b:BundleImpl)-[:REQUIRED_BUNDLE]->(b2:BundleImpl) WHERE id(b)=" + bundle.GetNeoId() + " RETURN b2.name");
+
+            List<string> reqBundleNameList = result.Select(record => record["b2.name"].As<string>()).ToList();
+            if(reqBundleNameList!=null && reqBundleNameList.Count > 0)
+            {
+                foreach(var reqBundleName in reqBundleNameList)
+                {
+                    Bundle reqB = FindBundle(reqBundleName);
+                    if (reqB != null)
+                    {
+                        foreach(Package p in reqB.getExportedPackages())
+                        {
+                            bundle.addImportedPackage(p);
+
+                            //Package dependency
+                            //Check if Vertices already in Graph
+
+                            List<GraphVertex> allVertices = dependencyGraph.Vertices.ToList();
+                            GraphVertex vert1 = allVertices.Find(v => (string.Equals(v.getName(), bundle.getName())));
+                            GraphVertex vert2 = allVertices.Find(v => (string.Equals(v.getName(), p.getBundle().getName())));
+
+                            if (vert1 == null)
+                                vert1 = new GraphVertex(bundle.getName());
+                            if (vert2 == null)
+                                vert2 = new GraphVertex(p.getBundle().getName());
+
+                            dependencyGraph.AddVertex(vert1);
+                            dependencyGraph.AddVertex(vert2);
+                            GraphEdge edge;
+                            bool edgePresent = dependencyGraph.TryGetEdge(vert1, vert2, out edge);
+                            if (edgePresent && dependencyGraph.AllowParallelEdges)
+                            {
+                                edge.incrementWeight(1f);
+                            }
+                            else
+                            {
+                                edge = new GraphEdge(vert1, vert2);
+                                dependencyGraph.AddEdge(edge);
+                            }
+
+                            GraphEdge opposingEdge;
+                            float bidirectionalEdgeWeight = edge.getWeight();
+                            bool oppEdgePresent = dependencyGraph.TryGetEdge(vert2, vert1, out opposingEdge);
+                            if (oppEdgePresent)
+                            {
+
+                                bidirectionalEdgeWeight += opposingEdge.getWeight();
+                            }
+
+                            if (bidirectionalEdgeWeight > osgiProject.getMaxImportCount())
+                                osgiProject.setMaxImportCount((int)bidirectionalEdgeWeight);
+                        }
                     }
                 }
             }
@@ -671,6 +730,18 @@ public class Neo4jOsgiConstructor : MonoBehaviour {
             {
                 if (p.getName() == fileName)
                     return p;
+            }
+        }
+        return null;
+    }
+
+    private Bundle FindBundle(string bundleName)
+    {
+        foreach(var b in osgiProject.getBundles())
+        {
+            if(b.getName() == bundleName)
+            {
+                return b;
             }
         }
         return null;
