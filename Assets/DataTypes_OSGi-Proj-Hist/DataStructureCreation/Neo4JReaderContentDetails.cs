@@ -395,7 +395,7 @@ namespace OSGI_Datatypes.DataStructureCreation
         public static IEnumerator ReadCommitsImportRelations(Commit c, Dictionary<int, Bundle> bundleDict, Dictionary<int, Package> packageDict, bool printInfo)
         {
             string statement = "MATCH (c:CommitImpl)-[:HAS]->(b:BundleImpl) WHERE id(c)=$cid " +
-                "OPTIONAL MATCH (b)-[:REQUIRED_BUNDLES]->(bReq:BundleImpl) with b, collect(distinct id(bReq)) AS breqlist " +
+                "OPTIONAL MATCH (b)-[:REQUIRED_BUNDLE]->(bReq:BundleImpl) with b, collect(distinct id(bReq)) AS breqlist " +
                 "OPTIONAL MATCH (b)-[:IMPORT]->(iPack:PackageFragmentImpl) WHERE not exists((iPack) -[:BUNDLE]->(b)) " +
                 "with b, breqlist, collect(distinct id(iPack)) AS ipacklist " +
                 "where length(breqlist)> 0 OR length(ipacklist)> 0 " +

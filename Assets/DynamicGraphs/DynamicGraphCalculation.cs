@@ -131,7 +131,7 @@ public class DynamicGraphCalculation : MonoBehaviour
                 elementDict.Add(bundle, vertex);
                 //radius calculation
                 float radius = VertexRadiusCaclulation(bundle, commitList[index]);
-                vertex.SetRadius(radius);
+                vertex.SetRadius(5*radius);
 
 
                 Vector2 pos;

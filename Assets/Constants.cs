@@ -48,7 +48,7 @@ namespace Assets
         //Number of predecessors whose position is taken into account for history-force based Graph Layout Algo
         public static int historyForceLayoutDepth = 4;
         //Maximal Radius of complete archipelago
-        public static float planeRadius = 450;
+        public static float planeRadius = 1000;
 
         //time to complete island movement if movement lasts to long, island will be placed to target position
         public static float timeToMove = 15f;

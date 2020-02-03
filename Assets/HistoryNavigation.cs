@@ -21,7 +21,8 @@ public class HistoryNavigation : MonoBehaviour
     public static HistoryNavigation Instance { get { return instance; } }
     private static HistoryNavigation instance; // The instance of this class.
 
-    public float islandspeed;
+    public float islandMaxSpeed;
+    public float islandMinSpeed;
     public float timelapsInterval = 1;
     public bool showTimeDependentHight;
     public bool showChangeSymbols;
@@ -236,9 +237,11 @@ public class HistoryNavigation : MonoBehaviour
         {
             //Für Vergleichssystem
             int aktiveSceneId = SceneManager.GetActiveScene().buildIndex;
-            if (aktiveSceneId == 0)
+            if (aktiveSceneId < 7)
             {
-                SceneManager.LoadScene(1);
+                IslandVizUI.Instance.MakeNotification(2*timelapsInterval, "Transform from \n Commit "+(aktiveSceneId+1)+" to \n Commit " + (aktiveSceneId+2));
+
+                SceneManager.LoadScene(aktiveSceneId+1);
             }
 
         }
@@ -262,9 +265,11 @@ public class HistoryNavigation : MonoBehaviour
         {
             //Für Vergleichssystem
             int aktiveSceneId = SceneManager.GetActiveScene().buildIndex;
-            if (aktiveSceneId == 1)
+            if (aktiveSceneId > 0)
             {
-                SceneManager.LoadScene(0);
+                IslandVizUI.Instance.MakeNotification(2 * timelapsInterval, "Transform from \n Commit " + (aktiveSceneId + 1) + " to \n Commit " + (aktiveSceneId));
+
+                SceneManager.LoadScene(aktiveSceneId-1);
             }
         }
     }

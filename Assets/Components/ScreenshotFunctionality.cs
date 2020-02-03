@@ -51,7 +51,10 @@ public class ScreenshotFunctionality : AdditionalIslandVizComponent
         IslandVizUI.Instance.MakeNotification(0.8f, "Taking a screenshot in 1 ...");
         yield return new WaitForSeconds(1f);
 
-        string fileName = "Screenshot " + System.DateTime.Now.Second + ".png";
+        //string fileName = "Screenshot " + System.DateTime.Now.Second + ".png";
+        System.DateTime now = System.DateTime.Now;
+        string fileName = "Screenshot_" + now.Year+"-"+now.Month+"-"+ now.Day + "_"+ now.Hour+"-" + now.Minute + "-" + now.Second +".png";
+
         ScreenCapture.CaptureScreenshot(fileName, 4);
      }
 

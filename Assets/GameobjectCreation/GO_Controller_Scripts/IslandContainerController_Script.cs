@@ -95,62 +95,29 @@ public class IslandContainerController_Script : MonoBehaviour
     }
 
 
-    private IEnumerator MoveIsland_old(Commit newCommit)
-    {
-        Vector2 pos2D = bundleMaster.GetElement(newCommit).GetPosition();
-        Vector3 target = new Vector3(pos2D.x, 0f, pos2D.y);
-
-        Vector3 direction = target - island.transform.position;
-
-        while(direction.magnitude >= 1.0 & Time.time - movingStartTime < 10)
-        {
-           /* if (direction.magnitude >= 1.0)
-            {
-                Vector3 oldPos = island.transform.position;
-                island.transform.position = oldPos + 0.2f * direction.normalized;
-            }
-            else
-            {
-                Vector3 oldPos = island.transform.position;
-                island.transform.position = oldPos + 0.1f * direction.normalized;
-            }*/
-
-           /*  try
-             {
-                 if (direction.magnitude >= 3.0)
-                 {
-                     island.GetComponent<Rigidbody>().velocity = 5*Mathf.Log(direction.magnitude)* direction.normalized;
-                 }
-                 else
-                 {
-                     island.GetComponent<Rigidbody>().velocity = direction.normalized;
-                 }
-             }
-             catch
-             {
-                 Debug.Log("Exception");
-             }*/
-            yield return new WaitForSeconds(0.1f);
-            direction = target - island.transform.position;
-        }
-    }
-
     private IEnumerator MoveIsland(Commit newCommit, System.Action<IslandContainerController_Script> callback)
     {
-        yield return null;
-        speed = HistoryNavigation.Instance.islandspeed;
-
+        Vector3 lastDirektion = Vector3.zero;
         Vector2 pos2D = bundleMaster.GetElement(newCommit).GetPosition();
         Vector3 target = new Vector3(pos2D.x, 0f, pos2D.y);
 
         Vector3 direction = target - island.transform.localPosition;
 
-        while (direction.magnitude >= 0.5f /*& Time.time - movingStartTime < 10*/ )
+        speed = direction.magnitude / HistoryNavigation.Instance.timelapsInterval;
+        if(speed > HistoryNavigation.Instance.islandMaxSpeed)
+        {
+            speed = HistoryNavigation.Instance.islandMaxSpeed;
+        }
+        if(speed < HistoryNavigation.Instance.islandMinSpeed)
+        {
+            speed = HistoryNavigation.Instance.islandMinSpeed;
+        }
+        float ankuftzeit = Time.time + direction.magnitude / speed + 1.5f;
+
+        while (direction.magnitude >= 0.5f & Time.time < ankuftzeit )
         {
             Vector3 newPos = island.transform.localPosition + direction.normalized * 0.1f * speed;
             island.transform.localPosition = newPos;
-            //island.transform.Translate(direction.normalized * 0.1f*speed);
-            //yield return null;
 
             yield return new WaitForSeconds(0.1f);
             direction = target - island.transform.localPosition;
