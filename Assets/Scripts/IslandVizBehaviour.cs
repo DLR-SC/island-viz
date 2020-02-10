@@ -105,6 +105,8 @@ public class IslandVizBehaviour : MonoBehaviour
         
         IslandVizUI.Instance.InitBundleNames(); // TODO Move */
 
+        GameObject.Find("LoadingScreen").SetActive(false);
+
         OnConstructionDone?.Invoke(); // Call the OnConstructionDone event.
     }
 
