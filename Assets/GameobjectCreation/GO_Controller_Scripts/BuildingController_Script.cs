@@ -153,6 +153,7 @@ public class BuildingController_Script : MonoBehaviour
         GameObject changeIdicator = AddChangeIndicator();
         MeshFilter mf = changeIdicator.GetComponent<MeshFilter>();
         GameobjectHelperClass.setUVsToSingularCoord(Constants.colValChangeHighlight, mf);
+        CallIslandBuildingHightChange();
     }
     public void AddChangeIndicatorNew()
     {
@@ -189,6 +190,10 @@ public class BuildingController_Script : MonoBehaviour
         regionScript.getParentIsland().gameObject.GetComponent<IslandController_Script>().SubstructureChange();
     }
 
+    public void CallIslandBuildingHightChange()
+    {
+        regionScript.getParentIsland().gameObject.GetComponent<IslandController_Script>().BuildingHightChange();
+    }
 
     public void ChangeHighlight(bool enabled)
     {

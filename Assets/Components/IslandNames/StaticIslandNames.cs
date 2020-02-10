@@ -390,6 +390,16 @@ namespace StaticIslandNamesComponent
             if (Vector3.Distance(lhs.position, Camera.main.transform.position) > Vector3.Distance(rhs.position, Camera.main.transform.position)) return -1;
             return 0;
         }
+       
+        public int GetCurrentNameCount()
+        {
+            return currentNames.Count;
+        }
+        public Transform GetFirstCurrentNameTransform()
+        {
+            return currentNames.Keys.ToList<Transform>()[0];
+        }
+
         #endregion
     }
 }

@@ -523,7 +523,6 @@ public class IslandVizVisualization : MonoBehaviour
         }
     }
 
-
     // ################
     // Helper Functions
     // ################

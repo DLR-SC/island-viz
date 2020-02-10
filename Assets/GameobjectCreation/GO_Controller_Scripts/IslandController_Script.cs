@@ -231,6 +231,9 @@ public class IslandController_Script : MonoBehaviour
         else if (cs.Equals(ChangeStatus.changedElement))
         {
             GameobjectHelperClass.setUVsToSingularCoord(Constants.colValChangeHighlight, mf);
+        }else if (cs.Equals(ChangeStatus.changedInnerElement))
+        {
+            GameobjectHelperClass.setUVsToSingularCoord(Constants.colValChangeBuildingHighlight, mf);
         }
         if (!IslandVizVisualization.Instance.CurrentZoomLevel.Equals(ZoomLevel.Far))
         {
@@ -249,12 +252,21 @@ public class IslandController_Script : MonoBehaviour
 
     public void SubstructureChange()
     {
-        if (changeStatus.Equals(ChangeStatus.unknown))
+        if (changeStatus.Equals(ChangeStatus.unknown)||changeStatus.Equals(ChangeStatus.changedInnerElement))
         {
             changeStatus = ChangeStatus.changedElement;
             SetChangeIndicator(changeStatus);
         }
 
+    }
+
+    public void BuildingHightChange()
+    {
+        if (changeStatus.Equals(ChangeStatus.unknown))
+        {
+            changeStatus = ChangeStatus.changedInnerElement;
+            SetChangeIndicator(changeStatus);
+        }
     }
 
     public void ChangeHighlight(bool enabled)

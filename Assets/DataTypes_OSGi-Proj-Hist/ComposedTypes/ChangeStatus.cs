@@ -8,6 +8,6 @@ namespace OSGI_Datatypes.ComposedTypes
 {
     public enum ChangeStatus
     {
-        newElement, deletedElement, changedElement, unknown
+        newElement, deletedElement, changedElement, changedInnerElement, unknown
     }
 }

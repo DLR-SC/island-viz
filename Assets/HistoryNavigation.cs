@@ -1,6 +1,7 @@
 ﻿using OSGI_Datatypes.OrganisationElements;
 using OsgiViz;
 using OsgiViz.Core;
+using StaticIslandNamesComponent;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -154,9 +155,9 @@ public class HistoryNavigation : MonoBehaviour
         currentCommitToShow = newCommit;
         GlobalVar.islandNumber = newCommit.GetBundleCount();
 
-        //Notify IslandContainers to change Islands
         int countFinishedIslands = 0;
-        foreach(IslandContainerController_Script islandC in islands)
+        //Notify IslandContainers to change Islands
+        foreach (IslandContainerController_Script islandC in islands)
         {
             StartCoroutine(islandC.RenewIsland(newCommit, (returnScript) => { if (returnScript != null) { countFinishedIslands++; } }));
         }
@@ -164,6 +165,10 @@ public class HistoryNavigation : MonoBehaviour
         while(countFinishedIslands < islands.Count)
         {
             yield return new WaitForSeconds(0.1f);
+        }
+        if (StaticIslandNames.Instance.GetCurrentNameCount() == 1&& (IslandVizVisualization.Instance.CurrentZoomLevel.Equals(ZoomLevel.Near)|| IslandVizVisualization.Instance.CurrentZoomLevel.Equals(ZoomLevel.Medium)))
+        {
+            IslandVizVisualization.Instance.FlyTo(StaticIslandNames.Instance.GetFirstCurrentNameTransform());
         }
         IslandVizUI.Instance.UpdateCurrentlyVisibleCommit(newCommit.GetCommitIndex() + 1, project.GetCommits().Count);
         //Create DependencyArrows

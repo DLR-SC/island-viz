@@ -33,6 +33,7 @@ namespace Assets
         };
         public static Vector2 colValNewHighlight = new Vector2(0.5f, 0.1f);
         public static Vector2 colValChangeHighlight = new Vector2(0.9f, 0.3f);
+        public static Vector2 colValChangeBuildingHighlight = new Vector2(0.1f, 0.9f);
         //Color for Coastline
         public static Vector3 coastlineColor = new Vector3(238, 197, 145);
         //Color for DeathArea
