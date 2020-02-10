@@ -51,6 +51,12 @@ public class HistoryNavigation : MonoBehaviour
         transformationRunning = false;
 
         historyHighlightActive = showChangeSymbols;
+
+        //This is to show Commit x of y in "old Version" for user Studie
+        if (IslandVizBehaviour.Instance.vizType.Equals(IslandVizBehaviour.VisualizationType.Static))
+        {
+            IslandVizUI.Instance.UpdateCurrentlyVisibleCommit(SceneManager.GetActiveScene().buildIndex + 1, SceneManager.sceneCountInBuildSettings);
+        }
     }
 
     public void AddDock(DependencyDock d)
@@ -159,6 +165,7 @@ public class HistoryNavigation : MonoBehaviour
         {
             yield return new WaitForSeconds(0.1f);
         }
+        IslandVizUI.Instance.UpdateCurrentlyVisibleCommit(newCommit.GetCommitIndex() + 1, project.GetCommits().Count);
         //Create DependencyArrows
         if (createDependencies)
         {
@@ -237,7 +244,7 @@ public class HistoryNavigation : MonoBehaviour
         {
             //Für Vergleichssystem
             int aktiveSceneId = SceneManager.GetActiveScene().buildIndex;
-            if (aktiveSceneId < 7)
+            if (aktiveSceneId < SceneManager.sceneCountInBuildSettings-1)
             {
                 IslandVizUI.Instance.MakeNotification(2*timelapsInterval, "Transform from \n Commit "+(aktiveSceneId+1)+" to \n Commit " + (aktiveSceneId+2));
 

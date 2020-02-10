@@ -312,8 +312,8 @@ public class IslandVizVisualization : MonoBehaviour
                 islandsDirty = true; // This causes the ZoomLevelRoutine on the next FixedUpdate to check all current visible islands and
                                      // to apply the current zoomlevel if needed.
             }
-
-            IslandVizUI.Instance.UpdateCurrentVisibleIslandsUI(((float)VisibleIslandGOs.Count/(float)GlobalVar.islandNumber) * 100f); // Update UI.
+            //TODO insert again if CurrentVisibleIslands shall be displayed
+            //IslandVizUI.Instance.UpdateCurrentVisibleIslandsUI(((float)VisibleIslandGOs.Count/(float)GlobalVar.islandNumber) * 100f); // Update UI.
         }
     }
 
@@ -327,8 +327,8 @@ public class IslandVizVisualization : MonoBehaviour
         if (VisibleIslandGOs.Contains(islandGO))
         {
             VisibleIslandGOs.Remove(islandGO);
-
-            IslandVizUI.Instance.UpdateCurrentVisibleIslandsUI(((float)VisibleIslandGOs.Count / (float)GlobalVar.islandNumber) * 100f); // Update UI.
+            //TODO insert again if CurrentVisibleIslands shall be displayed
+            //IslandVizUI.Instance.UpdateCurrentVisibleIslandsUI(((float)VisibleIslandGOs.Count / (float)GlobalVar.islandNumber) * 100f); // Update UI.
         }
     }
 

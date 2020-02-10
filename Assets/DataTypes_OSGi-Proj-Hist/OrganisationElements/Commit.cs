@@ -224,7 +224,7 @@ namespace OSGI_Datatypes.OrganisationElements
             {
                 msgLength = 20;
             }
-            result += commitIndex + "; " + author.GetToken() + "; " + commitMessage.Substring(0, msgLength);
+            result += (commitIndex+1) + "; " + author.GetToken() + "; " + commitMessage.Substring(0, msgLength);
 
 
             return result;

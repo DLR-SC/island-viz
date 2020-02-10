@@ -133,6 +133,16 @@ public class IslandVizUI : MonoBehaviour
         CurrentVisivleIslandsValue.text = "Currently visible:\n<b>" + percentage.ToString("0") + "%</b> of all islands";
     }
 
+    /// <summary>
+    /// Uses CurrentVisivleIslandsValue Textfield to display current commit  number
+    /// </summary>
+    /// <param name="commitNr"></param>
+    /// <param name="totalCommitNr"></param>
+    public void UpdateCurrentlyVisibleCommit(int commitNr, int totalCommitNr)
+    {
+        CurrentVisivleIslandsValue.text = "Commit <b>" + commitNr + "</b>\n of " + totalCommitNr + " Commits";
+    }
+
 
 
 
