@@ -21,6 +21,23 @@ public class BuildingProvider_Script : MonoBehaviour
     [SerializeField]
     private GameObject building7_prefab;
 
+    [SerializeField]
+    private GameObject interface0_prefab;
+    [SerializeField]
+    private GameObject interface1_prefab;
+    [SerializeField]
+    private GameObject interface2_prefab;
+    [SerializeField]
+    private GameObject interface3_prefab;
+    [SerializeField]
+    private GameObject interface4_prefab;
+    [SerializeField]
+    private GameObject interface5_prefab;
+    [SerializeField]
+    private GameObject interface6_prefab;
+    [SerializeField]
+    private GameObject interface7_prefab;
+
     private int nrOfLevels = 8;
     private float levelRange;
 
@@ -30,10 +47,13 @@ public class BuildingProvider_Script : MonoBehaviour
         levelRange = Mathf.Sqrt(maxLoc) / nrOfLevels;
     }
 
-    public List<object> GetBuildingPrefabForLoc(long loc)
+    public List<object> GetBuildingPrefabForLoc(long loc, bool isInterface)
     {
         int level = Mathf.Min(Mathf.FloorToInt(Mathf.Sqrt(loc) / levelRange), nrOfLevels - 1);
-        return new List<object> { GetPrefabOf(level), level };
+        if(!isInterface)
+            return new List<object> { GetPrefabOf(level), level };
+        else
+            return new List<object> { GetInterfacePrefabOf(level), level };
     }
 
     private GameObject GetPrefabOf(int index)
@@ -56,6 +76,31 @@ public class BuildingProvider_Script : MonoBehaviour
                 return building6_prefab;
             case 7:
                 return building7_prefab;
+            default:
+                return null;
+        }
+    }
+
+    private GameObject GetInterfacePrefabOf(int index)
+    {
+        switch (index)
+        {
+            case 0:
+                return interface0_prefab;
+            case 1:
+                return interface1_prefab;
+            case 2:
+                return interface2_prefab;
+            case 3:
+                return interface3_prefab;
+            case 4:
+                return interface4_prefab;
+            case 5:
+                return interface5_prefab;
+            case 6:
+                return interface6_prefab;
+            case 7:
+                return interface7_prefab;
             default:
                 return null;
         }

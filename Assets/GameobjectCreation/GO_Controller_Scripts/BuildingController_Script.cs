@@ -48,7 +48,7 @@ public class BuildingController_Script : MonoBehaviour
             ChangeStatus cs = ChangeStatus.unknown;
             CompilationUnit cuCurrent = compUnit.GetElement(c);
             long loc = cuCurrent.getLoc();
-            List<object> prefabAndBucket = bpScript.GetBuildingPrefabForLoc(loc);
+            List<object> prefabAndBucket = bpScript.GetBuildingPrefabForLoc(loc, cuCurrent.GetType().Equals(OsgiViz.Core.type.Interface));
 
             int newBucket = (int)prefabAndBucket[1];
             if (newBucket != oldBucket)
