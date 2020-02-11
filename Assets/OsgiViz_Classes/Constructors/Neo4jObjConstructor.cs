@@ -460,7 +460,7 @@ public class Neo4jOsgiConstructor : MonoBehaviour {
                     //Get CompUnits
                     result = neo4j.Transaction("MATCH (p:PackageFragmentImpl)-[:HAS]->(cu:CompilationUnitImpl)-[:CLASS]->(c) WHERE id(p)=" + package.GetNeoId() +
                     " AND (c:ClassImpl OR c:InterfaceImpl) AND NOT exists(() -[:NESTED_TYPES]->(c)) " +
-                    "return id(cu), c.name, c:InterfaceImpl, cu.LOC");
+                    "return id(cu), c.name, c:InterfaceImpl, cu.lOC");
 
                     var cuList = result.ToList();
 
@@ -472,9 +472,9 @@ public class Neo4jOsgiConstructor : MonoBehaviour {
                             CompilationUnit compilationUnit;
                             string name = cuInfo["c.name"].As<string>();
                             int loc = 0;
-                            if (cuInfo["cu.LOC"] != null)
+                            if (cuInfo["cu.lOC"] != null)
                             {
-                                loc = cuInfo["cu.LOC"].As<int>();
+                                loc = cuInfo["cu.lOC"].As<int>();
                             }
                             if (cuInfo["c:InterfaceImpl"].As<bool>())
                             {

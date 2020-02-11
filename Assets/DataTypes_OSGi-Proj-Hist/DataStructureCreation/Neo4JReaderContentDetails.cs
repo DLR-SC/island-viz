@@ -756,7 +756,7 @@ namespace OSGI_Datatypes.DataStructureCreation
                 "OPTIONAL MATCH(cuprev:CompilationUnitImpl)-[:NEXT]->(cu) " +
                 "OPTIONAL MATCH(cu)-[:NEXT]->(cunext: CompilationUnitImpl) " +
                 "return id(p) AS packageId, id(cu) AS neoId, c.name AS name, c.qualifiedName AS qName, c: InterfaceImpl as isInterface, " +
-                "cu.LOC as loc, cu.posX as cellX, cu.posZ as cellZ, " +
+                "cu.lOC as loc, cu.posX as cellX, cu.posZ as cellZ, " +
                 "id(cuprev), id(cunext) ORDER BY packageId, name";
 
             Dictionary<string, object> parameters = new Dictionary<string, object> { { "cid", c.GetNeoId() } };

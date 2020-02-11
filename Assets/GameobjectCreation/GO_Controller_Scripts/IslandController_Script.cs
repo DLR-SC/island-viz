@@ -104,14 +104,32 @@ public class IslandController_Script : MonoBehaviour
 
     public GameObject AddChangeIndicator()
     {
-            GameObject changeIndicator = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            changeIndicator.transform.parent = gameObject.transform;
-            changeIndicator.transform.localPosition = new Vector3(0f, Constants.standardHeight/6f, 0f);
-            changeIndicator.transform.localScale = new Vector3(5f, Constants.standardHeight/3f, 5f);
-            changeIndicator.name = "ChangeIndicator";
-            changeIndicator.GetComponent<CapsuleCollider>().enabled = false;
-            changeIndicator.GetComponent<MeshRenderer>().sharedMaterial = IslandVizVisualization.Instance.CombinedHoloMaterial;
-            return changeIndicator;
+        if (changeIndikator != null)
+        {
+            return changeIndikator;
+        }
+            changeIndikator = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            changeIndikator.transform.parent = gameObject.transform;
+            changeIndikator.transform.localPosition = new Vector3(0f, Constants.standardHeight/6f, 0f);
+            changeIndikator.transform.localScale = new Vector3(5f, Constants.standardHeight/3f, 5f);
+            changeIndikator.name = "ChangeIndicator";
+            changeIndikator.GetComponent<CapsuleCollider>().enabled = false;
+            changeIndikator.GetComponent<MeshRenderer>().sharedMaterial = IslandVizVisualization.Instance.CombinedHoloMaterial;
+
+        if (coastLine != null)
+        {
+            Renderer coastRender = coastLine.GetComponent<MeshRenderer>();
+            Vector3 center = coastRender.bounds.center;
+            Vector3 extends = coastRender.bounds.extents;
+            float radius = Mathf.Max(extends.x, extends.z);
+            Vector3 centerlocal = transform.InverseTransformPoint(center);
+            centerlocal.y = Constants.standardHeight / 6f;
+            changeIndikator.transform.localPosition = centerlocal;
+            changeIndikator.transform.localScale = new Vector3(2 * radius / transform.lossyScale.x, Constants.standardHeight / 3f, 2 * radius / transform.lossyScale.z);
+        }
+           
+
+        return changeIndikator;
     }
 
 
@@ -125,6 +143,9 @@ public class IslandController_Script : MonoBehaviour
         else
         {
             changeIndikator.SetActive(false);
+            changeIndikator.GetComponent<MeshRenderer>().enabled = false;
+            //GameObject.Destroy(changeIndikator);
+            //changeIndikator = null;
         }
 
         //Reposition & Update IslandDocks
@@ -172,11 +193,15 @@ public class IslandController_Script : MonoBehaviour
             cc.enabled = false;
 
         //Resize ChangeIndicator Based on MeshSizeOfIsland
-        Vector3 centerlocal = transform.InverseTransformPoint(center);
-        centerlocal.y = Constants.standardHeight / 6f;
-        changeIndikator.transform.localPosition = centerlocal;
-        changeIndikator.transform.localScale = new Vector3(2*radius/transform.lossyScale.x, Constants.standardHeight / 3f, 2*radius/transform.lossyScale.z);
-        SetChangeIndicator(changeStatus);
+        if (changeIndikator != null)
+        {
+            Vector3 centerlocal = transform.InverseTransformPoint(center);
+            centerlocal.y = Constants.standardHeight / 6f;
+            changeIndikator.transform.localPosition = centerlocal;
+            changeIndikator.transform.localScale = new Vector3(2 * radius / transform.lossyScale.x, Constants.standardHeight / 3f, 2 * radius / transform.lossyScale.z);
+            SetChangeIndicator(changeStatus);
+        }
+
 
 
         islandGOScript.SetRegions(activeRegions);
@@ -223,6 +248,12 @@ public class IslandController_Script : MonoBehaviour
 
     public void SetChangeIndicator(ChangeStatus cs)
     {
+        if (cs.Equals(ChangeStatus.unknown) || cs.Equals(ChangeStatus.deletedElement))
+        {
+            changeIndikator.GetComponent<MeshRenderer>().enabled = false;
+            return;
+        }
+        changeIndikator.GetComponent<MeshRenderer>().enabled = true;
         MeshFilter mf = changeIndikator.GetComponent<MeshFilter>();
         if (cs.Equals(ChangeStatus.newElement))
         {
@@ -275,6 +306,10 @@ public class IslandController_Script : MonoBehaviour
         {
             return;
         }
+        if (changeIndikator == null)
+        {
+            return;
+        }
         if (!enabled)
         {
             changeIndikator.SetActive(false);
@@ -287,6 +322,7 @@ public class IslandController_Script : MonoBehaviour
             }
         }
     }
+
 
 }
 

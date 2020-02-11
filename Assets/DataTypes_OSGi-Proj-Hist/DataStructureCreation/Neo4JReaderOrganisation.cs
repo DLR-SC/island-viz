@@ -209,7 +209,7 @@ namespace OSGI_Datatypes.DataStructureCreation
             if (!considerbranching)
             {
                 statement += "RETURN id(c) AS cNeoId, c.commitId AS cIdString, c.commitMessage AS cMessage, c.time AS cTime, " +
-                "c.Author AS cAuthor, a.token AS cAuthorNode, " +
+                "c.author AS cAuthor, a.token AS cAuthorNode, " +
                 "collect(distinct id(i)) AS cIssues, " +
                 "id(cOld) AS cPrev, " +
                 "c.graphLayouted, c.islandsLayouted " +
@@ -220,7 +220,7 @@ namespace OSGI_Datatypes.DataStructureCreation
                 statement += "OPTIONAL MATCH(cBranch:CommitImpl)-[:BRANCH]->(c) " +
                 "OPTIONAL MATCH(c)-[:MERGE]->(cMerge: CommitImpl) " +
                 "RETURN id(c) AS cNeoId, c.commitId AS cIdString, c.commitMessage AS cMessage, c.time as cTime, " +
-                "c.Author as cAuthor, a.token AS cAuthorNode, " +
+                "c.author as cAuthor, a.token AS cAuthorNode, " +
                 "collect(distinct id(i)) as cIssues, " +
                 "id(cOld) as cPrev, id(cBranch) as cBranchOrigin, id(cMerge) as cMergeTarget, " +
                 "c.graphLayouted, c.islandsLayouted " +

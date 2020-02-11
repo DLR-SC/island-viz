@@ -279,7 +279,7 @@ namespace OsgiViz.Unity.Island
             if (gameObject.GetComponent<IslandController_Script>() != null)
             {
                 ChangeStatus cs = gameObject.GetComponent<IslandController_Script>().changeStatus;
-                if ((cs.Equals(ChangeStatus.changedElement) || cs.Equals(ChangeStatus.newElement)) && HistoryNavigation.Instance.historyHighlightActive)
+                if ((cs.Equals(ChangeStatus.changedElement) || cs.Equals(ChangeStatus.newElement) ||cs.Equals(ChangeStatus.changedInnerElement)) && HistoryNavigation.Instance.historyHighlightActive)
                 {
                     gameObject.GetComponent<IslandController_Script>().changeIndikator.SetActive(true);
                 }
