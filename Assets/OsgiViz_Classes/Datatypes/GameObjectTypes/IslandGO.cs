@@ -248,8 +248,14 @@ namespace OsgiViz.Unity.Island
                 // Enable Docks.
                 if (!ImportDock.activeSelf)
                 {
-                    ImportDock.SetActive(true);
-                    ExportDock.SetActive(true);
+                    if (ImportDock.GetComponent<DependencyDock>().HasArrows())
+                    {
+                        ImportDock.SetActive(true);
+                    }
+                    if (ExportDock.GetComponent<DependencyDock>().HasArrows())
+                    {
+                        ExportDock.SetActive(true);
+                    }
                 }                
 
                 // Enable region colliders.

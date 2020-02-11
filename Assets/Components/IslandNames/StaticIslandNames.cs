@@ -77,6 +77,23 @@ namespace StaticIslandNamesComponent
         }
         #endregion
 
+        public IEnumerator UpdateStaticNames(List<Transform> newIslands, List<Transform> deletedIslands)
+        {
+            foreach(Transform t in deletedIslands)
+            {
+                RemoveStaticName(t);
+            }
+            yield return null;
+            if (IslandVizVisualization.Instance.CurrentZoomLevel.Equals(ZoomLevel.Far) && currentNames.Count > 1)
+            {
+                //TODO new static names shall be shown, if other static names are shown - this part doesn't word
+                foreach(Transform t in newIslands)
+                {
+                    CreateStaticName(t, IslandVizInteraction.SelectionType.Highlight);
+                }
+            }
+        }
+
 
         // ################
         // Selection Event Handling

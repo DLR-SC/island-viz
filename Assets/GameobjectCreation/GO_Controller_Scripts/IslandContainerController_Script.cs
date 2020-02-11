@@ -9,7 +9,7 @@ using OsgiViz.Unity.Island;
 
 public class IslandContainerController_Script : MonoBehaviour
 {
-    GameObject island;
+    public GameObject island { get; set; }
     BundleMaster bundleMaster;
 
     private Commit newCommit;

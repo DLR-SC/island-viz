@@ -37,10 +37,14 @@ public class HistoryNavigation : MonoBehaviour
     private List<IslandContainerController_Script> islands;
     private List<DependencyDock> docks;
 
+    private List<IslandController_Script> activeIslands;
+
     private void Awake()
     {
         islands = new List<IslandContainerController_Script>();
         docks = new List<DependencyDock>();
+
+        activeIslands = new List<IslandController_Script>();
     }
 
     #region Instantiation Methods
@@ -171,6 +175,31 @@ public class HistoryNavigation : MonoBehaviour
             IslandVizVisualization.Instance.FlyTo(StaticIslandNames.Instance.GetFirstCurrentNameTransform());
         }
         IslandVizUI.Instance.UpdateCurrentlyVisibleCommit(newCommit.GetCommitIndex() + 1, project.GetCommits().Count);
+        //Update aktiveIslands
+        List<Transform> newIslands = new List<Transform>();
+        List<Transform> deletedIslands = new List<Transform>();
+        foreach (IslandContainerController_Script islandC in islands)
+        {
+            if(islandC.island.activeSelf && !activeIslands.Contains(islandC.island.GetComponent<IslandController_Script>()))
+            {
+                //insel ist neu aktiviert
+                newIslands.Add(islandC.island.transform);
+                activeIslands.Add(islandC.island.GetComponent<IslandController_Script>());
+            }else if(!islandC.island.activeSelf && activeIslands.Contains(islandC.island.GetComponent<IslandController_Script>()))
+            {
+                //insel gelöscht
+                deletedIslands.Add(islandC.island.transform);
+                activeIslands.Remove(islandC.island.GetComponent<IslandController_Script>());
+            }
+            else
+            {
+                //Insel immernoch vorhanden oder gar nicht vorhanden-> nothing todo
+            }
+        }
+        yield return null;
+        //Update NameTags
+        StartCoroutine(StaticIslandNames.Instance.UpdateStaticNames(newIslands, deletedIslands));
+        
         //Create DependencyArrows
         if (createDependencies)
         {

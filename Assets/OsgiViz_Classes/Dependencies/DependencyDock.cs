@@ -279,6 +279,16 @@ namespace OsgiViz
             dockWeights = new List<float>();
             connectionArrows = new List<GameObject>();
         }
+
+        public bool HasArrows()
+        {
+            if (connectionArrows.Count > 0)
+            {
+                return true;
+            }
+            else
+                return false;
+        }
     }
 }
 
