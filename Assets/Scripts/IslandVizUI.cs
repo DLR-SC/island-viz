@@ -164,6 +164,22 @@ public class IslandVizUI : MonoBehaviour
 
         Notification.SetActive(false);
     }
+    /// <summary>
+    /// Added for user Study
+    /// </summary>
+    /// <param name="text"></param>
+    public void ActivateNotification(string text)
+    {
+        Notification.SetActive(true);
+        NotificationValue.text = text;
+    }
+    /// <summary>
+    /// Added for user Study
+    /// </summary>
+    public void DeactivateNotification()
+    {
+        Notification.SetActive(false);
+    }
 
 
     // ################

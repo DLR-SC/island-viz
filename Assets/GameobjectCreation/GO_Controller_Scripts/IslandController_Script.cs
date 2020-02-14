@@ -316,7 +316,7 @@ public class IslandController_Script : MonoBehaviour
         }
         else
         {
-            if ((changeStatus.Equals(ChangeStatus.newElement) || changeStatus.Equals(ChangeStatus.changedElement))&&IslandVizVisualization.Instance.CurrentZoomLevel.Equals(ZoomLevel.Far))
+            if ((changeStatus.Equals(ChangeStatus.newElement) || changeStatus.Equals(ChangeStatus.changedElement) || changeStatus.Equals(ChangeStatus.changedInnerElement))&&IslandVizVisualization.Instance.CurrentZoomLevel.Equals(ZoomLevel.Far))
             {
                 changeIndikator.SetActive(true);
             }
