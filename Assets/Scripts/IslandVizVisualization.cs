@@ -358,7 +358,7 @@ public class IslandVizVisualization : MonoBehaviour
                     if (i < VisibleIslandGOs.Count && VisibleIslandGOs[i].CurrentZoomLevel != CurrentZoomLevel) // The first condition is important, because islands can 
                                                                                                                 // appear or disappear at any point.
                     {
-                        IslandVizUI.Instance.ZoomLevelValue.text = "<color=yellow>" + (i / VisibleIslandGOs.Count) * 100 + " %</color>"; // Give simple feedback on progress // TODO
+                        //IslandVizUI.Instance.ZoomLevelValue.text = "<color=yellow>" + (i / VisibleIslandGOs.Count) * 100 + " %</color>"; // Give simple feedback on progress // TODO
                         VisibleIslandGOs[i].ApplyZoomLevel(CurrentZoomLevel);
                         counter++;
                     }
@@ -420,7 +420,7 @@ public class IslandVizVisualization : MonoBehaviour
         DebugCube.transform.localScale = new Vector3(0.01f, 100, 0.01f);
         DebugCube.transform.parent = Visualization;
         DebugCube.transform.localPosition = centerLocalPosition;
-        Debug.Log("DebugCube Position: " + DebugCube.transform.position + " --- WorldPosition: " + centerWorldPosition);
+        //Debug.Log("DebugCube Position: " + DebugCube.transform.position + " --- WorldPosition: " + centerWorldPosition);
         
         Vector3 startPosition = Visualization.position;
         Vector3 endPosition = (startPosition / GlobalVar.CurrentZoom - DebugCube.transform.position / GlobalVar.CurrentZoom) * endScale;

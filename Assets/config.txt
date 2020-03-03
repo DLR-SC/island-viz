@@ -1,12 +1,12 @@
 # DataLoading: Wether data is loaded from a Json file or from a Neo4J database (Json | Neo4J)
 DataLoading=Neo4J
-# DataLocation: location of the data 
+# DataLocation: location of the data (Models/rce_lite.model | Models/rce_23_05_2017.model | bolt://localhost:7687)
 DataLocation=bolt://localhost:7687
 # UserName: login data for Neo4J databases
 UserName=neo4j
 # Password
 Password=123
-# Seed: integer used for procedural island generation
+# Seed: integer used for procedural island generation. For random seed leave empty.
 Seed=0
 # GraphLayout: spatial island distribution method (ForceDirected | Random)
 GraphLayout=ForceDirected

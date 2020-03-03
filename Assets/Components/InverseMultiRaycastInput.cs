@@ -7,30 +7,29 @@ using Valve.VR;
 using Valve.VR.InteractionSystem;
 
 /// <summary>
-/// This class is a interaction component creating a interaction area on top of the table which can change transform of the visualization. 
+/// This class is a interaction component creating a interaction area on top of the table whitch can change transform of the visualization. 
 /// Most of this comes from the InverseMultiTouchController.cs in Assets/OsgiViz/VR_Interaction/.
 /// </summary>
-public class InverseMultiTouchInput : AdditionalIslandVizComponent {
+public class InverseMultiRaycastInput : AdditionalIslandVizComponent
+{
 
     [Header("Settings")]
     public float PivotTransferCutoff = 1.25f;
     public float TranslationMult = 1f;
     public float ScaleMult = 2.0f;
     public float RotationMult = 1f;
-
-
+    
     private GameObject mapNavigationArea; // The GameObject which holds the collider.
 
-    private List<Hand> touchingHandList;
-    private List<Hand> usingHandList;
     private Vector3 currentTranslationVelocity;
     private bool initiated = false;
-    private bool tooltippsDisabled = false;
+    private bool tooltipsDisabled = false;
+    private bool selected = false;
+    private List<Hand> currentHands;
+    private Vector3 lastHitPosition;
 
     // Settings
     private string mapNavigationAreaTag = "MapNavigationArea";
-
-
 
     // ################
     // Initiation
@@ -42,15 +41,15 @@ public class InverseMultiTouchInput : AdditionalIslandVizComponent {
     /// Initialize this input component. 
     /// This method is called by the IslandVizInteraction class.
     /// </summary>
-    public override IEnumerator Init ()
+    public override IEnumerator Init()
     {
         IslandVizUI.Instance.UpdateLoadingScreenUI("InverseMultiTouchInput Construction", "");
 
         // Init GameObject
         mapNavigationArea = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
         mapNavigationArea.name = mapNavigationAreaTag;
-        mapNavigationArea.transform.localScale = new Vector3(1.75f, 0.15f, 1.75f);
-        mapNavigationArea.transform.position = new Vector3(0f, OsgiViz.Core.GlobalVar.hologramTableHeight, 0f);
+        mapNavigationArea.transform.localScale = new Vector3(1.75f, 0.1f, 1.75f);
+        mapNavigationArea.transform.position = new Vector3(0f, OsgiViz.Core.GlobalVar.hologramTableHeight - 0.1f, 0f);
 
         // Remove Renderer & default collider 
         Destroy(mapNavigationArea.GetComponent<MeshRenderer>());
@@ -59,21 +58,19 @@ public class InverseMultiTouchInput : AdditionalIslandVizComponent {
         // Init Collider
         MeshCollider meshCollider = mapNavigationArea.AddComponent<MeshCollider>();
         meshCollider.convex = true;
-        meshCollider.isTrigger = true;
+        //meshCollider.isTrigger = true;
 
         // Physics Settings
         mapNavigationArea.tag = mapNavigationAreaTag;
-        mapNavigationArea.layer = LayerMask.NameToLayer("Interaction");
-        
-        // Subscribe input methods
-        IslandVizInteraction.Instance.OnControllerEnter += OnControllerEnterEvent;
-        IslandVizInteraction.Instance.OnControllerExit += OnControllerExitEvent;
-        IslandVizInteraction.Instance.OnControllerButtonEvent += OnControllerTriggerPressedEvent;
+        mapNavigationArea.layer = LayerMask.NameToLayer("Visualization");
+
+        // Subscribe input events
+        IslandVizInteraction.Instance.OnOtherSelected += OnRaycastSelectionEvent;
         IslandVizVisualization.Instance.OnTableHeightChanged += OnTableHeightChangedEvent;
 
-        touchingHandList = new List<Hand>();
-        usingHandList = new List<Hand>();
-        currentTranslationVelocity = new Vector3(0f, 0f, 0f);
+        currentHands = new List<Hand>();
+        currentTranslationVelocity = Vector3.zero;
+        lastHitPosition = Vector3.zero;
         initiated = true;
 
         yield return null;
@@ -88,57 +85,36 @@ public class InverseMultiTouchInput : AdditionalIslandVizComponent {
 
     #region Interaction - Event Handling
 
-    private void OnControllerEnterEvent(Collider collider, Hand hand)
+    public void OnRaycastSelectionEvent (GameObject go, Hand hand, IslandVizInteraction.SelectionType selectionType, bool selected)
     {
-        if (collider.tag == mapNavigationAreaTag && !touchingHandList.Contains(hand))
-        {
-            touchingHandList.Add(hand);
-
-            if (!tooltippsDisabled)
-            {
-                EnableTooltips(hand);
-            }
-        }
-    }
-
-    private void OnControllerExitEvent(Collider collider, Hand hand)
-    {
-        if (collider.tag == mapNavigationAreaTag && touchingHandList.Contains(hand))
-        {
-            touchingHandList.Remove(hand);
-
-            if (!tooltippsDisabled)
-            {
-                DisableTooltips(hand);
-            }
-        }
-    }
-
-    private void OnControllerTriggerPressedEvent (IslandVizInteraction.Button button, IslandVizInteraction.PressType type, Hand hand)
-    {
-        if (button != IslandVizInteraction.Button.Trigger)
+        if (go != mapNavigationArea)
         {
             return;
         }
-
-        if (type == IslandVizInteraction.PressType.PressDown)
+        // Current hand und selection handling.
+        if (selectionType == IslandVizInteraction.SelectionType.Select)
         {
-            if (!usingHandList.Contains(hand) && touchingHandList.Contains(hand))
+            this.selected = selected;
+            if (selected && hand != null && !currentHands.Contains(hand))
             {
-                usingHandList.Add(hand);
-
-                if (!tooltippsDisabled)
-                {
-                    tooltippsDisabled = true;
-                    DisableTooltips();
-                }
+                currentHands.Add(hand);
+            }
+            else if (!selected && hand != null && currentHands.Contains(hand))
+            {
+                currentHands.Remove(hand);
             }
         }
-        else if (type == IslandVizInteraction.PressType.PressUp)
+        // Tooltips
+        if (selectionType == IslandVizInteraction.SelectionType.Highlight)
         {
-            if (usingHandList.Contains(hand))
+            if (selected && !tooltipsDisabled)
             {
-                usingHandList.Remove(hand);
+                //EnableTooltips(hand);  
+            }
+            else if (!selected && !tooltipsDisabled)
+            {
+                //DisableTooltips(hand);
+                tooltipsDisabled = true;
             }
         }
     }
@@ -182,42 +158,60 @@ public class InverseMultiTouchInput : AdditionalIslandVizComponent {
         }
 
         //Handle Movement
-        if (usingHandList.Count == 1)
+        if (selected && currentHands.Count == 1)
         {
-            currentTranslationVelocity = -usingHandList[0].GetTrackedObjectVelocity();
-            UpdateTranslation(false);
-        }
-        else if (usingHandList.Count == 2)
-        {
-            //current pivot
-            Vector3 origin1 = usingHandList[0].gameObject.transform.GetChild(0).position;
-            Vector3 origin2 = usingHandList[1].gameObject.transform.GetChild(0).position;
-            Vector3 currentPivot = (origin1 + origin2) / 2f;
+            Debug.Log("InverseMultiRaycastInput!!");
 
-            //next pivot
-            Vector3 controllerVelocity1 = usingHandList[0].GetTrackedObjectVelocity();
-            Vector3 controllerVelocity2 = usingHandList[1].GetTrackedObjectVelocity();
-            Vector3 nextOrigin1 = controllerVelocity1 * Time.deltaTime + origin1;
-            Vector3 nextOrigin2 = controllerVelocity2 * Time.deltaTime + origin2;
-            Vector3 nextPivot = (nextOrigin1 + nextOrigin2) / 2f;
+            int handID = RaycastSelection.Instance.GetHandID(currentHands[0]);
+            Vector3 hitPosition = RaycastSelection.Instance.GetCurrentHit(handID).point;
 
-            //For an ideal scale/rotate gesture the pivot would stay the same. For real world applications
-            //the pivotTransferCutoff allows for some sloppiness in the gesture
-            if (Vector3.Distance(currentPivot, nextPivot) < PivotTransferCutoff)
+            if (lastHitPosition == Vector3.zero) // we did not hit anything last frame.
             {
-                Vector3 diffCurrent = origin1 - origin2;
-                Vector3 diffNext = nextOrigin1 - nextOrigin2;
-                float scalingFactor = diffCurrent.magnitude / diffNext.magnitude;
-                scalingFactor = 1.0f / scalingFactor;
-                Vector3 scaleRotPivot = new Vector3(currentPivot.x, GlobalVar.hologramTableHeight, currentPivot.z);
-
-                float radCurrent = Mathf.Atan2(diffCurrent.x, diffCurrent.z);
-                float radNext = Mathf.Atan2(diffNext.x, diffNext.z);
-                float rotationAngle = -Mathf.Rad2Deg * (radNext - radCurrent) * RotationMult;
-
-                RotateAndScale(scaleRotPivot, rotationAngle, scalingFactor);
+                lastHitPosition = hitPosition;
+                UpdateTranslation(true);
             }
+            else
+            {
+                currentTranslationVelocity = (lastHitPosition - hitPosition) * Time.deltaTime;
+                UpdateTranslation(false);
+                lastHitPosition = hitPosition;
+            }
+
+            Debug.Log("Point: " + RaycastSelection.Instance.GetCurrentHit(handID).point);
+            Debug.Log("Velocity: " + currentTranslationVelocity);
+            
         }
+        //else if (usingHandList.Count == 2)
+        //{
+        //    //current pivot
+        //    Vector3 origin1 = usingHandList[0].gameObject.transform.GetChild(0).position;
+        //    Vector3 origin2 = usingHandList[1].gameObject.transform.GetChild(0).position;
+        //    Vector3 currentPivot = (origin1 + origin2) / 2f;
+
+        //    //next pivot
+        //    Vector3 controllerVelocity1 = usingHandList[0].GetTrackedObjectVelocity();
+        //    Vector3 controllerVelocity2 = usingHandList[1].GetTrackedObjectVelocity();
+        //    Vector3 nextOrigin1 = controllerVelocity1 * Time.deltaTime + origin1;
+        //    Vector3 nextOrigin2 = controllerVelocity2 * Time.deltaTime + origin2;
+        //    Vector3 nextPivot = (nextOrigin1 + nextOrigin2) / 2f;
+
+        //    //For an ideal scale/rotate gesture the pivot would stay the same. For real world applications
+        //    //the pivotTransferCutoff allows for some sloppiness in the gesture
+        //    if (Vector3.Distance(currentPivot, nextPivot) < PivotTransferCutoff)
+        //    {
+        //        Vector3 diffCurrent = origin1 - origin2;
+        //        Vector3 diffNext = nextOrigin1 - nextOrigin2;
+        //        float scalingFactor = diffCurrent.magnitude / diffNext.magnitude;
+        //        scalingFactor = 1.0f / scalingFactor;
+        //        Vector3 scaleRotPivot = new Vector3(currentPivot.x, GlobalVar.hologramTableHeight, currentPivot.z);
+
+        //        float radCurrent = Mathf.Atan2(diffCurrent.x, diffCurrent.z);
+        //        float radNext = Mathf.Atan2(diffNext.x, diffNext.z);
+        //        float rotationAngle = -Mathf.Rad2Deg * (radNext - radCurrent) * RotationMult;
+
+        //        RotateAndScale(scaleRotPivot, rotationAngle, scalingFactor);
+        //    }
+        //}
         else
         {
             UpdateTranslation(true);

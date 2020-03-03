@@ -19,82 +19,78 @@ public class IslandVizConfig : MonoBehaviour
 
     public IEnumerator LoadAndApplyConfig()
     {
-        ArrayList lines = new ArrayList();
+        List<string> config;
         string line;
-        TextAsset textFile = (TextAsset)Resources.Load("Config", typeof(TextAsset));
-        System.IO.StringReader textStream = new System.IO.StringReader(textFile.text);
 
-        while ((line = textStream.ReadLine()) != null)
+        StreamReader reader = new StreamReader(Application.dataPath + "/config.txt");
+        config = new List<string>();
+        try
         {
-            if (line.StartsWith("#"))
+            while (reader.Peek() != -1)
             {
-                continue;
-            }
-            string[] entries = line.Split('=');
-            if (entries[0] == "DataLoading")
-            {
-                if (entries[1] == "Json")
+                line = reader.ReadLine();
+                Debug.Log(line);
+                string[] words = line.Split();
+                if (words[0] != "#")
                 {
-                    IslandVizData.Instance.DataLoading = IslandVizData.DataLoadingType.Json;
-                }
-                else if (entries[1] == "Neo4J")
-                {
-                    IslandVizData.Instance.DataLoading = IslandVizData.DataLoadingType.Neo4J;
-                }
-                else
-                {
-                    Debug.LogError("IslandVizConfig: Could not resolve config entry for DataLoading!");
-                }
-            }
-            else if (entries[0] == "DataLocation")
-            {
-                if (IslandVizData.Instance.DataLoading == IslandVizData.DataLoadingType.Neo4J)
-                {
-                    IslandVizData.Instance.Neo4J_URI = entries[1];
-                }
-                else
-                {
-                    IslandVizData.Instance.JsonDataPath = entries[1];
-                }
-            }
-            else if (entries[0] == "UserName")
-            {
-                IslandVizData.Instance.Neo4J_User = entries[1];
-            }
-            else if (entries[0] == "Password")
-            {
-                IslandVizData.Instance.Neo4J_Password = entries[1];
-            }
-            else if (entries[0] == "Seed")
-            {
-                int seed = 0;
-
-                if (int.TryParse(entries[1], out seed))
-                {
-                    IslandVizVisualization.Instance.RandomSeed = seed;
-                }
-                else
-                {
-                    Debug.LogError("IslandVizConfig: Could not resolve config entry for Seed!");
-                }
-            }
-            else if (entries[0] == "GraphLayout")
-            {
-                if (entries[1] == "ForceDirected")
-                {
-                    IslandVizVisualization.Instance.Graph_Layout = Graph_Layout.ForceDirected;
-                }
-                else if (entries[1] == "Random")
-                {
-                    IslandVizVisualization.Instance.Graph_Layout = Graph_Layout.Random;
-                }
-                else
-                {
-                    Debug.LogError("IslandVizConfig: Could not resolve config entry for GraphLayout!");
+                    string[] entries = line.Split('=');
+                    config.Add(entries[1]);
                 }
             }
         }
-        textStream.Close();
+        catch
+        {
+            Debug.LogError("config file may be corrupt!");
+        }
+        finally
+        {
+            reader.Close();
+        }
+
+        // Data Loading        
+        if (config[0] == "Json")
+        {
+            IslandVizData.Instance.DataLoading = IslandVizData.DataLoadingType.Json;
+        }
+        else if (config[0] == "Neo4J")
+        {
+            IslandVizData.Instance.DataLoading = IslandVizData.DataLoadingType.Neo4J;
+        }
+        else
+        {
+            Debug.LogError("IslandVizConfig: Could not resolve config entry for DataLoading!");
+        }
+        // Data Locations 
+        if (IslandVizData.Instance.DataLoading == IslandVizData.DataLoadingType.Neo4J)
+        {
+            IslandVizData.Instance.Neo4J_URI = config[1];
+        }
+        else
+        {
+            IslandVizData.Instance.JsonDataPath = config[1];
+        }
+        // Neo4J user name
+        IslandVizData.Instance.Neo4J_User = config[2];
+        // Neo4J password
+        IslandVizData.Instance.Neo4J_Password = config[3];
+        // Procedural seed
+        if (int.TryParse(config[4], out int seed))
+        {
+            IslandVizVisualization.Instance.RandomSeed = seed;
+        }
+        // Graph layout
+        if (config[5] == "ForceDirected")
+        {
+            IslandVizVisualization.Instance.Graph_Layout = Graph_Layout.ForceDirected;
+        }
+        else if (config[5] == "Random")
+        {
+            IslandVizVisualization.Instance.Graph_Layout = Graph_Layout.Random;
+        }
+        else
+        {
+            Debug.LogError("IslandVizConfig: Could not resolve config entry for GraphLayout!");
+        }
 
         yield return null;
     }

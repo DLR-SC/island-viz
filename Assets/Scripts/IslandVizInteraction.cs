@@ -196,7 +196,7 @@ public class IslandVizInteraction : MonoBehaviour
     /// <param name="go">The object that was selected.</param>
     /// <param name="selectionType">The type of the selection.</param>
     /// <param name="selected">True = select, false = deselect.</param>
-    public delegate void OtherSelected(GameObject go, SelectionType selectionType, bool selected);
+    public delegate void OtherSelected(GameObject go, Hand hand, SelectionType selectionType, bool selected);
     #endregion
 
 

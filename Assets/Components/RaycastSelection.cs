@@ -10,6 +10,8 @@ using Valve.VR.InteractionSystem;
 /// </summary>
 public class RaycastSelection : AdditionalIslandVizComponent
 {
+    public static RaycastSelection Instance { get; private set; }
+
     // ################
     // Public - Unity
     // ################
@@ -30,9 +32,9 @@ public class RaycastSelection : AdditionalIslandVizComponent
     private float laserThickness = 0.01f; // The thickness of the SphereCast and the laser beam.
 
     // Every field in these arrays belongs to one hand, i.e. the first hand always stores the values in the 0th field and so on.
-    private RaycastHit[] hit; // Current RaycastHits of the hands.
-    private Vector3[] forward; // Current forward vetors of the hands.
-    private Collider[] hittingCollider; // Current colliders the hands are hitting with the SphereCast.
+    private RaycastHit[] currentHits; // Current RaycastHits of the hands.
+    private Vector3[] currentForwards; // Current forward vetors of the hands.
+    private Collider[] hittingColliders; // Current colliders the hands are hitting with the SphereCast.
 
     private GameObject[] laserBeamObjs; // The GameObjects of the laser beams.
     private LineRenderer[] lineRenderers; // The LineRenderer components of the laser beam GameObjects.
@@ -52,6 +54,11 @@ public class RaycastSelection : AdditionalIslandVizComponent
 
     #region Initiation
 
+    void Awake ()
+    {
+        Instance = this;
+    }
+
     private void Start() { } // When this has no Start method, you will not be able to disable this in the editor.
 
     /// <summary>
@@ -63,9 +70,9 @@ public class RaycastSelection : AdditionalIslandVizComponent
         // Initiate arrays.
         laserBeamObjs = new GameObject[Hands.Length];
         lineRenderers = new LineRenderer[Hands.Length];
-        forward = new Vector3[Hands.Length];
-        hit = new RaycastHit[Hands.Length];
-        hittingCollider = new Collider[Hands.Length];
+        currentForwards = new Vector3[Hands.Length];
+        currentHits = new RaycastHit[Hands.Length];
+        hittingColliders = new Collider[Hands.Length];
         raycastSelectionIsRunning = new bool[] { false, false };
         currentlyHitting = new bool[] { false, false };
 
@@ -145,8 +152,8 @@ public class RaycastSelection : AdditionalIslandVizComponent
         }
         else if (type == IslandVizInteraction.PressType.PressDown && raycastSelectionIsRunning[handID] && currentlyHitting[handID])
         {
-            Collider collider = hit[handID].collider; // This local variable is very important for the undo to work!
-            ToggleSelection(collider, true); // Select the current selection.
+            Collider collider = currentHits[handID].collider; // This local variable is very important for the undo to work!
+            ToggleSelection(collider, Hands[handID], true); // Select the current selection.
         }
     }
 
@@ -174,18 +181,18 @@ public class RaycastSelection : AdditionalIslandVizComponent
 
         while (raycastSelectionIsRunning[handID]) // While touchpad is pressed.
         {
-            forward[handID] = Mode == RayMode.Laserpointer ? Hands[handID].transform.forward : (Hands[handID].transform.forward - Hands[handID].transform.up) / 2f;
+            currentForwards[handID] = Mode == RayMode.Laserpointer ? Hands[handID].transform.forward : (Hands[handID].transform.forward - Hands[handID].transform.up) / 2f;
 
-            if (Physics.SphereCast(Hands[handID].transform.position + forward[handID] * 0.1f, laserThickness / 2, forward[handID], out hit[handID], laserLength, laserLayerMask))
+            if (Physics.SphereCast(Hands[handID].transform.position + currentForwards[handID] * 0.1f, laserThickness / 2, currentForwards[handID], out currentHits[handID], laserLength, laserLayerMask))
             {
-                if (hit[handID].collider != hittingCollider[handID])
+                if (currentHits[handID].collider != hittingColliders[handID])
                 {
-                    if (hittingCollider[handID] != null) // We jumped from one collider to the next, hence, we need to deselect the collider that we hit last fixed update.
+                    if (hittingColliders[handID] != null) // We jumped from one collider to the next, hence, we need to deselect the collider that we hit last fixed update.
                     {
-                        ToggleHighlight(hittingCollider[handID], false);
+                        ToggleHighlight(hittingColliders[handID], Hands[handID], false);
                     }
-                    ToggleHighlight(hit[handID].collider, true);
-                    hittingCollider[handID] = hit[handID].collider;
+                    ToggleHighlight(currentHits[handID].collider, Hands[handID], true);
+                    hittingColliders[handID] = currentHits[handID].collider;
 
                     if (Hands[handID] != null)
                         Hands[handID].controller.TriggerHapticPulse(250); // Vibrate
@@ -195,25 +202,25 @@ public class RaycastSelection : AdditionalIslandVizComponent
 
                 // Make laser visuals look like it stops at hit.
                 lineRenderers[handID].SetPosition(0, Hands[handID].transform.position);
-                lineRenderers[handID].SetPosition(1, hit[handID].point);
+                lineRenderers[handID].SetPosition(1, currentHits[handID].point);
             }
-            else if (currentlyHitting[handID] || hittingCollider[handID] != null) // We hit something last update, but we do not now.
+            else if (currentlyHitting[handID] || hittingColliders[handID] != null) // We hit something last update, but we do not now.
             {
-                ToggleHighlight(hittingCollider[handID], false);
+                ToggleHighlight(hittingColliders[handID], Hands[handID], false);
 
                 currentlyHitting[handID] = false;
-                hittingCollider[handID] = null;
+                hittingColliders[handID] = null;
 
                 // Reset laser visuals
                 lineRenderers[handID].SetPosition(0, Hands[handID].transform.position);
-                lineRenderers[handID].SetPosition(1, Hands[handID].transform.position + forward[handID] * 5f);
+                lineRenderers[handID].SetPosition(1, Hands[handID].transform.position + currentForwards[handID] * 5f);
             }
 
-            if (hittingCollider[handID] == null)
+            if (hittingColliders[handID] == null)
             {
                 // Make laser visuals look like it hits nothing.
                 lineRenderers[handID].SetPosition(0, Hands[handID].transform.position);
-                lineRenderers[handID].SetPosition(1, Hands[handID].transform.position + forward[handID] * 5f);
+                lineRenderers[handID].SetPosition(1, Hands[handID].transform.position + currentForwards[handID] * 5f);
             }
 
             yield return new WaitForFixedUpdate();
@@ -222,8 +229,8 @@ public class RaycastSelection : AdditionalIslandVizComponent
 
         if (currentlyHitting[handID])
         {
-            ToggleHighlight(hittingCollider[handID], false);
-            hittingCollider[handID] = null;
+            ToggleHighlight(hittingColliders[handID], Hands[handID], false);
+            hittingColliders[handID] = null;
             currentlyHitting[handID] = false;
         }
         laserBeamObjs[handID].SetActive(false);
@@ -234,7 +241,7 @@ public class RaycastSelection : AdditionalIslandVizComponent
     /// </summary>
     /// <param name="collider">The collider whose highlight status is to be changed.</param>
     /// <param name="select">Wether it should be highlighted (true) or unhighlighted (false).</param>
-    public void ToggleHighlight(Collider collider, bool select)
+    public void ToggleHighlight(Collider collider, Hand hand, bool select)
     {
         if (collider.GetComponent<IslandGO>())
         {
@@ -258,7 +265,7 @@ public class RaycastSelection : AdditionalIslandVizComponent
         }
         else
         {
-            IslandVizInteraction.Instance.OnOtherSelected?.Invoke(collider.gameObject, IslandVizInteraction.SelectionType.Highlight, select);
+            IslandVizInteraction.Instance.OnOtherSelected?.Invoke(collider.gameObject, hand, IslandVizInteraction.SelectionType.Highlight, select);
         }
     }
 
@@ -267,7 +274,7 @@ public class RaycastSelection : AdditionalIslandVizComponent
     /// </summary>
     /// <param name="collider">The collider whose selection status is to be changed.</param>
     /// <param name="select">Wether it should be selected (true) or unselected (false).</param>
-    public void ToggleSelection(Collider collider, bool select, bool addToUndo = true)
+    public void ToggleSelection(Collider collider, Hand hand, bool select, bool addToUndo = true)
     {
         if (collider.GetComponent<IslandGO>())
         {
@@ -295,13 +302,13 @@ public class RaycastSelection : AdditionalIslandVizComponent
         }
         else
         {
-            IslandVizInteraction.Instance.OnOtherSelected?.Invoke(collider.gameObject, IslandVizInteraction.SelectionType.Select, select);
+            IslandVizInteraction.Instance.OnOtherSelected?.Invoke(collider.gameObject, hand, IslandVizInteraction.SelectionType.Select, select);
         }
 
         if (select && addToUndo)
         {
             IslandVizBehaviour.Instance.AddUndoAction(delegate () {
-                ToggleSelection(collider, true, false);
+                ToggleSelection(collider, hand, true, false);
             });
         }
     }
@@ -363,7 +370,7 @@ public class RaycastSelection : AdditionalIslandVizComponent
 
     #region Helper Functions
 
-    private int GetHandID (Hand hand)
+    public int GetHandID (Hand hand)
     {
         for (int i = 0; i < Hands.Length; i++)
         {
@@ -373,6 +380,11 @@ public class RaycastSelection : AdditionalIslandVizComponent
             }
         }
         return -1;
+    }
+
+    public RaycastHit GetCurrentHit (int handID)
+    {
+        return currentHits[handID];
     }
 
     #endregion
