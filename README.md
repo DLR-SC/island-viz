@@ -24,7 +24,7 @@ IslandViz is a software visualization tool which represents the architecture of 
 
 > git clone --recurse-submodules https://github.com/DLR-SC/island-viz.git
 
-2. Remove the Microsoft.Contracts.dll at quickgraph4unity/src/Assets/quickgraph4unity/Dependencies/CodeContracts (Silverlight)/ .
+2. Delete the _Dependencies_ folder at \Assets\QuickGraph4Unity\src\Assets\quickgraph4unity\ .
 
 3. Open the project in Unity.
 
