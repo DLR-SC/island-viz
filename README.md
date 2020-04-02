@@ -40,7 +40,7 @@ The IslandViz can currently import a software system either as a Json file or by
 
 You can change the import method and other settings in the config file _\Assets\config.txt_. The config file looks like this:
 
-```md
+```markdown
 # DataLoading: load the data from a Json file or from a Neo4J database (Json | Neo4J)
 DataLoading=Neo4J
 # DataLocation: location of the data (Models/rce_lite.model | bolt://localhost:7687)
