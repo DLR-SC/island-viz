@@ -27,7 +27,11 @@ IslandViz is a software visualization tool which represents the architecture of 
 
 2. Delete the _Dependencies_ folder at \Assets\QuickGraph4Unity\src\Assets\quickgraph4unity\ .
 
-3. Open the _IslandVizVR.scene_ in Unity.
+3. Open the project in Unity.
+
+4. If Unity shows the _API Update Required_ window, press -_I Made a Backup. Go Ahead!_-.
+
+5. Open the _IslandVizVR.scene_ in Unity.
 
 ---
 
