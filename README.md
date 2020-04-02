@@ -55,6 +55,8 @@ Seed=0
 GraphLayout=ForceDirected
 ```
 
+>Note: The config file is overwriting the IslandVizData and IslandVizVisualization components, i.e. changes in the Unity editor only apply when you disabled _Use Config_ in the IslandVizConfig component.
+
 ### Json
 
 We included two Json files for testing. Those files are located at _\Models\\_.
