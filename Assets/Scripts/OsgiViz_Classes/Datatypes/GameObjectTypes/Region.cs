@@ -18,37 +18,9 @@ namespace OsgiViz.Unity.Island
         private void Awake()
         {
             buildings = new List<Building>();
-
-            //#region clickable
-            //InteractableViaClickTouch ict = gameObject.GetComponent<InteractableViaClickTouch>();
-            //if (ict == null)
-            //    ict = gameObject.AddComponent<InteractableViaClickTouch>();
-
-            //ict.handleActivationDeactivation.Add(handleActivationDeactivation);
-            //#endregion
-
-            //#region PdaInspectable
-            //PdaInspectable pi = gameObject.GetComponent<PdaInspectable>();
-            //if (pi == null)
-            //    pi = gameObject.AddComponent<PdaInspectable>();
-            //#endregion
         }
         
 
-
-        private void handleActivationDeactivation(Hand hand)
-        {
-            string contentText = "";
-            contentText += "<b><color=green>Name</b></color>";
-            contentText += "\n";
-            contentText += package.getName();
-            contentText += "\n";
-            contentText += "<b><color=green>#Compilation units</b></color>";
-            contentText += "\n";
-            contentText += package.getCuCount();
-
-            gameObject.GetComponent<PdaInspectable>().sendContentToPda(contentText);
-        }
 
 
         public Package getPackage()

@@ -26,13 +26,13 @@ namespace OsgiViz
             //connectionPrefab = (GameObject)Resources.Load("Prefabs/ServiceConnection");
                         
 
-            #region clickable
-            InteractableViaClickTouch ict = gameObject.GetComponent<InteractableViaClickTouch>();
-            if (ict == null)
-                ict = gameObject.AddComponent<InteractableViaClickTouch>();
+            //#region clickable
+            //InteractableViaClickTouch ict = gameObject.GetComponent<InteractableViaClickTouch>();
+            //if (ict == null)
+            //    ict = gameObject.AddComponent<InteractableViaClickTouch>();
 
-            ict.handleActivationDeactivation.Add(handleActivationDeactivation);
-            #endregion
+            //ict.handleActivationDeactivation.Add(handleActivationDeactivation);
+            //#endregion
         }
 
         void Start()
