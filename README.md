@@ -175,10 +175,6 @@ public class StaticIslandNames : AdditionalIslandVizComponent
 |------------------------------------|------|-------------------------------------------------|
 | __OnControllerButtonEvent__        | Button, PressType, Hand | _Called when a button of a controller is pressed, released or touched._        |
 
->__Buttons__: Trigger, Menu, Touchpad, Grip
-
->__PressTypes__: PressDown, PressUp, TouchDown, TouchUp
-
 
 ### Physics-Events:
 
@@ -199,7 +195,8 @@ public class StaticIslandNames : AdditionalIslandVizComponent
 | __OnUIButtonSelected__             | Button, SelectionType, Bool     | _Called when a UI button was selected or deselected._            |
 | __OnOtherSelected__                | GameObject, SelectionType, Bool | _Called when any other object was selected or deselected._       |
 
->__SelectionTypes__: Select, Highlight 
+
+### Additional Components 
 
 [![](https://mermaid.ink/img/eyJjb2RlIjoiZ3JhcGggVERcbiAgc3ViZ3JhcGggTWFpbiBBcHBsaWNhdGlvblxuICAgICAgSXNsYW5kVml6QmVoYXZpb3VyLS0-SXNsYW5kVml6SW50ZXJhY3Rpb25cbiAgICAgIElzbGFuZFZpekJlaGF2aW91ci0tPklzbGFuZFZpekRhdGFcbiAgICAgIElzbGFuZFZpekJlaGF2aW91ci0tPklzbGFuZFZpelZpc3VhbGl6YXRpb25cbiAgZW5kXG4gICAgc3ViZ3JhcGggQWRkaXRpb25hbCBDb21wb25lbnRzXG4gICAgICBJc2xhbmRWaXpWaXN1YWxpemF0aW9uLS0-VmlzdWFsaXphdGlvbkNvbXBvbmVudHNcbiAgICAgIElzbGFuZFZpekRhdGEtLT5EYXRhQ29tcG9uZW50c1xuICAgICAgSXNsYW5kVml6SW50ZXJhY3Rpb24tLT5JbnRlcmFjdGlvbkNvbXBvbmVudHNcblx0ZW5kIiwibWVybWFpZCI6eyJ0aGVtZSI6ImRlZmF1bHQifSwidXBkYXRlRWRpdG9yIjpmYWxzZX0)](https://mermaid-js.github.io/mermaid-live-editor/#/edit/eyJjb2RlIjoiZ3JhcGggVERcbiAgc3ViZ3JhcGggTWFpbiBBcHBsaWNhdGlvblxuICAgICAgSXNsYW5kVml6QmVoYXZpb3VyLS0-SXNsYW5kVml6SW50ZXJhY3Rpb25cbiAgICAgIElzbGFuZFZpekJlaGF2aW91ci0tPklzbGFuZFZpekRhdGFcbiAgICAgIElzbGFuZFZpekJlaGF2aW91ci0tPklzbGFuZFZpelZpc3VhbGl6YXRpb25cbiAgZW5kXG4gICAgc3ViZ3JhcGggQWRkaXRpb25hbCBDb21wb25lbnRzXG4gICAgICBJc2xhbmRWaXpWaXN1YWxpemF0aW9uLS0-VmlzdWFsaXphdGlvbkNvbXBvbmVudHNcbiAgICAgIElzbGFuZFZpekRhdGEtLT5EYXRhQ29tcG9uZW50c1xuICAgICAgSXNsYW5kVml6SW50ZXJhY3Rpb24tLT5JbnRlcmFjdGlvbkNvbXBvbmVudHNcblx0ZW5kIiwibWVybWFpZCI6eyJ0aGVtZSI6ImRlZmF1bHQifSwidXBkYXRlRWRpdG9yIjpmYWxzZX0)
 
