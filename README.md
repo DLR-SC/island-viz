@@ -101,6 +101,74 @@ The IslandViz application consists of three basic parts:
 - __IslandVizVisualization__ creates and stores the islands and ports based on the Osgi project. Also handles all visualization-based events.
 - __IslandVizInteraction__ handles all user input events.
 
+### Events
+
+Key elements of the IslandViz architectures are [delegates](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/delegates/) and instances. 
+
+This simplified example shows how a island name tag is created using a delegate. The OnIslandSelect delegate is defined in IslandVizInteraction.cs, called by RaycastSelection.cs which then calls all methods that are subscribed to the OnIslandSelect delegate, i.a. the OnIslandSelection method in StaticIslandNames.cs.
+
+```C#
+public class IslandVizInteraction : MonoBehaviour
+{
+    public static IslandVizInteraction Instance { get; private set; } // The instance of this class.
+
+    /// <param name="island">The island that was selected.</param>
+    /// <param name="selectionType">The type of the selection.</param>
+    /// <param name="selected">True = select, false = deselect.</param>
+    public delegate void IslandSelected(IslandGO island, SelectionType selectionType, bool selected);
+
+    /// <summary>
+    /// Called when an island was selected or deselected.
+    /// </summary>
+    public IslandSelected OnIslandSelect;
+}
+
+public class RaycastSelection : AdditionalIslandVizComponent
+{
+    /// <summary>
+    /// Throw a highlight event for this collider.
+    /// </summary>
+    /// <param name="collider">The collider whose highlight status is to be changed.</param>
+    /// <param name="select">Wether it should be highlighted (true) or unhighlighted (false).</param>
+    public void ToggleHighlight(Collider collider, Hand hand, bool selected)
+    {
+        if (collider.GetComponent<IslandGO>())
+        {
+            IslandVizInteraction.Instance.OnIslandSelect(collider.GetComponent<IslandGO>(), IslandVizInteraction.SelectionType.Highlight, selected);
+        }
+        ...
+    }
+}
+
+public class StaticIslandNames : AdditionalIslandVizComponent
+{
+    // Called by Unity on Start.
+    void Awake()
+    {        
+        IslandVizInteraction.Instance.OnIslandSelect += OnIslandSelection;
+    }
+
+    /// <summary>
+    /// Called by the OnIslandSelect event when an island is either selected or deselected and 
+    /// either creates or removes the name if this island.
+    /// </summary>
+    /// <param name="island">The island that was selected.</param>
+    /// <param name="selected">Wether the island was selected or deselected.</param>
+    private void OnIslandSelection(IslandGO island, IslandVizInteraction.SelectionType selectionType, bool selected)
+    {            
+        if (selectionType == IslandVizInteraction.SelectionType.Select && selected)
+        {
+            CreateStaticName(island.transform, selectionType);
+        }
+        else if (selectionType == IslandVizInteraction.SelectionType.Select && !selected)
+        {
+            RemoveStaticName(island.transform);
+        }
+    }
+}
+```
+
+
 ### Input-Events:
 
 | Name                               | Params | Description                                     |
@@ -119,7 +187,9 @@ The IslandViz application consists of three basic parts:
 | __OnControllerEnter__              | Collider, Hand     | _Called when a controller entered a trigger._   |
 | __OnControllerExit__               | Collider, Hand     | _Called when a controller exited a trigger._    |
 
+
 ### Selection-Events:
+
 | Name                               | Params                          | Description                                                      |
 |------------------------------------|---------------------------------|------------------------------------------------------------------|
 | __OnIslandSelect__                 | Island, SelectionType, Bool     | _Called when an island GameObject was selected or deselected._   |
