@@ -4,6 +4,6 @@
 
 # IslandViz DOTS
 
-Data-oriented re-implementation of the OSGi software structure visualization tool [IslandViz VR](https://github.com/DLR-SC/island-viz) using Unity's new data-oriented technology stack (DOTS) and OpenXR. Unlike the legacy IslandViz, IslandViz DOTS is not restricted to OSGi software structures and is able do visualize almost any structure stored in a Neo4j database.
+Data-oriented re-implementation of the OSGi software structure visualization tool [IslandViz VR](https://github.com/DLR-SC/island-viz) using Unity's new data-oriented technology stack (DOTS). Unlike the legacy IslandViz, IslandViz DOTS is not restricted to OSGi software structures and is able do visualize almost any structure stored in a Neo4j database.
 
 ![](./header.PNG)
