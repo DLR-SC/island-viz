@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db4952ecb1f28af458c09c85ffbfc11d, type: 3}
+  m_Name: DefaultConstructorSettings - white
+  m_EditorClassIdentifier: 
+  HexPrefab: {fileID: 7583106316500044476, guid: 53a283a8202a87541978dddf9e2ea269, type: 3}
+  BuildingPrefabs:
+  - {fileID: 7176244626207998221, guid: 6cbbddff5543c8243b5444e10089c77d, type: 3}
+  - {fileID: 1893133936502769055, guid: 6e8f59fa335ce344095bb808ad10440b, type: 3}
+  - {fileID: 7911340120794189689, guid: a0293ce71c7e3dc49809b3a7141c3cbb, type: 3}
+  - {fileID: 6941705524622542062, guid: f66a48283affd2a419795aeb7b0d0575, type: 3}
+  - {fileID: 7538407957296742434, guid: ccaae5fdbf69ef94a8a89535c4723580, type: 3}
+  - {fileID: 2638299622967652735, guid: bf7683f5b29d9eb459b7bf4a21c1f78f, type: 3}
+  - {fileID: 6874075044117503142, guid: 0a6bae1a7f22f6140acd37e4d8bb4a38, type: 3}
+  - {fileID: 8459223208110411800, guid: 508571ad238dc194493feeec1e681910, type: 3}
+  RelationshipPrefab: {fileID: 7454459512512857059, guid: e61b76d9e165db3458d89bf0faa50554, type: 3}
+  RegionBorderPrefab: {fileID: 6980583190394092451, guid: 0727ea59e2cf86b45bccf137ced26559, type: 3}
+  RegionColorPalette:
+  - {r: 1, g: 1, b: 1, a: 1}
+  BuildingColorPalette:
+  - {r: 0.6226415, g: 0.6226415, b: 0.6226415, a: 1}
+  - {r: 0.9257356, g: 0.9339623, b: 0, a: 1}
+  - {r: 1, g: 0.24905658, b: 0.7096054, a: 1}
+  RegionBaseMaterial: {fileID: 2100000, guid: 1e244b4061cf2c7418812d5af87a4c61, type: 2}
+  BuildingBaseMaterial: {fileID: 2100000, guid: cfc3084f441cf6c40a89139c2ff1fb82, type: 2}
+  BorderBaseMaterial: {fileID: 2100000, guid: 56da400942b633849b745d4d85b8c61c, type: 2}
+  HighlightMaterial: {fileID: 2100000, guid: f59b0083a4b24b2408a280eb1ac634ed, type: 2}
+  Seed: 0
+  DrawSprings: 0
+  SpringForceDebugPrefab: {fileID: 1932498153222713457, guid: b3f60a256c47b2b4087754121d2082e5, type: 3}

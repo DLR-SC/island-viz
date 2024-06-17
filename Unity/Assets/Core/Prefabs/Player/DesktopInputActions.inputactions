@@ -1,0 +1,120 @@
+{
+    "name": "DesktopInputActions",
+    "maps": [
+        {
+            "name": "Mouse Left",
+            "id": "18b6c6fd-e517-418f-a5b1-6f0501906c6d",
+            "actions": [
+                {
+                    "name": "Mouse",
+                    "type": "Button",
+                    "id": "f01f8e3d-8e55-47a7-be33-7b1d00f95853",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "84f3e43f-0f1c-4fc2-8093-e522fa562d1e",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Desktop",
+                    "action": "Mouse",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Mouse Right",
+            "id": "686c8a62-5e06-4b24-8f02-aba8ee42374b",
+            "actions": [
+                {
+                    "name": "New action",
+                    "type": "Button",
+                    "id": "02b3739f-ed86-4fa2-abd0-38a6f449558b",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": ""
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "578d8e51-8579-4e6b-8aeb-df8b1f6b5d1d",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Desktop",
+                    "action": "New action",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Scroll",
+            "id": "dfebe4bb-c884-4646-88f1-52ff648b9143",
+            "actions": [
+                {
+                    "name": "MouseZoom",
+                    "type": "Value",
+                    "id": "a2920cd9-8a3f-4b83-ae80-c4407d59d624",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": ""
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "ca734860-9c14-4795-986c-ce94661a3fa1",
+                    "path": "<Mouse>/scroll/y",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MouseZoom",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "MousePosition",
+            "id": "21afdc53-6e68-4d82-9724-23af3554c523",
+            "actions": [
+                {
+                    "name": "MousePosition",
+                    "type": "Value",
+                    "id": "adcdffcd-4160-4591-9686-3dbb9bd4512f",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": ""
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "5ab75d5d-b62d-47e6-a53a-0fcdfb65b715",
+                    "path": "<Mouse>/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "MousePosition",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": [
+        {
+            "name": "Desktop",
+            "bindingGroup": "Desktop",
+            "devices": []
+        }
+    ]
+}
